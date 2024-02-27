@@ -43,4 +43,6 @@ function update_system(sys, x)
 	sys.x = x
     sys.y += sys.dy
     sys.dy += (x + sys.k3 * dx - sys.y - sys.k1 * sys.dy) / sys.k2
+
+	return sys.y, sys.dy
 end
