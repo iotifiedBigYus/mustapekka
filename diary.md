@@ -13,3 +13,15 @@ Things to be fixed:
 - Making sprinting stop when colliding or letting go while jumping, and having to activate it again afterwards.
 - Bug: When jumping up into an opening just under the ceiling, you can get inside the floor of the opening when hitting the ceiling.
 - Collision when trying to jump into a hole in a wall.
+
+
+## Sam, 28.2.24, 1600, version 0.1.1
+
+Published the first version to BBS. A bit scary tbh having my code visible to the public.
+
+Changes made:
+- Added initial acceleration.
+- Made the player have a smaller hit-box when in the air so it's easier to jump into openings.
+- Decided to remove sprinting, at least for the time being
+- Made platform collisions better. Now the player can go down them.
+
