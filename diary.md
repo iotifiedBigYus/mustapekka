@@ -25,3 +25,8 @@ Changes made:
 - Decided to remove sprinting, at least for the time being
 - Made platform collisions better. Now the player can go down them.
 
+
+## Sam, 2.3.24, 2000,  version 0.1.2
+
+Noticed that jumping on mobile is much easier if it's mapped to O. Added that alternative.
+

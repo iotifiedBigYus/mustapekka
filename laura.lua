@@ -226,7 +226,7 @@ function update_player(a)
 
     --debug.abs_dx = abs(a.dx)
 
-    if btn(⬆️) then
+    if btn(⬆️) or btn(🅾️) then
         if a.standing then
             --begin jump
             a.dy = -a.vy
