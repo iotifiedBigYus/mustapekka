@@ -30,6 +30,8 @@ MV = .04
 -- | other constants |
 -- *-----------------*
 
+--version number
+version = 'v0.1.2'
 --maximum amount of actors
 max_actors = 128
 --debug object / namespace
@@ -425,6 +427,8 @@ function _draw()
             print(k..': '..tostring(v))
         end
     end
+    color(7)
+    print(version)
 end
 
 

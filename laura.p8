@@ -1,10 +1,6 @@
 pico-8 cartridge // http://www.pico-8.com
 version 41
 __lua__
---laura
---sam westerlund
---23.2.24
-
 #include laura.lua
 #include system.lua
 #include btnd.lua

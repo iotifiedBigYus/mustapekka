@@ -30,3 +30,8 @@ Changes made:
 
 Noticed that jumping on mobile is much easier if it's mapped to O. Added that alternative.
 
+Checklist when creating a new version because I noticed I need one:
+- Update the version number
+- Capture new label image (ctrl-7)
+- "save .png"
+
