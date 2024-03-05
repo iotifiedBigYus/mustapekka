@@ -26,7 +26,7 @@ Changes made:
 - Made platform collisions better. Now the player can go down them.
 
 
-## Sam, 2.3.24, 2000,  version 0.1.2
+## Sam, 2.3.24, 2000, version 0.1.2
 
 Noticed that jumping on mobile is much easier if it's mapped to O. Added that alternative.
 
@@ -34,4 +34,9 @@ Checklist when creating a new version because I noticed I need one:
 - Update the version number
 - Capture new label image (ctrl-7)
 - "save .png"
+
+
+## Sam, 5.3.24, 1000, version 0.1.3
+
+Made a menu item that changes the jump button between o and up. It felt a bit janky and less is more, so the jump button is now only o. Might bring back up in the future. We most likely will use the x button, so two hands will be needed either way.
 
