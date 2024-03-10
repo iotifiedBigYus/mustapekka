@@ -51,12 +51,16 @@ Made the map larger, and added vertical scroll.
 
 Added an auto_jump boolean.
 
-Bugs:
+Bug:
 - Two landing sounds when coming from a platform down to a platform directly below
 
 
 ## Benjamin, 10.3.2024
 
-Composed a diddy. Since it is my first tima using Pico8 as a DAW, this very well might not even be used in the final product. The cyper-punkiness does not match up to my vision of the game's visual aesthetic - but then again, it might be hard to create this desired soundscape in Pico8.
+Composed a diddy. Since it is my first time using Pico8 as a DAW, this very well might not even be used in the final product. The cyper-punkiness does not match up to my vision of the game's visual aesthetic - but then again, it might be hard to create this desired soundscape in Pico8.
 I will consider introducing other elements to the visuals, which would justify a more electronic soundscape. For now the dream of a Ghibli-inspired game stands, though.
+
+## Sam, 10.3.2024
+
+Added Benji's new diddy to the game with the ability to turn on and off the music in the menu.
 

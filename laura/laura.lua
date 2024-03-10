@@ -90,6 +90,9 @@ function _init()
     camera_x = player_x
     camera_y = player_y
 
+    music_playing = true
+    music(0)
+    menu_init()
 	pal(c,1)
 end
 
@@ -145,9 +148,29 @@ function make_actor(kind,x,y,d)
 	return a
 end
 
+
+function menu_init()
+    menuitem( 1, 'music: on', music_toggle)
+end
+
+
+function music_toggle()
+    music_playing = not music_playing
+    if music_playing then
+        music(0)
+        menuitem( 1, 'music: on')
+    else
+        menuitem( 1, 'music: off')
+        music(-1)
+    end
+    return true
+end
+
+
 -- *------------------*
 -- | update functions |
 -- *------------------*
+
 
 function _update60()
     t += 1
@@ -212,7 +235,12 @@ function update_player(a)
         a.dx = a.d * a.vx * (1-a.r)
         --if(a.d * a.dx < 0)a.dx = 0
         --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
-        if(a.standing)a.state = 'walking'
+        if(a.standing)then
+            if not a.state == 'walking' then
+                sfx(7)
+            end
+            a.state = 'walking'
+        end
     else
         --friction
         a.dx *= EF
@@ -268,7 +296,7 @@ function update_body(a)
         end
     elseif a.state == 'walking' then
         a.f_t = flr(a.f_t * 4 + 1.5) / 4 --> four ticks per frame
-        if(a.f_t % 4 == 3)sfx(0) --> tip tap
+        if(a.f_t % 4 == 3)sfx(7) --> tip tap
         if abs(a.dx) < VX and a.f_t%4 == 0 then
             -- stop
             a.frame = 48
@@ -343,7 +371,7 @@ function collide_down(a)
 
         if(a.state == 'falling') then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
-            sfx(0)
+            sfx(7)
         end
         a.standing=true
         a.dy = 0
@@ -356,7 +384,7 @@ function collide_down(a)
         a.y = flr(8*a.y+.5)/8
         if(a.state == 'falling') then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
-            sfx(0)
+            sfx(7)
         end
         a.standing=true
         a.decending=false
