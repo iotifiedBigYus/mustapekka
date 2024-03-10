@@ -36,7 +36,22 @@ Checklist when creating a new version because I noticed I need one:
 - "save .png"
 
 
-## Sam, 5.3.24, 1000, version 0.1.3
+## Sam, 5.3.24, 1800, version 0.1.3
 
-Made a menu item that changes the jump button between o and up. It felt a bit janky and less is more, so the jump button is now only o. Might bring back up in the future. We most likely will use the x button, so two hands will be needed either way.
+Made a menu item that changes the jump button between o and up. It felt a bit janky and less is more, so the jump button is now only o. Might bring back up in the future. The x button will most likely be in use, so two hands will be needed either way.
+
+To make it easier to position one self I added linear acceleration, and changed where friction is added because of it. Tried linear de-acceleration but did not like it at all. In the end I changed the acceleration back to asymptotic. Positioning is not the best because of the fast movement response, but for the moment being it's alright.
+
+Tried making the jump button in a way where you have to press it again every time you jump, but did not like it.
+
+Made the map larger, and added vertical scroll.
+
+
+## Sam, 9.3.24, 1700, version 0.1.3
+
+Added an auto_jump boolean.
+
+Bugs:
+- Two landing sounds when coming from a platform down to a platform directly below
+
 

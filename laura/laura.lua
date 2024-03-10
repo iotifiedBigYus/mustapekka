@@ -50,6 +50,8 @@ slowdown = 1
 camera_f = 0.01
 camera_z = 1
 camera_r = 0
+--auto jump
+auto_jump = false
 
 -- *---------------*
 -- | color palette |
@@ -68,6 +70,9 @@ c[12] = 13
 c[13] = 13+128
 c[15] = 15+128
 alt_colors = c
+
+--background color
+BG = 13
 
 -- *----------------*
 -- | initial values |
@@ -94,6 +99,9 @@ function make_player(x, y, d)
     a = make_actor(1, x, y, d) --> kind: 1
     a.walking_y = {0,-.125,-.125,0}
     a.button_jump = 4
+    a.jumped = false
+    a.jump_t = 0
+    a.jump_max = 5
     return a
 end
 
@@ -113,8 +121,8 @@ function make_actor(kind,x,y,d)
     a.ddx = DDX
 	a.ddy = G -- gravity
 	a.d   = d --pickup 1, monster -1 (looking direction)
-    a.jump_t    = 0
-    a.jump_max  = J
+    a.boost_t   = 0
+    a.boost_max = J
     a.state     = 'still'
 	a.standing  = false
     a.decending = false
@@ -137,6 +145,9 @@ function make_actor(kind,x,y,d)
 	return a
 end
 
+-- *------------------*
+-- | update functions |
+-- *------------------*
 
 function _update60()
     t += 1
@@ -154,8 +165,6 @@ end
 
 function update_actor(a)
     if(a.kind == 1)update_player(a)
-
-    a.h = a.standing and a.standing_h or a.falling_h
     --debug.h = a.h
     -- x movement 
     collide_side(a)
@@ -169,6 +178,9 @@ function update_actor(a)
 
     --sprite
     update_body(a)
+
+
+    debug.jumped = a.jumped
 
     --gravity
     a.dy += a.ddy
@@ -214,20 +226,25 @@ function update_player(a)
 
     --jumping
     if btn(🅾️) then
-        if a.standing then
+        a.jump_t = a.jump_max
+        if a.standing and (not a.jumped or auto_jump) then
             --begin jump
             a.dy = -a.vy
-            a.jump_t = a.jump_max
-        elseif a.state == 'falling' and a.jump_t > 0 then
-            a.jump_t -= 1
+            a.boost_t = a.boost_max
+        elseif a.state == 'falling' and a.boost_t > 0 then
+            a.boost_t -= 1
             a.dy = -a.vy
         end
     else
         a.jumped = false
-        a.jump_t = 0
+        a.boost_t = 0
+        a.jump_t = a.jump_t > 0 and a.jump_t - 1 or 0
     end
 
+    debug.jump_t = a.jump_t
+
     a.decending = (btn(⬇️) and a.standing)
+    a.h = a.standing and a.standing_h or a.falling_h
 end
 
 --[[
@@ -245,6 +262,7 @@ function update_body(a)
         a.f_t = 3
         if a.dy < 0 then --> going up
             a.frame = abs(a.dx) > 0 and 50 or 49
+            a.jumped = true
         else --> going down
             a.frame = abs(a.dx) > 0 and 51 or 52
         end
@@ -301,7 +319,7 @@ function collide_up(a, d)
         end
 
         a.dy=0
-        a.jump_t = 0
+        a.boost_t = 0
         --debug.solid_up = true
     else
         if a.standing then
@@ -378,10 +396,13 @@ function update_camera()
     camera_system_y.b = camera_y
 end
 
+-- *-------------------*
+-- | drawing functions |
+-- *-------------------*
 
 function _draw()
     pal(alt_colors,1)
-	cls(13)
+	cls(BG)
     camera(8*camera_x-64, 8*camera_y-64)
     map()
 	pal(alt_colors,1)
