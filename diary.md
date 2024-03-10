@@ -40,3 +40,8 @@ Checklist when creating a new version because I noticed I need one:
 
 Made a menu item that changes the jump button between o and up. It felt a bit janky and less is more, so the jump button is now only o. Might bring back up in the future. We most likely will use the x button, so two hands will be needed either way.
 
+## Benjamin, 10.3.2024
+
+Composed a diddy. Since it is my first tima using Pico8 as a DAW, this very well might not even be used in the final product. The cyper-punkiness does not match up to my vision of the game's visual aesthetic - but then again, it might be hard to create this desired soundscape in Pico8.
+I will consider introducing other elements to the visuals, which would justify a more electronic soundscape. For now the dream of a Ghibli-inspired game stands, though.
+
