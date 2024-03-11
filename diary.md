@@ -66,5 +66,5 @@ Added Benji's new diddy to the game with the ability to turn on and off the musi
 
 ## Benjamin 11.3.2024
 
-This is horrible. My music should not turn off - although, this I admit: so far it has been kind of bland. That all changes with this second song, an absolute banger, not tried and yet true. Summa summarum: I made a second song today.
+This is horrible. My music should not turn off - although, this I admit: so far it has been kind of bland. That all changes with this second song, an absolute banger, not tried and yet true. Summa summarum: I made a second song today. UPDATE: additional mastering completed.
 
