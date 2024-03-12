@@ -35,7 +35,7 @@ MV = .04
 -- *-----------------*
 
 --version number
-version = 'v0.1.3'
+version = 'v0.2.1'
 --maximum amount of actors
 max_actors = 128
 --debug object / namespace

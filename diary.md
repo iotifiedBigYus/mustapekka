@@ -68,3 +68,6 @@ Added Benji's new diddy to the game with the ability to turn on and off the musi
 
 This is horrible. My music should not turn off - although, this I admit: so far it has been kind of bland. That all changes with this second song, an absolute banger, not tried and yet true. Summa summarum: I made a second song today. UPDATE: additional mastering completed.
 
+## Sam, 11.3.2024
+
+Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
