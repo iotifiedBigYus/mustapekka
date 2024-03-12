@@ -71,3 +71,7 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 ## Sam, 11.3.2024
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
+
+## Sam, 11.3.2024
+
+Making the umbrella tilt discrete with positions left, center right. Thinking that this will make the drawing easier.

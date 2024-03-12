@@ -17,6 +17,8 @@ G = .02
 EI = 0.5
 --exponential deacceleration
 EF = 0.9
+--air drag
+C = .02
 --sideways acceleration (thrust / friction)
 --DDX = VX / 4
 --maximum jump duration (in ticks)
@@ -35,13 +37,13 @@ MV = .04
 -- *-----------------*
 
 --version number
-version = 'v0.2.1'
+version = 'v0.2.0'
 --maximum amount of actors
 max_actors = 128
 --debug object / namespace
 debug = {t=0}
 --show debug info
-debugging = false
+debugging = true
 --update the game one frame at a time by pressng ⬆️
 freeze =  false
 --frames per tick
@@ -52,6 +54,8 @@ camera_z = 1
 camera_r = 0
 --auto jump
 auto_jump = false
+--music
+play_music = true
 
 -- *---------------*
 -- | color palette |
@@ -81,6 +85,20 @@ BG = 13
 player_x = 6
 player_y = 16
 
+-- *--------*
+-- | sounds |
+-- *--------*
+
+SFX_STEP = 63
+SFX_JUMP = 62
+MUSIC = 0
+MUSIC_FADE_IN = 1000
+
+-- *-------------------*
+-- | initial functions |
+-- *-------------------*
+
+
 function _init()
     t = 0
 	actors = {}
@@ -90,8 +108,8 @@ function _init()
     camera_x = player_x
     camera_y = player_y
 
-    music_playing = true
-    music(0)
+    music_playing = play_music
+    if(music_playing)music(MUSIC,MUSIC_FADE_IN)
     menu_init()
 	pal(c,1)
 end
@@ -105,6 +123,7 @@ function make_player(x, y, d)
     a.jumped = false
     a.jump_t = 0
     a.jump_max = 5
+    a.umbrella = false
     return a
 end
 
@@ -123,6 +142,7 @@ function make_actor(kind,x,y,d)
     a.vy  = VY
     a.ddx = DDX
 	a.ddy = G -- gravity
+    a.drag = C
 	a.d   = d --pickup 1, monster -1 (looking direction)
     a.boost_t   = 0
     a.boost_max = J
@@ -208,6 +228,14 @@ function update_actor(a)
     --gravity
     a.dy += a.ddy
 
+    --air resistance
+    if not a.standing then
+        a.dy += -sgn(a.dy) * a.dy * a.dy * a.drag
+        a.dx += -sgn(a.dx) * a.dx * a.dx * a.drag
+    end
+
+    debug.drag = a.drag
+
     --snapping
     if(a.dx == 0)a.x = (flr(8*(a.x+a.cx)+.5) - 8*a.cx) * .125
     if(a.dy == 0)a.y =  flr(8 * a.y + .5) * 0.125
@@ -218,6 +246,15 @@ end
 
 
 function update_player(a)
+    --umbrella
+    if not a.standing and btn(❎) then
+        a.umbrella = true
+    else
+        a.umbrella = false
+    end
+
+    debug.umbrella = a.umbrella
+
     --side movement
     local moving = false
     if(btn(➡️) and not btn(⬅️))then
@@ -237,7 +274,7 @@ function update_player(a)
         --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
         if(a.standing)then
             if not a.state == 'walking' then
-                sfx(7)
+                sfx(SFX_STEP)
             end
             a.state = 'walking'
         end
@@ -256,7 +293,7 @@ function update_player(a)
     if btn(🅾️) then
         a.jump_t = a.jump_max
         if a.standing and (not a.jumped or auto_jump) then
-            --begin jump
+            --begin (trying to) jump
             a.dy = -a.vy
             a.boost_t = a.boost_max
         elseif a.state == 'falling' and a.boost_t > 0 then
@@ -296,7 +333,7 @@ function update_body(a)
         end
     elseif a.state == 'walking' then
         a.f_t = flr(a.f_t * 4 + 1.5) / 4 --> four ticks per frame
-        if(a.f_t % 4 == 3)sfx(7) --> tip tap
+        if(a.f_t % 4 == 3)sfx(SFX_STEP) --> tip tap
         if abs(a.dx) < VX and a.f_t%4 == 0 then
             -- stop
             a.frame = 48
@@ -371,7 +408,7 @@ function collide_down(a)
 
         if(a.state == 'falling') then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
-            sfx(7)
+            sfx(SFX_STEP)
         end
         a.standing=true
         a.dy = 0
@@ -384,7 +421,7 @@ function collide_down(a)
         a.y = flr(8*a.y+.5)/8
         if(a.state == 'falling') then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
-            sfx(7)
+            sfx(SFX_STEP)
         end
         a.standing=true
         a.decending=false
