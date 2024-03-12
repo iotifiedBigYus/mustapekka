@@ -21,6 +21,10 @@ EF = 0.9
 C = .02
 --umbrella drag
 UC = .7
+--umbrella system
+UF = 0.1
+UZ = 1
+UR = 0
 --sideways acceleration (thrust / friction)
 --DDX = VX / 4
 --maximum jump duration (in ticks)
@@ -46,7 +50,7 @@ max_actors = 128
 --debug object / namespace
 debug = {t=0}
 --show debug info
-debugging = true
+debugging = false
 --update the game one frame at a time by pressng ⬆️
 freeze =  false
 --frames per tick
@@ -85,7 +89,7 @@ BG = 13
 -- | initial values |
 -- *----------------*
 
-player_x = 6
+player_x = 7.5
 player_y = 48
 
 -- *--------*
@@ -118,6 +122,7 @@ function _init()
     camera_system_y = new_system(camera_f, camera_z, camera_r, player_y)
     camera_x = player_x
     camera_y = player_y
+    camera_locked = false
 
     music_playing = play_music
     if(music_playing)music(MUSIC,MUSIC_FADE_IN)
@@ -138,9 +143,10 @@ function make_player(x, y, d)
     a.u_drag   = UC
     a.u_a      = 0
     a.u_d      = 0
-    a.u_tilt   = 0.125
+    a.u_tilt   = 0.1
     a.u_x      = 0 
     a.u_y      = -1
+    a.u_system_d = new_system(camera_f, camera_z, camera_r, player_x)
     return a
 end
 
@@ -291,6 +297,12 @@ function update_umbrella(a)
         a.u_d = 0
     end
 
+    if(a.dy <= 0)return
+    --> only apply drag when decending
+
+    --player looks in the movement direction
+    if(a.dx != 0)a.d = sgn(a.dx)
+
     a.u_x =  sin(a.u_a)
     a.u_y = -cos(a.u_a)
 
@@ -299,9 +311,6 @@ function update_umbrella(a)
 
     a.dx += c * a.u_x
     a.dy += c * a.u_y
-
-    --player looks in the movement direction
-    if(a.dx != 0)a.d = sgn(a.dx)
 end
 
 
@@ -400,7 +409,7 @@ function update_body(a)
         end
     elseif a.state == 'umbrella' then
         a.f_y = 0
-        a.frame = SPR_GLIDING + a.u_d
+        a.frame = SPR_GLIDING + a.u_d * a.d
         debug.u_d = a.u_d
     else
         a.f_y   = 0
@@ -506,7 +515,6 @@ end
 function update_camera()
     local x, dx = update_system(camera_system_x, player.x)
     if(abs(dx) > MV)camera_x = x
-    --if(abs(player.dx-dx) < MV)camera_x = camera_x + player.dx
     camera_x = mid(WX+8, camera_x, WX+WW-8)
     camera_system_x.b = camera_x
 
@@ -524,6 +532,8 @@ function _draw()
     pal(alt_colors,1)
 	cls(BG)
     camera(8*camera_x-64, 8*camera_y-64)
+    color(6)
+    print('🅾️ to jump\n❎ to glide',player_x*8-16,player_y*8-16)
     map()
 	pal(alt_colors,1)
     foreach(actors, draw_actor)
@@ -556,8 +566,20 @@ actor position is center bottom
 ]]
 function draw_player(a)
     local x = a.d>0 and 8*(a.x-a.cx)+.5 or 8*(a.x-1+a.cx)+.5
+    local y = 8*(a.y+a.f_y-1)+.5
+
+    --draw umbrella
     if(a.umbrella)then
-        --draw umbrella
+        local s = a.d > 0 and 0 or 1 --> shift
+        if a.u_d < 0 then
+            sspr(104, 18, 5, 5, x-4+s, y-2)
+        elseif a.u_d > 0 then
+            sspr(114, 18, 5, 5, x+6+s, y-2)
+        else
+            local ux = a.d>0 and x-2+s or x+2+s
+            sspr(108, 17, 7, 4, ux, y-3)
+        end
     end
-    spr(a.frame, x, 8*(a.y+a.f_y-1)+.5,1,1,a.d<0)
+
+    spr(a.frame, x, y,1,1,a.d<0)
 end
