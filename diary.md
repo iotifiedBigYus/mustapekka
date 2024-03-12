@@ -72,6 +72,10 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
 
-## Sam, 11.3.2024
+## Sam, 12.3.2024
 
-Making the umbrella tilt discrete with positions left, center right. Thinking that this will make the drawing easier.
+Making the umbrella tilt discrete with positions left, center, right. Thinking that this will make controlling and drawing the character easier.
+
+I added air resistance and it works as it should, but it yields weird results when I make the umbrella drag proportional to velocity squared. Direct proportionality it is. I got the umbrella (not yet drawn) implemented into the game. Call me chef the way my code is starting to look like spaghetti. It isn't that bad at the moment but it needs some cleaning.
+
+Visual bug: The character jitters when the camera follows them at approx the same speed.

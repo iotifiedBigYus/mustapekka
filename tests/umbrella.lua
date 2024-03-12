@@ -6,9 +6,9 @@
 -- gravity
 G = .02
 -- drag coefficient
-C = 0--.01
+C = .01
 -- umbrella drag coefficient
-UC = .2
+UC = .3
 -- angle change
 DA = 0.01
 -- max angle
@@ -48,8 +48,8 @@ function _update60()
         if(btn(⬅️))a = MA--a=min(0.25, a+DA)
         if(btn(➡️))a = -MA--a=max(-0.25, a-DA)
 
-        vsq = dx * dx + dy + dy
-        d = -(dx * ux + dy * uy) * UC * vsq
+        vsq = dx * dx + dy * dy
+        d = -(dx * ux + dy * uy) * UC * sqrt(vsq)
 
         dx += d * ux
         dy += d * uy
