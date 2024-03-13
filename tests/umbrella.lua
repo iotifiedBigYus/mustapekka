@@ -6,13 +6,11 @@
 -- gravity
 G = .02
 -- drag coefficient
-C = .01
+C = .02
 -- umbrella drag coefficient
-UC = .3
+UC = .2
 -- angle change
 DA = 0.01
--- max angle
-MA = 0.125
 -- umbrella radius
 UR = 2
 -- dot radius (in pixels)
@@ -44,12 +42,11 @@ function _update60()
     --umbrella
     ux,uy = sin(a),-cos(a)
     if umbrella then
-        a = 0
-        if(btn(⬅️))a = MA--a=min(0.25, a+DA)
-        if(btn(➡️))a = -MA--a=max(-0.25, a-DA)
+        if(btn(⬅️))a=min(0.25, a+DA)
+        if(btn(➡️))a=max(-0.25, a-DA)
 
-        vsq = dx * dx + dy * dy
-        d = -(dx * ux + dy * uy) * UC * sqrt(vsq)
+        vsq = dx * dx + dy + dy
+        d = -(dx * ux + dy * uy) * UC * vsq
 
         dx += d * ux
         dy += d * uy
