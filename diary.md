@@ -65,7 +65,6 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
 
-<<<<<<< HEAD
 ## Sam, 12.3.2024, version 0.2.0
 
 Made the umbrella tilt discrete with the positions left, center, and right. Thinking that this will make controlling and drawing the character easier.
@@ -92,22 +91,25 @@ Made a proto level. Colour codes:
 - red = spikes
 - brown = honing (bird?)
 - green = cat
-(EDIT - Sam)
+(
+EDIT - Sam
 - gray = ground
 - pink = solid wall
 - dark red = background wall 1
 - dark green = background wall 2
+)
 UPDATE: Done messed up. Problems with Github - overwrote Sam's demo. After a long reverting session the two should be separate and navigable. This problem should not arise in the future, as long as I remember to edit a duplicated file, and not the original.
 
 ## Sam 13.3.2024
 
-Thats how it goes in the world of game dev. I don't know how branches work, so this method will do for now.
+Thats how it goes in the world of game dev. I don't know how git branches work, so this method will do for now.
 
 I created a separate file for constants called "constants.lua". Some so called constants were not even constant. They are moved to laura.lua. The code of laura.p8 now includes: constants.lua, laura.lua, and system.lua.
 
-Merged laura proto with laura. The feels really good, but the movement needs some tweaking. Small steps are hard not to overshoot and strafing makes gliding much faster. The latter might be a feature more than a bug, but we need to think about it. All-in-all I think we need to make the basic movement a bit slower, but we will have to experiment.
+Inserted the laura proto map and sprites into laura. The map feels really good, but the movement needs some tweaking. Small steps are hard not to overshoot and strafing makes gliding much faster. The latter might be more a feature more than a bug, but we need to think about it. All-in-all I think we need to make the basic movement a bit slower. Experimentation is needed.
+
+Tried to make the camera lock on to the player in a good way, but the locking is way to snappy, and it does not even fix the glide jittering. Will get back to it another time.
 
 TODO:
-- make all the identifiers of constants puny (CAPITAL letters).
-- move the umbrella sprite (make constants that point to the sprites location)
+- more precise movement
 

@@ -15,17 +15,23 @@ function _init()
     debug = {t=0}   
     
 	actors = {}
-    player = make_player(player_x,player_y)
-    camera_system_x = new_system(camera_f, camera_z, camera_r, player_x)
-    camera_system_y = new_system(camera_f, camera_z, camera_r, player_y)
-    camera_x = player_x
-    camera_y = player_y
-    camera_locked = false
-
-    music_playing = play_music
-    if(music_playing)music(MUSIC,MUSIC_FADE_IN)
-    menu_init()
+    player = make_player(PLAYER_X,PLAYER_Y)
+    make_camera()
+    music_playing = PLAY_MUSIC
+    make_menu()
 	pal(c,1)
+end
+
+
+function make_camera()
+    camera_system_x = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_X)
+    camera_system_y = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_Y)
+    camera_x = PLAYER_X
+    camera_y = PLAYER_Y
+    camera_locked_horz = false
+    camera_locked_x = 0
+    camera_locked_vert = false
+    camera_locked_y = 0
 end
 
 
@@ -44,7 +50,7 @@ function make_player(x, y, d)
     a.u_tilt   = 0.1
     a.u_x      = 0 
     a.u_y      = -1
-    a.u_system_d = new_system(camera_f, camera_z, camera_r, player_x)
+    --a.u_system_d = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_X)
     return a
 end
 
@@ -82,7 +88,7 @@ function make_actor(kind,x,y,d)
     a.f_y   = 0
     --timer
 	a.t		= 0
-	if (count(actors) < max_actors) then
+	if (count(actors) < MAX_ACTORS) then
 		--> actor is global
 		add(actors, a)
 	end
@@ -90,20 +96,15 @@ function make_actor(kind,x,y,d)
 end
 
 
-function menu_init()
-    menuitem( 1, 'music: on', music_toggle)
+function make_menu()
+    menuitem( 1, '', music_toggle)
+    update_music()
 end
 
 
 function music_toggle()
     music_playing = not music_playing
-    if music_playing then
-        music(0)
-        menuitem( 1, 'music: on')
-    else
-        menuitem( 1, 'music: off')
-        music(-1)
-    end
+    update_music()
     return true
 end
 
@@ -112,15 +113,26 @@ end
 -- | update functions |
 -- *------------------*
 
+function update_music()
+    if music_playing then
+        music(MUSIC, MUSIC_FADE_IN)
+        menuitem( 1, 'music: on', music_toggle)
+    else
+        music(-1)
+        menuitem( 1, 'music: off', music_toggle)
+    end
+end
+
+
 
 function _update60()
     t += 1
-    if freeze and not btnp(⬆️) then return end
-    if t % slowdown ~= 0 then return end
+    if FREEZE and not btnp(🅾️,1) then return end
+    if t % SLOWDOWN ~= 0 then return end
     debug.t += 1
 
 	foreach(actors, update_actor)
-    update_camera()
+    --update_camera()
 
     --debug.camera = tostr(camera_x)..'  '..tostr(camera_y)
 end
@@ -138,6 +150,8 @@ function update_actor(a)
     --moving
     a.x += a.dx
     a.y += a.dy
+
+    if(a.kind == 1)update_camera()
 
     --sprite
     update_body(a)
@@ -252,7 +266,7 @@ function update_jumping(a)
     --jumping
     if btn(🅾️) then
         a.jump_t = a.jump_max
-        if a.standing and (not a.jumped or auto_jump) then
+        if a.standing and (not a.jumped or AUTO_JUMP) then
             --begin (trying to) jump
             a.dy = -a.vy
             a.boost_t = a.boost_max
@@ -421,26 +435,48 @@ function update_camera()
     camera_system_y.b = camera_y
 end
 
+
+function update_smart8_system()
+    local x, dx = update_system(camera_system_x, player.x)
+    if(abs(dx) < MV)then
+        --> do not move
+    elseif(abs(dx - player.dx) > MDV)then
+        --> different enough speed
+        camera_locked_horz = false
+        camera_x = x
+    elseif camera_locked_horz then
+        --> already locked on to the player
+        camera_x += player.dx
+    else
+        --> initiate horizontal lock
+        camera_locked_horz = true
+        local r8 = 8*player.x - flr(8*player.x)
+        local x8 = flr(8*camera_x+.5) + r8
+        camera_x = x8 * .125
+    end
+    camera_x = mid(WX+8, camera_x, WX+WW-8)
+    camera_system_x.b = camera_x
+end
+
 -- *-------------------*
 -- | drawing functions |
 -- *-------------------*
 
 function _draw()
-    pal(alt_colors,1)
-	cls(BG)
+    pal(ALT_COLORS,1)
+	cls(BG) 
     camera(8*camera_x-64, 8*camera_y-64)
     color(6)
-    print('🅾️ to jump\n❎ to glide',player_x*8-16,player_y*8-16)
+    print('🅾️ to jump\n❎ to glide',PLAYER_X*8-16,PLAYER_Y*8-16)
     map()
-	pal(alt_colors,1)
     foreach(actors, draw_actor)
 
     --debug
     camera(0,0)
     cursor(1,1)
     color(7)
-    print(version)
-    if debugging then
+    print('v'..VERSION)
+    if DEBUGGING then
         for k,v in pairs(debug) do
             print(k..': '..tostring(v))
         end
@@ -469,12 +505,12 @@ function draw_player(a)
     if(a.umbrella)then
         local s = a.d > 0 and 0 or 1 --> shift
         if a.u_d < 0 then
-            sspr(104, 18, 5, 5, x-4+s, y-2)
+            sspr(SPR_UMBRELLA_L_X, SPR_UMBRELLA_L_Y, 5, 5, x-4+s, y-2)
         elseif a.u_d > 0 then
-            sspr(114, 18, 5, 5, x+6+s, y-2)
+            sspr(SPR_UMBRELLA_R_X, SPR_UMBRELLA_R_Y, 5, 5, x+6+s, y-2)
         else
             local ux = a.d>0 and x-2+s or x+2+s
-            sspr(108, 17, 7, 4, ux, y-3)
+            sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
         end
     end
 

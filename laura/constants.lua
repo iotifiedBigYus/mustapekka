@@ -2,64 +2,46 @@
 --sam westerlund
 --13.3.24
 
--- *--------------------*
--- | "nature" constants |
--- *--------------------*
+-- *------------------------------*
+-- | physics / physical constants |
+-- *------------------------------*
 
---horizontal speed
-VX = .125
---jump speed
-VY = 0.2 --> when pressing fast (~5 ticks) you jump exactly one block
---gravitational acceleration
-G = .02
---exponential acceleration
-EI = 0.5
---exponential deacceleration
-EF = 0.9
---air drag
-C = .02
---umbrella drag
-UC = .7
---umbrella system
-UF = 0.1
+VX = .125 -- horizontal speed
+VY = 0.2 -- jump speed > when pressing fast (~5 ticks) you jump exactly one block
+G = .02 -- gravitational acceleration
+EI = 0.5 -- exponential acceleration
+EF = 0.9 --exponential deacceleration
+C = .02 --air drag
+UC = .7 --umbrella drag (only downwards)
+UF = 0.1 --umbrella system
 UZ = 1
 UR = 0
---sideways acceleration (thrust / friction)
---DDX = VX / 4
---maximum jump duration (in ticks)
-J = 11
---epsilon (a small number)
-E = .01
---world upper left corner x,y; width; height
-WX = 0
+--DDX = VX / 4 --sideways acceleration (thrust / friction)
+J = 11 --maximum jump duration (in ticks)
+E = .01 --epsilon (a small number used when finding edges)
+WX = 0 --world upper left corner x,y; width; height
 WY = 0
 WW = 77
 WH = 38
---minimum velocity
-MV = .04
+MV = .04 --minimum velocity
+MDV = .02 --minimum difference in velocity (for camera)
+CAMERA_F = 0.01 --camera dynamics
+CAMERA_Z = 1
+CAMERA_R = 0
+PLAYER_X = 4
+PLAYER_Y = 20
 
 -- *-----------------*
 -- | other constants |
 -- *-----------------*
 
---version number
-version = 'v0.2.0'
---maximum amount of actors
-max_actors = 128
---show debug info
-debugging = false
---update the game one frame at a time by pressng ⬆️
-freeze =  false
---frames per tick
-slowdown = 1
---camera dynamics
-camera_f = 0.01
-camera_z = 1
-camera_r = 0
---auto jump
-auto_jump = false
---music
-play_music = false
+VERSION = '0.2.0' --version number
+DEBUGGING = true --show debug info
+FREEZE = false --update the game one frame at a time by pressng player two 🅾️
+SLOWDOWN = 1 --frames per tick
+AUTO_JUMP = false
+PLAY_MUSIC = false
+MAX_ACTORS = 128 --maximum amount of actors
 
 -- *---------------*
 -- | color palette |
@@ -77,17 +59,8 @@ c[11] = 3
 c[12] = 13
 c[13] = 13+128
 c[15] = 15+128
-alt_colors = c
-
---background color
-BG = 13
-
--- *----------------*
--- | initial values |
--- *----------------*
-
-player_x = 8
-player_y = 16
+ALT_COLORS = c
+BG = 13 --background color
 
 -- *--------*
 -- | sounds |
@@ -105,3 +78,9 @@ MUSIC_FADE_IN = 1000
 SPR_STILL = 1
 SPR_WALKING = 2
 SPR_GLIDING = 7 --> center
+SPR_UMBRELLA_L_X = 72
+SPR_UMBRELLA_L_Y = 2
+SPR_UMBRELLA_C_X = 76
+SPR_UMBRELLA_C_Y = 1
+SPR_UMBRELLA_R_X = 82
+SPR_UMBRELLA_R_Y = 2
