@@ -46,21 +46,14 @@ Tried making the jump button in a way where you have to press it again every tim
 
 Made the map larger, and added vertical scroll.
 
-
-## Sam, 9.3.24, 1700, version 0.1.3
-
-Added an auto_jump boolean.
-
-Bug:
-- Two landing sounds when coming from a platform down to a platform directly below
-
-
 ## Benjamin, 10.3.2024
 
 Composed a diddy. Since it is my first time using Pico8 as a DAW, this very well might not even be used in the final product. The cyper-punkiness does not match up to my vision of the game's visual aesthetic - but then again, it might be hard to create this desired soundscape in Pico8.
 I will consider introducing other elements to the visuals, which would justify a more electronic soundscape. For now the dream of a Ghibli-inspired game stands, though.
 
 ## Sam, 10.3.2024
+
+Added auto_jump boolean. Making manual jumping the default. Feelis kinda weird, but It's better when you are trying to reach stuff and not wanting jumping off when you land.
 
 Added Benji's new diddy to the game with the ability to turn on and off the music in the menu.
 
@@ -71,3 +64,21 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 ## Sam, 11.3.2024
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
+
+## Sam, 12.3.2024, version 0.2.0
+
+Made the umbrella tilt discrete with the positions left, center, and right. Thinking that this will make controlling and drawing the character easier.
+
+I added air resistance and it works as it should, but it yields weird results when I make the umbrella drag proportional to velocity squared. Direct proportionality it is. I got the umbrella (not yet drawn) implemented into the game. _Call me chef the way my code is starting to look like spaghetti._ It isn't _that_ bad at the moment but it needs some cleaning at some point.
+
+My thinking was correct. The umbrella is now being drawn. It looks pretty janky in slow motion but at 60 fps its alright. Might make a system that shifts the position of the umbrella. Also noticed that the rotations of the umbrella use the same amount of pixels (except the handle, but that can be covered up with the hand of the player). This means that it could be rotated using three shears. _How exciting._ It will stay snappy for the moment being.
+
+I also realized I've been using semantic versioning wrong.
+
+Bugs
+- Visual: The character jitters when the camera follows them at approx the same speed.
+- Double jump using the umbrella.
+- Two landing sounds when coming from a platform down to a platform directly below.
+
+TODO
+- make the camera "lock on to" the player when their velocities are similar so that the jittering does not occur
