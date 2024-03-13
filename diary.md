@@ -87,4 +87,4 @@ TODO
 ## Benjamin 13.3.2024
 
 Made a proto level. Colour codes: yellow = chasing dog; blue = window; red = spikes; brown = honing (bird?); green = cat.
->>>>>>> f61870fee98649368cc9690c1438abb856d0f617
+UPDATE: Done messed up. Problems with Github - overwrote Sam's demo. After a long reverting session the two should be separate and navigable. This problem should not arise in the future, as long as I remember to edit a duplicated file, and not the original.
