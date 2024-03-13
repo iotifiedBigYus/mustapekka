@@ -71,3 +71,7 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 ## Sam, 11.3.2024
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
+
+## Benjamin 13.3.2024
+
+Made a proto level. Colour codes: yellow = chasing dog; blue = window; red = spikes; brown = honing (bird?); green = cat.
