@@ -65,6 +65,7 @@ This is horrible. My music should not turn off - although, this I admit: so far 
 
 Made an umbrella demo. Feels very nice. Will add terminal velocity to the game, but only when you're not standing, I think.
 
+<<<<<<< HEAD
 ## Sam, 12.3.2024, version 0.2.0
 
 Made the umbrella tilt discrete with the positions left, center, and right. Thinking that this will make controlling and drawing the character easier.
@@ -82,3 +83,8 @@ Bugs
 
 TODO
 - make the camera "lock on to" the player when their velocities are similar so that the jittering does not occur
+=======
+## Benjamin 13.3.2024
+
+Made a proto level. Colour codes: yellow = chasing dog; blue = window; red = spikes; brown = honing (bird?); green = cat.
+>>>>>>> f61870fee98649368cc9690c1438abb856d0f617
