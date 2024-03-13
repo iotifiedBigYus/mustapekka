@@ -86,18 +86,26 @@ TODO:
 
 ## Benjamin 13.3.2024
 
-Made a proto level. Colour codes: yellow = chasing dog; blue = window; red = spikes; brown = honing (bird?); green = cat.
+Made a proto level. Colour codes:
+- yellow = chasing dog
+- blue = window
+- red = spikes
+- brown = honing (bird?)
+- green = cat
+(EDIT - Sam)
+- gray = ground
+- pink = solid wall
+- dark red = background wall 1
+- dark green = background wall 2
 UPDATE: Done messed up. Problems with Github - overwrote Sam's demo. After a long reverting session the two should be separate and navigable. This problem should not arise in the future, as long as I remember to edit a duplicated file, and not the original.
 
 ## Sam 13.3.2024
 
 Thats how it goes in the world of game dev. I don't know how branches work, so this method will do for now.
 
-I created a separate file for constants called "constants.lua". Some so called constants were not even constant. They are moved to laura.lua. The code of laura.p8 now looks like:
-#include constants.lua
-#include laura.lua
-#include system.lua 
+I created a separate file for constants called "constants.lua". Some so called constants were not even constant. They are moved to laura.lua. The code of laura.p8 now includes: constants.lua, laura.lua, and system.lua.
 
 TODO:
 - make all the identifiers of constants puny (CAPITAL letters).
+- move all the sprites in laura proto and insert them to laura (wip).
 

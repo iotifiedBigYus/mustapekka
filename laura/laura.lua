@@ -10,6 +10,10 @@
 
 function _init()
     t = 0
+
+    --debug object / namespace
+    debug = {t=0}   
+    
 	actors = {}
     player = make_player(player_x,player_y)
     camera_system_x = new_system(camera_f, camera_z, camera_r, player_x)

@@ -102,6 +102,6 @@ MUSIC_FADE_IN = 1000
 -- | sprites |
 -- *---------*
 
-SPR_STILL = 48
-SPR_WALKING = 49
-SPR_GLIDING = 61
+SPR_STILL = 1
+SPR_WALKING = 2
+SPR_GLIDING = 7 --> center
