@@ -24,7 +24,7 @@ J = 11
 --epsilon (a small number)
 E = .01
 --world width
-WW = 32
+WW = 128
 --world height
 WH = 32
 --minimum velocity
