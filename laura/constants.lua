@@ -32,9 +32,9 @@ J = 11
 E = .01
 --world upper left corner x,y; width; height
 WX = 0
-WY = 32
-WW = 32
-WH = 32
+WY = 0
+WW = 77
+WH = 38
 --minimum velocity
 MV = .04
 
@@ -86,8 +86,8 @@ BG = 13
 -- | initial values |
 -- *----------------*
 
-player_x = 7.5
-player_y = 48
+player_x = 8
+player_y = 16
 
 -- *--------*
 -- | sounds |

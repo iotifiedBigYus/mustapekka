@@ -105,7 +105,9 @@ Thats how it goes in the world of game dev. I don't know how branches work, so t
 
 I created a separate file for constants called "constants.lua". Some so called constants were not even constant. They are moved to laura.lua. The code of laura.p8 now includes: constants.lua, laura.lua, and system.lua.
 
+Merged laura proto with laura. The feels really good, but the movement needs some tweaking. Small steps are hard not to overshoot and strafing makes gliding much faster. The latter might be a feature more than a bug, but we need to think about it. All-in-all I think we need to make the basic movement a bit slower, but we will have to experiment.
+
 TODO:
 - make all the identifiers of constants puny (CAPITAL letters).
-- move all the sprites in laura proto and insert them to laura (wip).
+- move the umbrella sprite (make constants that point to the sprites location)
 
