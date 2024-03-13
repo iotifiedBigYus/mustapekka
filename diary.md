@@ -81,10 +81,23 @@ Bugs
 - Double jump using the umbrella.
 - Two landing sounds when coming from a platform down to a platform directly below.
 
-TODO
+TODO:
 - make the camera "lock on to" the player when their velocities are similar so that the jittering does not occur
-=======
+
 ## Benjamin 13.3.2024
 
 Made a proto level. Colour codes: yellow = chasing dog; blue = window; red = spikes; brown = honing (bird?); green = cat.
 UPDATE: Done messed up. Problems with Github - overwrote Sam's demo. After a long reverting session the two should be separate and navigable. This problem should not arise in the future, as long as I remember to edit a duplicated file, and not the original.
+
+## Sam 13.3.2024
+
+Thats how it goes in the world of game dev. I don't know how branches work, so this method will do for now.
+
+I created a separate file for constants called "constants.lua". Some so called constants were not even constant. They are moved to laura.lua. The code of laura.p8 now looks like:
+#include constants.lua
+#include laura.lua
+#include system.lua 
+
+TODO:
+- make all the identifiers of constants puny (CAPITAL letters).
+

@@ -46,8 +46,6 @@ MV = .04
 version = 'v0.2.0'
 --maximum amount of actors
 max_actors = 128
---debug object / namespace
-debug = {t=0}
 --show debug info
 debugging = false
 --update the game one frame at a time by pressng ⬆️
@@ -67,7 +65,7 @@ play_music = false
 -- | color palette |
 -- *---------------*
 
-c = {}
+local c = {}
 c[0]  = 0
 c[1]  = 0
 c[2]  = 2+128
