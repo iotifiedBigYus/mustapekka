@@ -15,43 +15,46 @@ function _init()
     debug = {t=0}   
     
 	actors = {}
-    player = make_player(PLAYER_X,PLAYER_Y)
+
+    player = make_player()
+    position_player()
     make_camera()
+    info_string = '🅾️/z jump\n❎/x glide'
+    info_x = player.x*8-16
+    info_y = player.y*8-16
     music_playing = PLAY_MUSIC
     make_menu()
 	pal(c,1)
 end
 
 
+function clear_cell(x, y)
+    --straight up copied from jelpi
+    local val0 = mget(x-1,y)
+    local val1 = mget(x+1,y)
+    if ((x>WX and val0 == 0) or (x<WX+WW-1 and val1 == 0)) then
+        mset(x,y,0)
+    elseif (not fget(val1,1)) then
+        mset(x,y,val1)
+    elseif (not fget(val0,1)) then
+        mset(x,y,val0)
+    else
+        mset(x,y,0)
+    end
+end
+
+
 function make_camera()
-    camera_system_x = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_X)
-    camera_system_y = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_Y)
-    camera_x = PLAYER_X
-    camera_y = PLAYER_Y
+    local x = mid(WX+8, player.x, WX+WW-8)
+    local y = mid(WY+8, player.y, WY+WH-8)
+    camera_system_x = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, x)
+    camera_system_y = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, y)
+    camera_x = x
+    camera_y = y
     camera_locked_horz = false
     camera_locked_x = 0
     camera_locked_vert = false
     camera_locked_y = 0
-end
-
-
-function make_player(x, y, d)
-    d = d or 1
-    a = make_actor(1, x, y, d) --> kind: 1
-    a.walking_y = {0,-.125,-.125,0}
-    a.button_jump = 4
-    a.jumped   = false
-    a.jump_t   = 0
-    a.jump_max = 5
-    a.umbrella = false
-    a.u_drag   = UC
-    a.u_a      = 0
-    a.u_d      = 0
-    a.u_tilt   = 0.1
-    a.u_x      = 0 
-    a.u_y      = -1
-    --a.u_system_d = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, PLAYER_X)
-    return a
 end
 
 
@@ -71,11 +74,9 @@ function make_actor(kind,x,y,d)
 	a.ddy = G -- gravity
     a.drag = C
 	a.d   = d --pickup 1, monster -1 (looking direction)
-    a.boost_t   = 0
-    a.boost_max = J
-    a.state     = 'still'
-	a.standing  = false
-    a.decending = false
+    --state
+    a.state    = 'still'
+	a.standing = true
     --size
     a.cx = .4375 --> sprite center x
     a.w  = .625
@@ -113,6 +114,7 @@ end
 -- | update functions |
 -- *------------------*
 
+
 function update_music()
     if music_playing then
         music(MUSIC, MUSIC_FADE_IN)
@@ -122,7 +124,6 @@ function update_music()
         menuitem( 1, 'music: off', music_toggle)
     end
 end
-
 
 
 function _update60()
@@ -140,192 +141,6 @@ end
 
 function update_actor(a)
     if(a.kind == 1)update_player(a)
-    --debug.h = a.h
-    -- x movement 
-    collide_side(a)
-    -- y movement
-    if(a.dy < 0)collide_up(a)
-    if(a.dy >= 0)collide_down(a)
-
-    --moving
-    a.x += a.dx
-    a.y += a.dy
-
-    if(a.kind == 1)update_camera()
-
-    --sprite
-    update_body(a)
-
-    --gravity
-    a.dy += a.ddy
-
-    --air resistance
-    if not a.standing then
-        a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
-        a.dx -= sgn(a.dx) * a.dx * a.dx * a.drag
-    end
-
-    --snapping
-    if(a.dx == 0)a.x = (flr(8*(a.x+a.cx)+.5) - 8*a.cx) * .125
-    if(a.dy == 0)a.y =  flr(8 * a.y + .5) * 0.125
-
-    --timers
-    a.t += 1
-end
-
-
-function update_player(a)
-    --umbrella
-    if not a.standing and btn(❎) then
-        a.umbrella = true
-    else
-        a.umbrella = false
-    end
-
-    if a.umbrella then
-        update_umbrella(a)
-    else
-        update_walking(a)
-        update_jumping(a)
-    end
-
-    a.h = a.standing and a.standing_h or a.falling_h
-end
-
-
-function update_umbrella(a)
-    --umbrella
-    a.state = 'umbrella'
-    
-    if(btn(⬅️) and not btn(➡️))then
-        a.u_a = a.u_tilt
-        a.u_d = -1
-    elseif(btn(➡️) and not btn(⬅️))then
-        a.u_a = -a.u_tilt
-        a.u_d = 1
-    else
-        a.u_a = 0
-        a.u_d = 0
-    end
-
-    if(a.dy <= 0)return
-    --> only apply drag when decending
-
-    --player looks in the movement direction
-    if(a.dx != 0)a.d = sgn(a.dx)
-
-    a.u_x =  sin(a.u_a)
-    a.u_y = -cos(a.u_a)
-
-    local v = sqrt(a.dx * a.dx + a.dy * a.dy)
-    local c = -(a.dx * a.u_x + a.dy * a.u_y) * a.u_drag * v
-
-    a.dx += c * a.u_x
-    a.dy += c * a.u_y
-end
-
-
-function update_walking(a)
-    --side movement
-    local moving = false
-    if(btn(➡️) and not btn(⬅️))then
-        a.d = 1
-        moving = true
-    elseif(btn(⬅️)and not btn(➡️))then
-        a.d = -1
-        moving = true
-    else
-        a.r = 1
-    end
-
-    if moving then
-        a.r *= EI
-        a.dx = a.d * a.vx * (1-a.r)
-        --if(a.d * a.dx < 0)a.dx = 0
-        --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
-        if(a.standing)then
-            if not a.state == 'walking' then
-                sfx(SFX_STEP)
-            end
-            a.state = 'walking'
-        end
-    else
-        --friction
-        a.dx *= EF
-        --if(a.d * a.dx > 0)a.dx -= a.d * a.ddx
-        if(abs(a.dx) < MV)a.dx = 0
-    end
-
-    debug.dx = a.dx
-
-    a.decending = (btn(⬇️) and a.standing)
-end
-
-
-function update_jumping(a)
-    --jumping
-    if btn(🅾️) then
-        a.jump_t = a.jump_max
-        if a.standing and (not a.jumped or AUTO_JUMP) then
-            --begin (trying to) jump
-            a.dy = -a.vy
-            a.boost_t = a.boost_max
-        elseif a.umbrella then
-            a.boost_t = 0
-        elseif a.state == 'falling' and a.boost_t > 0 then
-            a.boost_t -= 1
-            a.dy = -a.vy
-        end
-    else
-        a.jump_t = a.jump_t > 0 and a.jump_t - 1 or 0
-        a.jumped = false
-        a.boost_t = 0
-    end
-end
-
-
---[[
-
-   O       O       O       O    
---@@@-- --@@@-- --@@@-- --@@@-- 
-  @@@\    @@@\   _@@@    _@@@  
-  |      /           \      |   
-
---]]
-
-function update_body(a)
-    debug.state = a.state
-    if a.state == 'falling' then
-        a.f_y = 0
-        a.f_t = 3
-        if a.dy < 0 then --> going up
-            a.frame = abs(a.dx) > 0 and SPR_WALKING+1 or SPR_WALKING
-            a.jumped = true
-        else --> going down
-            a.frame = abs(a.dx) > 0 and SPR_WALKING+2 or SPR_WALKING+3
-        end
-    elseif a.state == 'walking' then
-        a.f_t = flr(a.f_t * 4 + 1.5) / 4 --> four ticks per frame
-        if(a.f_t % 4 == 3)sfx(SFX_STEP) --> tip tap
-        if abs(a.dx) < VX and a.f_t%4 == 0 then
-            -- stop
-            a.frame = SPR_STILL
-            a.f_y = 0
-            a.f_t = 0
-            a.walking = false
-            a.state = 'still'
-        else
-            a.frame = SPR_WALKING + flr(a.f_t%4)
-            a.f_y = a.walking_y[flr(a.f_t%4)+1]
-        end
-    elseif a.state == 'umbrella' then
-        a.f_y = 0
-        a.frame = SPR_GLIDING + a.u_d * a.d
-        debug.u_d = a.u_d
-    else
-        a.f_y   = 0
-        a.frame = SPR_STILL
-    end
 end
 
 
@@ -334,7 +149,6 @@ function collide_side(a)
     local d = a.dx ~= 0 and sgn(a.dx) or a.d
     local x1 = a.x + a.dx + d * (.5*a.w)
     local xe = d > 0 and 0 or -E --> stay outside edges
-    --local xe = d > 0 and -E or 0 --> stay inside edges
     if solid(x1+xe,a.y-E) or solid(x1+xe,a.y-a.h) then
         -- hit wall
         -- search for contact point
@@ -343,9 +157,6 @@ function collide_side(a)
         end
         a.x = (flr( 8*(a.x+a.cx)+.5) - 8*a.cx) * .125
         a.dx = 0 --> do this after contact point, because sgn(0) is not 1
-        --debug.side = true
-    else
-        --debug.side = false
     end
 end
 
@@ -401,6 +212,10 @@ function collide_down(a)
         a.decending=false
         a.dy = 0
     else
+        --coyote time
+        if (a.coyote_t > 0) a.coyote_t -= 1
+        if (a.standing) a.coyote_t = a.coyote_max
+
         a.state = a.umbrella and 'umbrella' or 'falling'
         a.standing = false
     end
@@ -458,16 +273,18 @@ function update_smart8_system()
     camera_system_x.b = camera_x
 end
 
+
 -- *-------------------*
 -- | drawing functions |
 -- *-------------------*
+
 
 function _draw()
     pal(ALT_COLORS,1)
 	cls(BG) 
     camera(8*camera_x-64, 8*camera_y-64)
     color(6)
-    print('🅾️ to jump\n❎ to glide',PLAYER_X*8-16,PLAYER_Y*8-16)
+    print(info_string, info_x, info_y)
     map()
     foreach(actors, draw_actor)
 
@@ -496,7 +313,249 @@ actor position is center bottom
 | (x,y) |
 |___.___|
 
-]]
+--]]
+
+
+-- *------------------*
+-- | player functions |
+-- *------------------*
+
+
+function make_player(x, y, d)
+    x = x or WX
+    y = y or WY
+    d = d or 1
+    a = make_actor(1, x, y, d) --> kind: 1
+    --motion
+    a.u_drag   = UC
+    a.u_d      = 0
+    a.u_tilt   = 0.1
+    --state
+    a.strafe     = false
+    a.jumped     = false
+    a.decending  = false
+    a.umbrella   = false
+    a.boost_t    = 0
+    a.boost_max  = J
+    a.coyote_t   = 0
+    a.coyote_max = COYOTE
+    --drawing
+    a.walking_y = {0,-.125,-.125,0}
+    return a
+end
+
+
+function position_player()
+    for x=WX,WW-1 do
+        for y=WY,WH-1 do
+            if mget(x,y) == SPR_STILL then
+                player.x = x+player.cx
+                player.y = y+1
+                clear_cell(x,y)
+                break
+            end
+        end
+    end
+end
+
+
+function update_player(a)
+    --umbrella
+    a.umbrella = btn(❎) and not a.standing
+
+    if a.umbrella then
+        update_umbrella(a)
+    else
+        update_walking(a)
+        update_jumping(a)
+    end
+
+    a.h = a.standing and a.standing_h or a.falling_h
+
+    -- x movement 
+    collide_side(a)
+    -- y movement
+    if(a.dy < 0)collide_up(a)
+    if(a.dy >= 0)collide_down(a)
+
+    --moving
+    a.x += a.dx
+    a.y += a.dy
+
+    update_camera()
+
+    --sprite
+    update_body(a)
+
+    --gravity
+    a.dy += a.ddy
+
+    --air resistance
+    if not a.standing then
+        a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
+        a.dx -= sgn(a.dx) * a.dx * a.dx * a.drag
+    end
+
+    --snapping
+    if(a.dx == 0)a.x = (flr(8*(a.x+a.cx)+.5) - 8*a.cx) * .125
+    if(a.dy == 0)a.y =  flr(8 * a.y + .5) * 0.125
+
+    --timers
+    a.t += 1
+end
+
+
+function update_umbrella(a)
+    --umbrella
+    a.state = 'umbrella'
+
+    a.boost_t = 0
+
+    if(btn(⬅️) and not btn(➡️) and not a.strafe)then
+        a.u_d = -1
+    elseif(btn(➡️) and not btn(⬅️) and not a.strafe)then
+        a.u_d = 1
+    else
+        if(not btn(⬅️) and not btn(➡️))a.strafe = false
+        a.u_d = 0
+    end
+
+    if(a.dy <= 0)return
+    --> only apply drag when decending
+
+    --player looks in the movement direction
+    if(a.dx != 0)a.d = sgn(a.dx)
+
+    a.u_x =  sin(-a.u_d * a.u_tilt)
+    a.u_y = -cos(-a.u_d * a.u_tilt)
+
+    local v = sqrt(a.dx * a.dx + a.dy * a.dy)
+    local c = -(a.dx * a.u_x + a.dy * a.u_y) * a.u_drag * v
+
+    a.dx += c * a.u_x
+    a.dy += c * a.u_y
+end
+
+
+function update_walking(a)
+    --side movement
+    if(btn(➡️) and not btn(⬅️))then
+        a.d = 1
+        a.strafe = true
+    elseif(btn(⬅️)and not btn(➡️))then
+        a.d = -1
+        a.strafe = true
+    else
+        a.r = 1
+        a.strafe = false
+    end
+
+    debug.strafe = a.strafe
+
+    if a.strafe then
+        --> inverse exponential
+        --a.r *= EI
+        --a.dx = a.d * a.vx * (1-a.r)
+
+        --> linear
+        --a.r = max(0, a.r-1/DDXT)
+        --a.dx = a.d * a.vx * (1-a.r)
+
+        --> exponential
+        --a.r = min(1/MV, a.r*EA)
+        --a.dx = a.d * a.vx * MV * (a.r-1)
+
+        --> quadratic
+        a.r = max(0, a.r-1/DDXT)
+        a.dx = a.d * a.vx * (1-a.r) * (1-a.r)
+
+        --if(a.d * a.dx < 0)a.dx = 0 --> change of direction
+        --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
+
+        if(a.standing)then
+            if not a.state == 'walking' then
+                sfx(SFX_STEP)
+            end
+            a.state = 'walking'
+        end
+    else
+        --friction
+
+        a.dx *= EF
+        if(abs(a.dx) < MV)a.dx = 0
+    end
+
+    debug.dx = a.dx/a.vx
+
+    --going down platforms
+    a.decending = (btn(⬇️) and a.standing)
+end
+
+
+function update_jumping(a)
+    --jumping
+    if btn(🅾️) then
+        if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
+            --begin (trying to) jump
+            a.dy = -a.vy
+            a.boost_t = a.boost_max
+        elseif a.umbrella then
+            a.boost_t = 0
+        elseif a.state == 'falling' and a.boost_t > 0 then
+            a.boost_t -= 1
+            a.dy = -a.vy
+        end
+    else
+        a.jumped = false
+        a.boost_t = 0
+    end
+end
+
+--[[
+
+   O       O       O       O    
+--@@@-- --@@@-- --@@@-- --@@@-- 
+  @@@\    @@@\   _@@@    _@@@  
+  |      /           \      |   
+
+--]]
+
+function update_body(a)
+    debug.state = a.state
+    if a.state == 'falling' then
+        a.f_y = 0
+        a.f_t = 3
+        if a.dy < 0 then --> going up
+            a.frame = abs(a.dx) > 0 and SPR_WALKING+1 or SPR_WALKING
+            a.jumped = true
+        else --> going down
+            a.frame = abs(a.dx) > 0 and SPR_WALKING+2 or SPR_WALKING+3
+        end
+    elseif a.state == 'walking' then
+        a.f_t = flr(a.f_t * 4 + 1.5) / 4 --> four ticks per frame
+        if(a.f_t % 4 == 3)sfx(SFX_STEP) --> tip tap
+        if abs(a.dx) < VX and a.f_t%4 == 0 then
+            -- stop
+            a.frame = SPR_STILL
+            a.f_y = 0
+            a.f_t = 0
+            a.walking = false
+            a.state = 'still'
+        else
+            a.frame = SPR_WALKING + flr(a.f_t%4)
+            a.f_y = a.walking_y[flr(a.f_t%4)+1]
+        end
+    elseif a.state == 'umbrella' then
+        a.f_y = 0
+        a.frame = SPR_GLIDING + a.u_d * a.d
+        debug.u_d = a.u_d
+    else
+        a.f_y   = 0
+        a.frame = SPR_STILL
+    end
+end
+
+
 function draw_player(a)
     local x = a.d>0 and 8*(a.x-a.cx)+.5 or 8*(a.x-1+a.cx)+.5
     local y = 8*(a.y+a.f_y-1)+.5

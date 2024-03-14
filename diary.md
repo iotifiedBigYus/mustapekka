@@ -30,12 +30,6 @@ Changes made:
 
 Noticed that jumping on mobile is much easier if it's mapped to O. Added that alternative.
 
-Checklist when creating a new version because I noticed I need one:
-- Update the version number
-- Capture new label image (ctrl-7)
-- "save .png"
-
-
 ## Sam, 5.3.24, 1800, version 0.1.3
 
 Made a menu item that changes the jump button between o and up. It felt a bit janky and less is more, so the jump button is now only o. Might bring back up in the future. The x button will most likely be in use, so two hands will be needed either way.
@@ -112,4 +106,18 @@ Tried to make the camera lock on to the player in a good way, but the locking is
 
 TODO:
 - more precise movement
+
+## Sam 14.3.2024, version 0.3.0
+
+All right. Went back to linear acceleration. I does not feel like the greatest thing ever but I think it is good enough, and I might just be used to the previous movement. **Never mind.** After writing this I realized quadratic curves existed and used that. 6 ticks to full speed. Man, what a difference. Quadratic is definitely the way to go.
+
+The umbrella now stays straight when you deploy it whilst pressing one of the directional keys. You have to press one of them again to tilt it.
+
+Added coyote time after watching a video by The Shaggy Dev, making it possible to jump some ticks after walking off an edge. Will also add 'push-off' so that you don't have to align yourself up perfectly to jump into spaces above you.
+(Video: *[5 tips for better platformer controls](https://www.youtube.com/watch?v=Bsy8pknHc0M&t=181s)*)
+
+TODO:
+- add push-off
+
+
 

@@ -9,38 +9,41 @@
 VX = .125 -- horizontal speed
 VY = 0.2 -- jump speed > when pressing fast (~5 ticks) you jump exactly one block
 G = .02 -- gravitational acceleration
-EI = 0.5 -- exponential acceleration
-EF = 0.9 --exponential deacceleration
+--EI = 0.6 -- inverse exponential acceleration
+--EA = 1.1 -- exponential acceleration
+EF = 0.9 -- exponential deacceleration
 C = .02 --air drag
 UC = .7 --umbrella drag (only downwards)
-UF = 0.1 --umbrella system
-UZ = 1
-UR = 0
---DDX = VX / 4 --sideways acceleration (thrust / friction)
+--UF = 0.1 --umbrella system
+--UZ = 1
+--UR = 0
+--DDX = VX / 6 --sideways acceleration (thrust / friction)
+DDXT = 6--8--ticks to accelerate
 J = 11 --maximum jump duration (in ticks)
+COYOTE = 4 --coyote time (window where you can jump when falling)
 E = .01 --epsilon (a small number used when finding edges)
 WX = 0 --world upper left corner x,y; width; height
 WY = 0
 WW = 77
 WH = 38
 MV = .04 --minimum velocity
-MDV = .02 --minimum difference in velocity (for camera)
+--MDV = .02 --minimum difference in velocity (for camera)
 CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 1
 CAMERA_R = 0
-PLAYER_X = 4
-PLAYER_Y = 20
+--PLAYER_X = 4
+--PLAYER_Y = 20
 
 -- *-----------------*
 -- | other constants |
 -- *-----------------*
 
-VERSION = '0.2.0' --version number
-DEBUGGING = true --show debug info
+VERSION = '0.3.0' --version number
+DEBUGGING = false --show debug info
 FREEZE = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN = 1 --frames per tick
 AUTO_JUMP = false
-PLAY_MUSIC = false
+PLAY_MUSIC = true
 MAX_ACTORS = 128 --maximum amount of actors
 
 -- *---------------*
