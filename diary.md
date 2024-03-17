@@ -77,7 +77,7 @@ Bugs
 TODO:
 - make the camera "lock on to" the player when their velocities are similar so that the jittering does not occur
 
-## Benjamin 13.3.2024
+## Benjamin, 13.3.2024
 
 Made a proto level. Colour codes:
 - yellow = chasing dog
@@ -94,7 +94,7 @@ EDIT - Sam
 )
 UPDATE: Done messed up. Problems with Github - overwrote Sam's demo. After a long reverting session the two should be separate and navigable. This problem should not arise in the future, as long as I remember to edit a duplicated file, and not the original.
 
-## Sam 13.3.2024
+## Sam, 13.3.2024
 
 Thats how it goes in the world of game dev. I don't know how git branches work, so this method will do for now.
 
@@ -107,7 +107,7 @@ Tried to make the camera lock on to the player in a good way, but the locking is
 TODO:
 - more precise movement
 
-## Sam 14.3.2024, version 0.3.0
+## Sam, 14.3.2024, version 0.3.0
 
 All right. Went back to linear acceleration. I does not feel like the greatest thing ever but I think it is good enough, and I might just be used to the previous movement. **Never mind.** After writing this I realized quadratic curves existed and used that. 6 ticks to full speed. Man, what a difference. Quadratic is definitely the way to go.
 
@@ -118,6 +118,18 @@ Added coyote time after watching a video by The Shaggy Dev, making it possible t
 
 TODO:
 - add push-off
+
+## Sam, 17.3.2024
+
+_Caffeine is one hell of a drug._ It's currently 0532 and I've experimented with colors. Found seven colors that look good behind the charater, those being greens, grays, purples, and a dark brown thats a little on the edge of looking good. The rest of the colors are too bright, dark, or clash with the sprite.
+
+The chosen colors are easy on the eyes, but the purples and the grays are functionally similar. We might want to choose to only use one of the pairs to leave room for other colors.
+
+Changes:
+- The umbrella is darker (might be changed back)
+- Made an orange cat sprite that I'm pretty pleased with.
+- Made pink walls light gray and dark purple walls dark gray
+
 
 
 

@@ -43,7 +43,7 @@ DEBUGGING = false --show debug info
 FREEZE = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN = 1 --frames per tick
 AUTO_JUMP = false
-PLAY_MUSIC = true
+PLAY_MUSIC = false
 MAX_ACTORS = 128 --maximum amount of actors
 
 -- *---------------*
@@ -57,13 +57,16 @@ c[2]  = 2+128
 c[3]  = 3+128
 c[4]  = 4+128
 c[5]  = 0+128
+c[6]  = 6+128
+c[8]  = 8+128
 c[9]  = 9+128
 c[11] = 3
 c[12] = 13
-c[13] = 13+128
+c[13] = 5
+c[14] = 13+128
 c[15] = 15+128
 ALT_COLORS = c
-BG = 13 --background color
+BG = 12 --background color
 
 -- *--------*
 -- | sounds |
