@@ -63,22 +63,22 @@ function make_actor(kind,x,y,d)
 	local a = {}
 	a.kind  = kind --1: player, 2: pickup, 3:monster
     --motion
-	a.x   = x
-	a.y   = y
-	a.dx  = 0
-	a.dy  = 0
-    a.r   = 1
-    a.vx  = VX
-    a.vy  = VY
-    a.ddx = DDX
-	a.ddy = G -- gravity
+	a.x    = x
+	a.y    = y
+	a.dx   = 0
+	a.dy   = 0
+    a.r    = 1
+    a.vx   = VX
+    a.vy   = VY
+    a.ddx  = DDX
+	a.ddy  = G -- gravity
     a.drag = C
-	a.d   = d --pickup 1, monster -1 (looking direction)
+	a.d    = d --pickup 1, monster -1 (looking direction)
     --state
     a.state    = 'still'
 	a.standing = true
     --size
-    a.cx = .4375 --> sprite center x
+    a.cx = -1/16 --> sprite center deviation
     a.w  = .625
     a.h  = 1
     a.standing_h = 1
@@ -155,7 +155,7 @@ function collide_side(a)
         while not (solid(a.x+d*(a.w*.5+E)+xe, a.y-E) or solid(a.x+d*(a.w*.5+E)+xe, a.y-a.h)) do
             a.x += sgn(a.dx) * E
         end
-        a.x = (flr( 8*(a.x+a.cx)+.5) - 8*a.cx) * .125
+        a.x = snap8(a.x,a.cx)
         a.dx = 0 --> do this after contact point, because sgn(0) is not 1
     end
 end
@@ -163,21 +163,29 @@ end
 
 function collide_up(a, d)
     local y1 = a.y+a.dy-a.h
-    if (solid(a.x-a.w*.5+a.dx, y1) or solid(a.x+a.w*.5-E+a.dx, y1)) then
-        -- search up for collision point
-        while (not (solid(a.x-a.w*.5+a.dx, a.y-a.h-E)
-        or solid(a.x+a.w*.5-E+a.dx, a.y-a.h-E))) do
-            a.y = a.y - E
-        end
+    local xl = a.x+a.dx-a.w*.5
+    local xr = a.x+a.dx+a.w*.5-E
+    local push = {0,-.125,.125,-.25,.25}
+    local i = 1
 
-        a.dy=0
-        a.boost_t = 0
-        --debug.solid_up = true
-    else
-        a.standing = false
-        a.state = a.umbrella and 'umbrella' or 'falling'
-        --debug.solid_up = false
+    for _,p in ipairs(push) do
+        if not (solid(xl+p, y1) or solid(xr+p, y1)) then
+            a.standing = false
+            a.x += p
+            a.state = a.umbrella and 'umbrella' or 'falling'
+            --debug.solid_up = false
+            return
+        end
     end
+    --> hit
+    -- search up for collision point
+    while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
+        a.y = a.y - E
+    end
+
+    a.dy=0
+    a.boost_t = 0
+    --debug.solid_up = true
 end
 
 
@@ -189,7 +197,7 @@ function collide_down(a)
         while not (solid(xl, a.y+E) or solid(xr, a.y+E)) do
             a.y += E
         end
-        a.y = flr(8*a.y+.5)/8
+        a.y = snap8(a.y)
 
         if not a.standing then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
@@ -203,7 +211,7 @@ function collide_down(a)
         while not(platform(xl, a.y+E) or platform(xr, a.y+E)) do
             a.y += E
         end
-        a.y = flr(8*a.y+.5)/8
+        a.y = snap8(a.y)
         if not a.standing then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
             sfx(SFX_STEP)
@@ -235,6 +243,12 @@ end
 function platform(x,y)
     local val = mget(x, y)
 	return fget(val, 2)
+end
+
+
+function snap8(val, shift)
+    shift = shift or 0
+    return flr(8*(val+shift)+.5) * .125 - shift
 end
 
 
@@ -349,7 +363,7 @@ function position_player()
     for x=WX,WW-1 do
         for y=WY,WH-1 do
             if mget(x,y) == SPR_STILL then
-                player.x = x+player.cx
+                player.x = x+0.5+player.cx
                 player.y = y+1
                 clear_cell(x,y)
                 break
@@ -397,8 +411,8 @@ function update_player(a)
     end
 
     --snapping
-    if(a.dx == 0)a.x = (flr(8*(a.x+a.cx)+.5) - 8*a.cx) * .125
-    if(a.dy == 0)a.y =  flr(8 * a.y + .5) * 0.125
+    if(a.dx == 0)a.x = snap8(a.x,a.cx)
+    if(a.dy == 0)a.y = snap8(a.y,0)
 
     --timers
     a.t += 1
@@ -557,7 +571,7 @@ end
 
 
 function draw_player(a)
-    local x = a.d>0 and 8*(a.x-a.cx)+.5 or 8*(a.x-1+a.cx)+.5
+    local x = a.d>0 and 8*(a.x-0.5-a.cx)+.5 or 8*(a.x-0.5+a.cx)+.5
     local y = 8*(a.y+a.f_y-1)+.5
 
     --draw umbrella

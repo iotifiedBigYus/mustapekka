@@ -39,7 +39,7 @@ CAMERA_R = 0
 -- *-----------------*
 
 VERSION = '0.3.0' --version number
-DEBUGGING = false --show debug info
+DEBUGGING = true --show debug info
 FREEZE = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN = 1 --frames per tick
 AUTO_JUMP = false
@@ -57,7 +57,7 @@ c[2]  = 2+128
 c[3]  = 3+128
 c[4]  = 4+128
 c[5]  = 0+128
-c[6]  = 6+128
+c[6]  = 6+128 
 c[8]  = 8+128
 c[9]  = 9+128
 c[11] = 3

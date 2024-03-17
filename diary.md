@@ -121,14 +121,16 @@ TODO:
 
 ## Sam, 17.3.2024
 
-_Caffeine is one hell of a drug._ It's currently 0532 and I've experimented with colors. Found seven colors that look good behind the charater, those being greens, grays, purples, and a dark brown thats a little on the edge of looking good. The rest of the colors are too bright, dark, or clash with the sprite.
+I've experimented with colors. Found seven colors that look good behind the charater, those being greens, grays, purples, and a dark brown thats a little on the edge of looking good. The darker red might also work, but thats the new color of the umbrella. The rest of the colors are too bright, too dark, or clash with the sprite.
 
-The chosen colors are easy on the eyes, but the purples and the grays are functionally similar. We might want to choose to only use one of the pairs to leave room for other colors.
+The chosen colors are easy on the eyes, but the purples and the grays are functionally very similar. We might want to only use two of the four colors to leave room for other colors. The purples have more color than the grays, but the grays work better with the greens. _Tough Choice._
 
 Changes:
 - The umbrella is darker (might be changed back)
 - Made an orange cat sprite that I'm pretty pleased with.
 - Made pink walls light gray and dark purple walls dark gray
+
+There is now some slack when jumping into a space. Collision is checked up to two pixels from the current position and the character is teleported sideways to match the gap. This might need to be reworked so that the character is given sideways momentum instead of teleportation, staying outside walls so that the physics don't break.
 
 
 
