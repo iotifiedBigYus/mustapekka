@@ -132,12 +132,16 @@ Changes:
 
 There is now some slack when jumping into a space. Collision is checked up to two pixels from the current position and the character is teleported sideways to match the gap. This might need to be reworked so that the character is given sideways momentum instead of teleportation, staying outside walls so that the physics don't break.
 
-## Sam, 18.3.2024
+## Sam, 18.3.2024, version 0.4.0
 
 Made the push off better by offsetting the player sprite after push-off and re-centering the sprite smoothly. There is no push-off if your jumping with a block directly over you and it checks in what direction you are going to not hinder you from jumping into a hole in a wall by pushing you away.
 
 Experimented with the umbrella by making the drag stronger, tilting it less, and making the y-component of the drag vector constant. Not yet satisfied but there is potential.
 
+## Sam, 19.3.2024
+
+TODO:
+- add push-off when decending
 
 
 
