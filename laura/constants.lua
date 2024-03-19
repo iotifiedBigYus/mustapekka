@@ -2,6 +2,15 @@
 --sam westerlund
 --13.3.24
 
+-- *-----------------*
+-- | debug constants |
+-- *-----------------*
+
+DEBUGGING = false --show debug info
+FREEZE = false --update the game one frame at a time by pressng player two 🅾️
+SLOWDOWN = 1 --frames per tick
+HITBOX = false
+
 -- *------------------------------*
 -- | physics / physical constants |
 -- *------------------------------*
@@ -12,16 +21,18 @@ G = .02 -- gravitational acceleration
 --EI = 0.6 -- inverse exponential acceleration
 --EA = 1.1 -- exponential acceleration
 EF = 0.9 -- exponential deacceleration
-C = .02 --air drag
-UC = .7 --umbrella drag (only downwards)
+DRAG = .02 --air drag
+U_DRAG = 1.2 --umbrella drag (only downwards)
+U_TILT = 0.08
 --UF = 0.1 --umbrella system
 --UZ = 1
 --UR = 0
 --DDX = VX / 6 --sideways acceleration (thrust / friction)
 DDXT = 6--8--ticks to accelerate
-J = 11 --maximum jump duration (in ticks)
+BOOST = 10 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
 E = .01 --epsilon (a small number used when finding edges)
+FVX = .04 --spirte recentering speed
 WX = 0 --world upper left corner x,y; width; height
 WY = 0
 WW = 77
@@ -38,12 +49,9 @@ CAMERA_R = 0
 -- | other constants |
 -- *-----------------*
 
-VERSION = '0.3.0' --version number
-DEBUGGING = true --show debug info
-FREEZE = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN = 1 --frames per tick
+VERSION = '0.4.0' --version number
 AUTO_JUMP = false
-PLAY_MUSIC = false
+PLAY_MUSIC = true
 MAX_ACTORS = 128 --maximum amount of actors
 
 -- *---------------*
@@ -53,11 +61,11 @@ MAX_ACTORS = 128 --maximum amount of actors
 local c = {}
 c[0]  = 0
 c[1]  = 0
-c[2]  = 2+128
+c[2]  = 4+128
 c[3]  = 3+128
-c[4]  = 4+128
-c[5]  = 0+128
-c[6]  = 6+128 
+c[4]  = 4
+c[5]  = 5+128
+c[6]  = 6+128
 c[8]  = 8+128
 c[9]  = 9+128
 c[11] = 3

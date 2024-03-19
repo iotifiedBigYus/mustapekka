@@ -72,7 +72,7 @@ function make_actor(kind,x,y,d)
     a.vy   = VY
     a.ddx  = DDX
 	a.ddy  = G -- gravity
-    a.drag = C
+    a.drag = DRAG
 	a.d    = d --pickup 1, monster -1 (looking direction)
     --state
     a.state    = 'still'
@@ -87,6 +87,8 @@ function make_actor(kind,x,y,d)
 	a.frame = 1
     a.f_t   = 0
     a.f_y   = 0
+    a.f_x   = 0
+    a.f_vx  = FVX
     --timer
 	a.t		= 0
 	if (count(actors) < MAX_ACTORS) then
@@ -163,15 +165,24 @@ end
 
 function collide_up(a, d)
     local y1 = a.y+a.dy-a.h
-    local xl = a.x+a.dx-a.w*.5
-    local xr = a.x+a.dx+a.w*.5-E
-    local push = {0,-.125,.125,-.25,.25}
-    local i = 1
+    local xl = snap8(a.x+a.dx-a.w*.5)
+    local xr = snap8(a.x+a.dx+a.w*.5)-E
+    local push
+    if a.standing then
+        push = {0}
+    elseif a.dx > 0 then
+        push = {0,.125,.25}
+    elseif a.dx < 0 then
+        push = {0,-.125,-.25}
+    else
+        push = {0,-.125,.125,-.25,.25}
+    end
 
     for _,p in ipairs(push) do
         if not (solid(xl+p, y1) or solid(xr+p, y1)) then
             a.standing = false
             a.x += p
+            a.f_x -= p
             a.state = a.umbrella and 'umbrella' or 'falling'
             --debug.solid_up = false
             return
@@ -300,6 +311,7 @@ function _draw()
     color(7)
     print(info_string, info_x, info_y)
     map()
+    if (HITBOX) foreach(actors, draw_hitbox)
     foreach(actors, draw_actor)
 
     --debug
@@ -329,6 +341,16 @@ actor position is center bottom
 
 --]]
 
+function draw_hitbox(a)
+    rect(
+        8*snap8(a.x-a.w*.5),
+        8*snap8(a.y-a.h),
+        8*(snap8(a.x+a.w*.5)-E),
+        8*(snap8(a.y)-E),
+        8
+    )  
+end
+
 
 -- *------------------*
 -- | player functions |
@@ -341,16 +363,16 @@ function make_player(x, y, d)
     d = d or 1
     a = make_actor(1, x, y, d) --> kind: 1
     --motion
-    a.u_drag   = UC
+    a.u_drag   = U_DRAG
     a.u_d      = 0
-    a.u_tilt   = 0.1
+    a.u_tilt   = U_TILT
     --state
-    a.strafe     = false
+    a.strafing     = false
     a.jumped     = false
     a.decending  = false
     a.umbrella   = false
     a.boost_t    = 0
-    a.boost_max  = J
+    a.boost_max  = BOOST
     a.coyote_t   = 0
     a.coyote_max = COYOTE
     --drawing
@@ -396,6 +418,8 @@ function update_player(a)
     a.x += a.dx
     a.y += a.dy
 
+    debug.dy = a.dy
+
     update_camera()
 
     --sprite
@@ -425,23 +449,23 @@ function update_umbrella(a)
 
     a.boost_t = 0
 
-    if(btn(⬅️) and not btn(➡️) and not a.strafe)then
+    if(btn(⬅️) and not btn(➡️) and not a.strafing)then
         a.u_d = -1
-    elseif(btn(➡️) and not btn(⬅️) and not a.strafe)then
+    elseif(btn(➡️) and not btn(⬅️) and not a.strafing)then
         a.u_d = 1
     else
-        if(not btn(⬅️) and not btn(➡️))a.strafe = false
+        if(not btn(⬅️) and not btn(➡️))a.strafing = false
         a.u_d = 0
     end
 
-    if(a.dy <= 0)return
+    --if(a.dy <= 0)return
     --> only apply drag when decending
 
     --player looks in the movement direction
     if(a.dx != 0)a.d = sgn(a.dx)
 
     a.u_x =  sin(-a.u_d * a.u_tilt)
-    a.u_y = -cos(-a.u_d * a.u_tilt)
+    a.u_y = -1-- -cos(-a.u_d * a.u_tilt)
 
     local v = sqrt(a.dx * a.dx + a.dy * a.dy)
     local c = -(a.dx * a.u_x + a.dy * a.u_y) * a.u_drag * v
@@ -455,18 +479,18 @@ function update_walking(a)
     --side movement
     if(btn(➡️) and not btn(⬅️))then
         a.d = 1
-        a.strafe = true
+        a.strafing = true
     elseif(btn(⬅️)and not btn(➡️))then
         a.d = -1
-        a.strafe = true
+        a.strafing = true
     else
         a.r = 1
-        a.strafe = false
+        a.strafing = false
     end
 
-    debug.strafe = a.strafe
+    debug.strafing = a.strafing
 
-    if a.strafe then
+    if a.strafing then
         --> inverse exponential
         --a.r *= EI
         --a.dx = a.d * a.vx * (1-a.r)
@@ -509,7 +533,7 @@ end
 function update_jumping(a)
     --jumping
     if btn(🅾️) then
-        if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
+        if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_BOOSTUMP) then
             --begin (trying to) jump
             a.dy = -a.vy
             a.boost_t = a.boost_max
@@ -536,6 +560,13 @@ end
 
 function update_body(a)
     debug.state = a.state
+
+    --recenter the spirte
+    if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
+    if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
+
+    debug.f_x = a.f_x
+
     if a.state == 'falling' then
         a.f_y = 0
         a.f_t = 3
@@ -571,7 +602,7 @@ end
 
 
 function draw_player(a)
-    local x = a.d>0 and 8*(a.x-0.5-a.cx)+.5 or 8*(a.x-0.5+a.cx)+.5
+    local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
     local y = 8*(a.y+a.f_y-1)+.5
 
     --draw umbrella
