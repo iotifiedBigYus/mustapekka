@@ -6,7 +6,7 @@
 -- | debug / performance constants |
 -- *-------------------------------*
 
-DEBUGGING  = false --show debug info
+DEBUGGING  = true --show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
@@ -41,6 +41,8 @@ MV = .04 --minimum velocity
 CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 1
 CAMERA_R = 0
+CAMERA_MIN_V = 0.32
+CAMERA_LOCK_V = 0.2
 NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}

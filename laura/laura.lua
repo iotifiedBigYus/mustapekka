@@ -268,7 +268,7 @@ end
 function _draw()
     pal(ALT_COLORS,1)
 	cls(BG) 
-    camera(8*camera_x.pos-64, 8*camera_y.pos-64)
+    camera(camera_x.pos-64, camera_y.pos-64)
     color(7)
     print(info_string, info_x, info_y)
     map()
@@ -380,8 +380,6 @@ function update_player(a)
     a.x += a.dx
     a.y += a.dy
 
-    debug.dy = a.dy
-
     --sprite
     update_body(a)
 
@@ -448,7 +446,7 @@ function update_walking(a)
         a.strafing = false
     end
 
-    debug.strafing = a.strafing
+    --debug.strafing = a.strafing
 
     if a.strafing then
         --> inverse exponential
@@ -523,13 +521,11 @@ end
 --]]
 
 function update_body(a)
-    debug.state = a.state
+    --debug.state = a.state
 
     --recenter the spirte
     if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
     if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
-
-    debug.f_x = a.f_x
 
     if a.state == 'falling' then
         a.f_y = 0
@@ -557,7 +553,6 @@ function update_body(a)
     elseif a.state == 'umbrella' then
         a.f_y = 0
         a.frame = SPR_GLIDING + a.u_d * a.d
-        debug.u_d = a.u_d
     else
         a.f_y   = 0
         a.frame = SPR_STILL
@@ -592,8 +587,8 @@ end
 
 
 function make_camera()
-    camera_x = make_camera_axis(player.x, world_x+8, world_x+world_w-8)
-    camera_y = make_camera_axis(player.y, world_y+8, world_y+world_h-8)
+    camera_x = make_camera_axis(8*player.x, 8*(world_x+8), 8*(world_x+world_w-8))
+    camera_y = make_camera_axis(8*player.y, 8*(world_y+8), 8*(world_y+world_h-8))
 end
 
 
@@ -624,7 +619,9 @@ function make_camera_axis(pos, min, max)
 	--init variables
 	sys.target_pos = pos or 0
 	sys.pos = pos or 0
-	sys.db = 0
+	sys.vel = 0
+    sys.locked = false
+    sys.locked_pos = pos or 0
     sys.min = min or -math.huge
     sys.max = max or math.huge
 	
@@ -633,19 +630,42 @@ end
 
 
 function update_camera()
-    update_camera_axis(camera_x, player.x)
-    update_camera_axis(camera_y, player.y)
+    update_camera_axis_old(camera_x, 8*player.x)
+    update_camera_axis_old(camera_y, 8*player.y)
 end
 
 
 function update_camera_axis(sys, pl)
-    local cam = sys.pos
     local target_vel = pl - sys.target_pos
     sys.target_pos = pl
-    sys.pos += sys.db
-    sys.db += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.db) / sys.k2
 
-    if(abs(sys.db) > MV)cam = sys.pos
-    cam = mid(sys.min, cam, sys.max)
-    sys.pos = cam
+    if abs(sys.vel - target_vel) < CAMERA_LOCK_V then
+        if (not sys.locked) then
+            sys.pos = flr(sys.pos) + pl-target_vel - flr(pl-target_vel) -0.5
+        end
+        sys.vel = target_vel
+        sys.locked = true
+    else
+        sys.locked = false
+    end
+
+    if(abs(sys.vel) > CAMERA_MIN_V)then
+        sys.pos += sys.vel
+    end
+
+    sys.pos = mid(sys.min, sys.pos, sys.max)
+    sys.vel += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.vel) / sys.k2
+end
+
+
+function update_camera_axis_old(sys, pl)
+    local target_vel = pl - sys.target_pos
+    sys.target_pos = pl
+
+    if(abs(sys.vel) > CAMERA_MIN_V)then
+        sys.pos += sys.vel
+    end
+
+    sys.pos = mid(sys.min, sys.pos, sys.max)
+    sys.vel += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.vel) / sys.k2
 end

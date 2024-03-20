@@ -151,6 +151,8 @@ From this day onward I am calling 'push-off' nudging, which now also occurs when
 
 My friend noted that the umbrella deaccelerates the player too fast, and I agree. We will need to deviate from physics to come up with a smoother drag model.
 
+Tried to fix the glide jittering. Got closer but it only works sometimes.
+
 Changes:
 - Made the start of the player acceleration constant as the minimum velocity until the quadratic curves becomes larger.
 - Cleaned up the camera code so that smart following can be implemented easier and removed system.lua
