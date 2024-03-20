@@ -12,6 +12,7 @@ SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 VERSION    = '0.4.1' --version number
 MAX_ACTORS = 128 --maximum amount of actors
+LEVEL_N    = 1
 
 -- *------------------------------*
 -- | physics / physical constants |
@@ -34,11 +35,7 @@ DDXT = 6--8--ticks to accelerate
 BOOST = 10 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
 E = .01 --epsilon (a small number used when finding edges)
-FVX = .04 --spirte recentering speed
-WX = 0 --world upper left corner x,y; width; height
-WY = 0
-WW = 77
-WH = 38
+FVX = .04 --sprite recentering speed
 MV = .04 --minimum velocity
 --MDV = .02 --minimum difference in velocity (for camera)
 CAMERA_F = 0.01 --camera dynamics
@@ -75,10 +72,10 @@ BG = 12 --background color
 -- | sounds |
 -- *--------*
 
-PLAY_MUSIC   = true
-SFX_STEP = 63
-SFX_JUMP = 62
-MUSIC = 0
+PLAY_MUSIC    = false
+SFX_STEP      = 63
+SFX_JUMP      = 62
+MUSIC         = 0
 MUSIC_FADE_IN = 1000
 
 -- *---------*

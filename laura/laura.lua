@@ -15,6 +15,11 @@ function _init()
     debug = {t=0}   
     
 	actors = {}
+    local l = levels[LEVEL_N]
+    world_x = l[1]
+    world_y = l[2]
+    world_w = l[3]
+    world_h = l[4]
 
     player = make_player()
     position_player()
@@ -32,7 +37,7 @@ function clear_cell(x, y)
     --straight up copied from jelpi
     local val0 = mget(x-1,y)
     local val1 = mget(x+1,y)
-    if ((x>WX and val0 == 0) or (x<WX+WW-1 and val1 == 0)) then
+    if ((x>world_x and val0 == 0) or (x<world_x+world_w-1 and val1 == 0)) then
         mset(x,y,0)
     elseif (not fget(val1,1)) then
         mset(x,y,val1)
@@ -234,7 +239,7 @@ end
 
 
 function solid(x, y)
-	if (x < WX or x >= WX+WW) then
+	if (x < world_x or x >= world_x+world_w) then
         return true
     end
 				
@@ -314,8 +319,8 @@ end
 
 
 function make_player(x, y, d)
-    x = x or WX
-    y = y or WY
+    x = x or 0
+    y = y or 0
     d = d or 1
     a = make_actor(1, x, y, d) --> kind: 1
     --motion
@@ -338,8 +343,8 @@ end
 
 
 function position_player()
-    for x=WX,WW-1 do
-        for y=WY,WH-1 do
+    for x=world_x,world_w-1 do
+        for y=world_y,world_h-1 do
             if mget(x,y) == SPR_STILL then
                 player.x = x+0.5+player.cx
                 player.y = y+1
@@ -587,14 +592,12 @@ end
 
 
 function make_camera()
-    local x = mid(WX+8, player.x, WX+WW-8)
-    local y = mid(WY+8, player.y, WY+WH-8)
-    camera_x = make_camera_axis(x)
-    camera_y = make_camera_axis(y)
+    camera_x = make_camera_axis(player.x, world_x+8, world_x+world_w-8)
+    camera_y = make_camera_axis(player.y, world_y+8, world_y+world_h-8)
 end
 
 
-function make_camera_axis(pos)
+function make_camera_axis(pos, min, max)
     --f (frequency): natural frequency
 
 	--z (damping): how the system comes to settle at the target
@@ -622,6 +625,8 @@ function make_camera_axis(pos)
 	sys.target_pos = pos or 0
 	sys.pos = pos or 0
 	sys.db = 0
+    sys.min = min or -math.huge
+    sys.max = max or math.huge
 	
 	return sys
 end
@@ -641,6 +646,6 @@ function update_camera_axis(sys, pl)
     sys.db += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.db) / sys.k2
 
     if(abs(sys.db) > MV)cam = sys.pos
-    cam = mid(WX+8, cam, WX+WW-8)
+    cam = mid(sys.min, cam, sys.max)
     sys.pos = cam
 end

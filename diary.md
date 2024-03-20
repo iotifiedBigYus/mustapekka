@@ -145,7 +145,7 @@ Added a lying german shepherd here and there.
 TODO:
 - add push-off when descending
 
-## Sam, 20.3.2024
+## Sam, 20.3.2024, version 0.4.1
 
 From this day onward I am calling 'push-off' nudging, which now also occurs when descending from standstill. I have been spelling descending wrong in my code this whole time.
 
@@ -154,6 +154,7 @@ My friend noted that the umbrella deaccelerates the player too fast, and I agree
 Changes:
 - Made the start of the player acceleration constant as the minimum velocity until the quadratic curves becomes larger.
 - Cleaned up the camera code so that smart following can be implemented easier and removed system.lua
+- Created levels.lua where Benjamin can define the borders of levels 
 
 
 
