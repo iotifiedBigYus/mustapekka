@@ -167,22 +167,17 @@ function collide_up(a, d)
     local y1 = a.y+a.dy-a.h
     local xl = snap8(a.x+a.dx-a.w*.5)
     local xr = snap8(a.x+a.dx+a.w*.5)-E
-    local push
-    if a.standing then
-        push = {0}
-    elseif a.dx > 0 then
-        push = {0,.125,.25}
-    elseif a.dx < 0 then
-        push = {0,-.125,-.25}
-    else
-        push = {0,-.125,.125,-.25,.25}
-    end
+    local nudges
+    if a.standing then nudges = {0}
+    elseif a.dx > 0 then nudges = NUDGES_RIGHT
+    elseif a.dx < 0 then nudges = NUDGES_LEFT
+    else nudges = NUDGES_CENTER end
 
-    for _,p in ipairs(push) do
-        if not (solid(xl+p, y1) or solid(xr+p, y1)) then
+    for _,n in ipairs(nudges) do
+        if not (solid(xl+n, y1) or solid(xr+n, y1)) then
             a.standing = false
-            a.x += p
-            a.f_x -= p
+            a.x += n
+            a.f_x -= n
             a.state = a.umbrella and 'umbrella' or 'falling'
             --debug.solid_up = false
             return
@@ -201,34 +196,46 @@ end
 
 
 function collide_down(a)
+    local y1 = a.y+a.dy
     local xl = a.x-a.w*.5+a.dx
     local xr = a.x+a.w*.5+a.dx-E
-    if(solid(xl, a.y+a.dy) or solid(xr, a.y+a.dy))then
-        --snap down
-        while not (solid(xl, a.y+E) or solid(xr, a.y+E)) do
-            a.y += E
-        end
-        a.y = snap8(a.y)
+    local nudges = a.dx == 0 and NUDGES_CENTER or {0}
 
-        if not a.standing then
-            a.state = abs(a.dx) < VX and 'still' or 'walking'
-            sfx(SFX_STEP)
+    local hit = false
+    if a.descending then
+        --> look for platforms nearby nudge player above them
+        for _,n in ipairs(nudges) do
+            if platform(xl+n, y1) and platform(xr+n, y1) then
+                decend = true
+                a.x   += n
+                a.f_x -= n
+                xl    += n
+                xr    += n
+                break
+            end
         end
-        a.standing=true
-        a.dy = 0
-    elseif (platform(xl, a.y+a.dy) or platform(xr, a.y+a.dy))
-    and ceil(a.y) == flr(a.y+a.dy)
-    and not a.decending then
-        while not(platform(xl, a.y+E) or platform(xr, a.y+E)) do
-            a.y += E
-        end
+    end
+
+    if(solid(xl, y1) or solid(xr, y1))then
+        --hit solid
+        hit = true
+        while not (solid(xl, a.y+E) or solid(xr, a.y+E)) do a.y += E end
+    elseif (platform(xl, y1) or platform(xr, y1))
+    and ceil(a.y) == flr(y1)
+    and not a.descending then
+        --hit platform
+        hit = true
+        while not(platform(xl, a.y+E) or platform(xr, a.y+E)) do a.y += E end
+        a.descending=false
+    end
+
+    if hit then
         a.y = snap8(a.y)
         if not a.standing then
             a.state = abs(a.dx) < VX and 'still' or 'walking'
             sfx(SFX_STEP)
         end
         a.standing=true
-        a.decending=false
         a.dy = 0
     else
         --coyote time
@@ -369,7 +376,7 @@ function make_player(x, y, d)
     --state
     a.strafing     = false
     a.jumped     = false
-    a.decending  = false
+    a.descending  = false
     a.umbrella   = false
     a.boost_t    = 0
     a.boost_max  = BOOST
@@ -401,6 +408,7 @@ function update_player(a)
 
     if a.umbrella then
         update_umbrella(a)
+        update_jumping(a)
     else
         update_walking(a)
         update_jumping(a)
@@ -447,7 +455,7 @@ function update_umbrella(a)
     --umbrella
     a.state = 'umbrella'
 
-    a.boost_t = 0
+    --a.boost_t = 0
 
     if(btn(⬅️) and not btn(➡️) and not a.strafing)then
         a.u_d = -1
@@ -458,8 +466,8 @@ function update_umbrella(a)
         a.u_d = 0
     end
 
-    --if(a.dy <= 0)return
-    --> only apply drag when decending
+    if(a.dy <= 0)return
+    --> only apply drag when descending
 
     --player looks in the movement direction
     if(a.dx != 0)a.d = sgn(a.dx)
@@ -505,7 +513,7 @@ function update_walking(a)
 
         --> quadratic
         a.r = max(0, a.r-1/DDXT)
-        a.dx = a.d * a.vx * (1-a.r) * (1-a.r)
+        a.dx = a.d * max(MV,a.vx * (1-a.r) * (1-a.r))
 
         --if(a.d * a.dx < 0)a.dx = 0 --> change of direction
         --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
@@ -526,7 +534,11 @@ function update_walking(a)
     debug.dx = a.dx/a.vx
 
     --going down platforms
-    a.decending = (btn(⬇️) and a.standing)
+    if btn(⬇️) then
+        if (a.standing) a.descending = true
+    else
+        a.descending = false
+    end
 end
 
 
@@ -537,9 +549,9 @@ function update_jumping(a)
             --begin (trying to) jump
             a.dy = -a.vy
             a.boost_t = a.boost_max
-        elseif a.umbrella then
-            a.boost_t = 0
-        elseif a.state == 'falling' and a.boost_t > 0 then
+        --elseif a.umbrella then
+        --    a.boost_t = 0
+        elseif not a.standing and a.boost_t > 0 then
             a.boost_t -= 1
             a.dy = -a.vy
         end

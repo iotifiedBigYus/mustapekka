@@ -6,7 +6,7 @@
 -- | debug constants |
 -- *-----------------*
 
-DEBUGGING = false --show debug info
+DEBUGGING = true --show debug info
 FREEZE = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN = 1 --frames per tick
 HITBOX = false
@@ -49,10 +49,13 @@ CAMERA_R = 0
 -- | other constants |
 -- *-----------------*
 
-VERSION = '0.4.0' --version number
-AUTO_JUMP = false
-PLAY_MUSIC = true
-MAX_ACTORS = 128 --maximum amount of actors
+VERSION      = '0.4.0' --version number
+AUTO_JUMP    = false
+PLAY_MUSIC   = true
+MAX_ACTORS   = 128 --maximum amount of actors
+NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
+NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
+NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
 
 -- *---------------*
 -- | color palette |

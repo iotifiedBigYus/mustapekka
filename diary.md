@@ -138,10 +138,17 @@ Made the push off better by offsetting the player sprite after push-off and re-c
 
 Experimented with the umbrella by making the drag stronger, tilting it less, and making the y-component of the drag vector constant. Not yet satisfied but there is potential.
 
+Added a lying german shepherd here and there.
+
 ## Sam, 19.3.2024
 
 TODO:
-- add push-off when decending
+- add push-off when descending
+
+## Sam, 20.3.2024
+
+From this day onward I am calling 'push-off' nudging, which now also occurs when descending from standstill. I have been spelling descending wrong in my code this whole time.
+
 
 
 
