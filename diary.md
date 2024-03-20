@@ -156,6 +156,18 @@ Changes:
 - Cleaned up the camera code so that smart following can be implemented easier and removed system.lua
 - Created levels.lua where Benjamin can define the borders of levels 
 
+## Benjamin, 20.3.2024
+
+"You know, I feel like I am going crazy. I swear, I close the door every night. My cat sits on my bed as I sleep. But then, I wake up; the doors stands agape and my cat has ran away.
+Am I going crazy? Or is some unknowable, grotesque being snatching my cat with its' slimy fingers each night, waiting for me to have fallen asleep before peeking in - its' eye must be bigger than my whole body?"
+
+We had a meeting:
+	- Spikes as static enemies are derivative, so we had to change our way of thinking. Nothing, that can naturally be found in homes, can be considered life-threathening.
+	- We settled on the following aesthetic: a setting reminiscent of suburban Japan; weird anatomical limbs sticking out of the walls as static enemies (lovecraftian entities).
+	- We settled on which colours fit with the character design.
+	- We made up a plan for movig forward and settled the date of the next meeting.
+	- Also, levels should be shorter than the first draft, and each should have its' own gist.
+
 
 
 
