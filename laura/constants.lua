@@ -2,14 +2,16 @@
 --sam westerlund
 --13.3.24
 
--- *-----------------*
--- | debug constants |
--- *-----------------*
+-- *-------------------------------*
+-- | debug / performance constants |
+-- *-------------------------------*
 
-DEBUGGING = true --show debug info
-FREEZE = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN = 1 --frames per tick
-HITBOX = false
+DEBUGGING  = false --show debug info
+FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
+SLOWDOWN   = 1 --frames per tick
+HITBOX     = false
+VERSION    = '0.4.1' --version number
+MAX_ACTORS = 128 --maximum amount of actors
 
 -- *------------------------------*
 -- | physics / physical constants |
@@ -42,20 +44,10 @@ MV = .04 --minimum velocity
 CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 1
 CAMERA_R = 0
---PLAYER_X = 4
---PLAYER_Y = 20
-
--- *-----------------*
--- | other constants |
--- *-----------------*
-
-VERSION      = '0.4.0' --version number
-AUTO_JUMP    = false
-PLAY_MUSIC   = true
-MAX_ACTORS   = 128 --maximum amount of actors
 NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
+AUTO_JUMP    = false
 
 -- *---------------*
 -- | color palette |
@@ -83,6 +75,7 @@ BG = 12 --background color
 -- | sounds |
 -- *--------*
 
+PLAY_MUSIC   = true
 SFX_STEP = 63
 SFX_JUMP = 62
 MUSIC = 0

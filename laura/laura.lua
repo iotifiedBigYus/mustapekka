@@ -44,22 +44,7 @@ function clear_cell(x, y)
 end
 
 
-function make_camera()
-    local x = mid(WX+8, player.x, WX+WW-8)
-    local y = mid(WY+8, player.y, WY+WH-8)
-    camera_system_x = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, x)
-    camera_system_y = new_system(CAMERA_F, CAMERA_Z, CAMERA_R, y)
-    camera_x = x
-    camera_y = y
-    camera_locked_horz = false
-    camera_locked_x = 0
-    camera_locked_vert = false
-    camera_locked_y = 0
-end
-
-
 function make_actor(kind,x,y,d)
-	--TODO what is d?? maybe draing priority
 	local a = {}
 	a.kind  = kind --1: player, 2: pickup, 3:monster
     --motion
@@ -135,9 +120,9 @@ function _update60()
     debug.t += 1
 
 	foreach(actors, update_actor)
-    --update_camera()
+    update_camera()
 
-    --debug.camera = tostr(camera_x)..'  '..tostr(camera_y)
+    --debug.camera = tostr(camera_x.pos)..'  '..tostr(camera_y.pos)
 end
 
 
@@ -270,42 +255,6 @@ function snap8(val, shift)
 end
 
 
-function update_camera()
-    local x, dx = update_system(camera_system_x, player.x)
-    if(abs(dx) > MV)camera_x = x
-    camera_x = mid(WX+8, camera_x, WX+WW-8)
-    camera_system_x.b = camera_x
-
-    local y, dy = update_system(camera_system_y, player.y)
-    if(abs(dy) > MV)camera_y = y
-    camera_y = mid(WY+8, camera_y, WY+WH-8)
-    camera_system_y.b = camera_y
-end
-
-
-function update_smart8_system()
-    local x, dx = update_system(camera_system_x, player.x)
-    if(abs(dx) < MV)then
-        --> do not move
-    elseif(abs(dx - player.dx) > MDV)then
-        --> different enough speed
-        camera_locked_horz = false
-        camera_x = x
-    elseif camera_locked_horz then
-        --> already locked on to the player
-        camera_x += player.dx
-    else
-        --> initiate horizontal lock
-        camera_locked_horz = true
-        local r8 = 8*player.x - flr(8*player.x)
-        local x8 = flr(8*camera_x+.5) + r8
-        camera_x = x8 * .125
-    end
-    camera_x = mid(WX+8, camera_x, WX+WW-8)
-    camera_system_x.b = camera_x
-end
-
-
 -- *-------------------*
 -- | drawing functions |
 -- *-------------------*
@@ -314,7 +263,7 @@ end
 function _draw()
     pal(ALT_COLORS,1)
 	cls(BG) 
-    camera(8*camera_x-64, 8*camera_y-64)
+    camera(8*camera_x.pos-64, 8*camera_y.pos-64)
     color(7)
     print(info_string, info_x, info_y)
     map()
@@ -427,8 +376,6 @@ function update_player(a)
     a.y += a.dy
 
     debug.dy = a.dy
-
-    update_camera()
 
     --sprite
     update_body(a)
@@ -631,4 +578,69 @@ function draw_player(a)
     end
 
     spr(a.frame, x, y,1,1,a.d<0)
+end
+
+
+-- *------------------*
+-- | camera functions |
+-- *------------------*
+
+
+function make_camera()
+    local x = mid(WX+8, player.x, WX+WW-8)
+    local y = mid(WY+8, player.y, WY+WH-8)
+    camera_x = make_camera_axis(x)
+    camera_y = make_camera_axis(y)
+end
+
+
+function make_camera_axis(pos)
+    --f (frequency): natural frequency
+
+	--z (damping): how the system comes to settle at the target
+	--damping = 0: system is undamped, never settles
+	--0<damping<1: system is underdamped.
+	--damping = 1: critical damping
+	--damping >= 1: system does not vibrate
+
+	--r (response): inital response of the system
+	--response = 0: system takes time to accelerate
+	--response > 0: reacts immediately
+	--response > 1: system will overshoot
+	--response < 0: system will anitcipate
+	--response = 2 is typical for mechanical systems
+
+	local sys = {}
+
+	--compute constants
+	local p = 0.5/3.1415/CAMERA_F --> angular period
+	sys.k1 = 2*CAMERA_Z*p
+	sys.k2 = p*p
+	sys.k3 = CAMERA_R*CAMERA_Z*p
+
+	--init variables
+	sys.target_pos = pos or 0
+	sys.pos = pos or 0
+	sys.db = 0
+	
+	return sys
+end
+
+
+function update_camera()
+    update_camera_axis(camera_x, player.x)
+    update_camera_axis(camera_y, player.y)
+end
+
+
+function update_camera_axis(sys, pl)
+    local cam = sys.pos
+    local target_vel = pl - sys.target_pos
+    sys.target_pos = pl
+    sys.pos += sys.db
+    sys.db += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.db) / sys.k2
+
+    if(abs(sys.db) > MV)cam = sys.pos
+    cam = mid(WX+8, cam, WX+WW-8)
+    sys.pos = cam
 end

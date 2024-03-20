@@ -149,6 +149,12 @@ TODO:
 
 From this day onward I am calling 'push-off' nudging, which now also occurs when descending from standstill. I have been spelling descending wrong in my code this whole time.
 
+My friend noted that the umbrella deaccelerates the player too fast, and I agree. We will need to deviate from physics to come up with a smoother drag model.
+
+Changes:
+- Made the start of the player acceleration constant as the minimum velocity until the quadratic curves becomes larger.
+- Cleaned up the camera code so that smart following can be implemented easier and removed system.lua
+
 
 
 
