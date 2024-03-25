@@ -171,5 +171,7 @@ We had a meeting:
 	- Also, levels should be shorter than the first draft, and each should have its' own gist.
 
 
+## Sam, 25.3.2024, version 0.4.2
 
+After tries I've gotten rid of the gliding jitter. The problem was that the sprite gets sub-pixel shifted when drawn due to it being only seven pixels wide, but the camera did not shift the target. I hope I don't have to touch the camera axis code anymore.
 

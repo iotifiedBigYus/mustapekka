@@ -6,11 +6,11 @@
 -- | debug / performance constants |
 -- *-------------------------------*
 
-DEBUGGING  = true --show debug info
+DEBUGGING  = false --show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
-VERSION    = '0.4.1' --version number
+VERSION    = '0.4.2' --version number
 MAX_ACTORS = 128 --maximum amount of actors
 LEVEL_N    = 1
 
@@ -42,7 +42,7 @@ CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 1
 CAMERA_R = 0
 CAMERA_MIN_V = 0.32
-CAMERA_LOCK_V = 0.2
+CAMERA_LOCK_V = 0.32
 NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
@@ -74,7 +74,7 @@ BG = 12 --background color
 -- | sounds |
 -- *--------*
 
-PLAY_MUSIC    = false
+PLAY_MUSIC    = true
 SFX_STEP      = 63
 SFX_JUMP      = 62
 MUSIC         = 0

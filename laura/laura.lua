@@ -268,12 +268,14 @@ end
 function _draw()
     pal(ALT_COLORS,1)
 	cls(BG) 
-    camera(camera_x.pos-64, camera_y.pos-64)
+    camera(camera_x.pos-63.5, camera_y.pos-63.5)
     color(7)
     print(info_string, info_x, info_y)
     map()
     if (HITBOX) foreach(actors, draw_hitbox)
     foreach(actors, draw_actor)
+
+    --pset(camera_x.pos+.5, camera_y.pos+.5,7)
 
     --debug
     camera(0,0)
@@ -593,68 +595,78 @@ end
 
 
 function make_camera_axis(pos, min, max)
-    --f (frequency): natural frequency
+	--f (frequency): natural frequency
 
-	--z (damping): how the system comes to settle at the target
-	--damping = 0: system is undamped, never settles
-	--0<damping<1: system is underdamped.
+	--z (damping): how the atem comes to settle at the target
+	--damping = 0: atem is undamped, never settles
+	--0<damping<1: atem is underdamped.
 	--damping = 1: critical damping
-	--damping >= 1: system does not vibrate
+	--damping >= 1: atem does not vibrate
 
-	--r (response): inital response of the system
-	--response = 0: system takes time to accelerate
+	--r (response): inital response of the atem
+	--response = 0: atem takes time to accelerate
 	--response > 0: reacts immediately
-	--response > 1: system will overshoot
-	--response < 0: system will anitcipate
-	--response = 2 is typical for mechanical systems
+	--response > 1: atem will overshoot
+	--response < 0: atem will anitcipate
+	--response = 2 is typical for mechanical atems
 
-	local sys = {}
+	local c = {}
 
 	--compute constants
 	local p = 0.5/3.1415/CAMERA_F --> angular period
-	sys.k1 = 2*CAMERA_Z*p
-	sys.k2 = p*p
-	sys.k3 = CAMERA_R*CAMERA_Z*p
+	c.k1 = 2*CAMERA_Z*p
+	c.k2 = p*p
+	c.k3 = CAMERA_R*CAMERA_Z*p
 
 	--init variables
-	sys.target_pos = pos or 0
-	sys.pos = pos or 0
-	sys.vel = 0
-    sys.locked = false
-    sys.locked_pos = pos or 0
-    sys.min = min or -math.huge
-    sys.max = max or math.huge
+	c.target_pos = pos or 0
+	c.pos = pos or 0
+	c.vel = 0
+    c.locked = false
+	c.diff = 0
+    c.min = min
+    c.max = max
+	c.bounded = min and max
 	
-	return sys
+	return c
 end
 
 
 function update_camera()
-    update_camera_axis_old(camera_x, 8*player.x)
-    update_camera_axis_old(camera_y, 8*player.y)
+    update_camera_axis(camera_x, 8*(player.x-sgn(player.d)*player.cx))
+    update_camera_axis(camera_y, 8*player.y)
 end
 
 
-function update_camera_axis(sys, pl)
-    local target_vel = pl - sys.target_pos
-    sys.target_pos = pl
+function update_camera_axis(c, p)
+	local target_vel = p - c.target_pos
+	c.target_pos = p
 
-    if abs(sys.vel - target_vel) < CAMERA_LOCK_V then
-        if (not sys.locked) then
-            sys.pos = flr(sys.pos) + pl-target_vel - flr(pl-target_vel) -0.5
-        end
-        sys.vel = target_vel
-        sys.locked = true
-    else
-        sys.locked = false
-    end
+	--if abs(target_vel) > CAMERA_MIN_V and abs(c.vel - target_vel) < CAMERA_LOCK_V then
+	if abs(c.vel - target_vel) < CAMERA_LOCK_V then
+		--> camera is locked on to the target
+		if not c.locked then
+			c.diff = flr(c.pos + c.vel - p + .5)
+			c.locked = true
+		end
+		c.pos = p + c.diff
+	else
+		c.locked = false
+		if(abs(c.vel) > CAMERA_MIN_V) then
+			c.pos += c.vel
+		end
+	end
 
-    if(abs(sys.vel) > CAMERA_MIN_V)then
-        sys.pos += sys.vel
-    end
+	debug.locked = c.locked
+	debug.diff = c.locked and c.diff or nil
 
-    sys.pos = mid(sys.min, sys.pos, sys.max)
-    sys.vel += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.vel) / sys.k2
+	if(c.bounded)c.pos = mid(c.min, c.pos, c.max)
+	c.vel += (p + c.k3 * target_vel - c.pos - c.k1 * c.vel) / c.k2
+end
+
+
+function get_screen_pos(v, cam)
+    return flr(v+.5) - flr(cam+.5) + 64
 end
 
 
@@ -666,6 +678,6 @@ function update_camera_axis_old(sys, pl)
         sys.pos += sys.vel
     end
 
-    sys.pos = mid(sys.min, sys.pos, sys.max)
+	if(sys.bounded)sys.pos = mid(sys.min, sys.pos, sys.max)
     sys.vel += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.vel) / sys.k2
 end
