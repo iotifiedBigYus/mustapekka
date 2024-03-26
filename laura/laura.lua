@@ -321,26 +321,28 @@ end
 
 
 function make_player(x, y, d)
-    x = x or 0
-    y = y or 0
-    d = d or 1
-    a = make_actor(1, x, y, d) --> kind: 1
-    --motion
-    a.u_drag   = U_DRAG
-    a.u_d      = 0
-    a.u_tilt   = U_TILT
-    --state
-    a.strafing     = false
-    a.jumped     = false
-    a.descending  = false
-    a.umbrella   = false
-    a.boost_t    = 0
-    a.boost_max  = BOOST
-    a.coyote_t   = 0
-    a.coyote_max = COYOTE
-    --drawing
-    a.walking_y = {0,-.125,-.125,0}
-    return a
+	x = x or 0
+	y = y or 0
+	d = d or 1
+	a = make_actor(1, x, y, d) --> kind: 1
+	--motion
+	a.u_drag = U_DRAG
+	a.u_d    = 0
+	a.u_tilt = U_TILT
+	a.u_t    = 0
+	a.u_max  = U_DRAG_RESPONSE
+	--state
+	a.strafing     = false
+	a.jumped     = false
+	a.descending  = false
+	a.umbrella   = false
+	a.boost_t    = 0
+	a.boost_max  = BOOST
+	a.coyote_t   = 0
+	a.coyote_max = COYOTE
+	--drawing
+	a.walking_y = {0,-.125,-.125,0}
+	return a
 end
 
 
@@ -360,7 +362,14 @@ end
 
 function update_player(a)
     --umbrella
-    a.umbrella = btn(❎) and not a.standing
+	if btn(❎) then
+		if not a.standing and not a.umbrella then
+			a.u_t = a.u_max
+			a.umbrella = true
+		end
+	else
+    	a.umbrella = false
+	end
 
     if a.umbrella then
         update_umbrella(a)

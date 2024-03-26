@@ -173,5 +173,11 @@ We had a meeting:
 
 ## Sam, 25.3.2024, version 0.4.2
 
-After tries I've gotten rid of the gliding jitter. The problem was that the sprite gets sub-pixel shifted when drawn due to it being only seven pixels wide, but the camera did not shift the target. I hope I don't have to touch the camera axis code anymore.
+After many tries I've gotten rid of the gliding jitter. The problem was that the sprite gets sub-pixel shifted when drawn due to it being only seven pixels wide, but the camera did not shift the target. I hope I don't have to touch the camera axis code anymore.
 
+
+## Sam, 25.3.2024, version 0.4.2
+
+Made Benji's map 32 blocks high and added a secret room under the first building.
+
+Began working on a slower responding umbrella.
