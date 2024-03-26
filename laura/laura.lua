@@ -328,7 +328,7 @@ function make_player(x, y, d)
 	--motion
 	a.u_drag = U_DRAG
 	a.u_d    = 0
-	a.u_tilt = U_TILT
+	a.u_ddx  = U_DDX
 	a.u_t    = 0
 	a.u_max  = U_DRAG_RESPONSE
 	--state
@@ -362,8 +362,8 @@ end
 
 function update_player(a)
     --umbrella
-	if btn(❎) then
-		if not a.standing and not a.umbrella then
+	if btn(❎) and not a.standing then
+		if not a.umbrella then
 			a.u_t = a.u_max
 			a.umbrella = true
 		end
@@ -416,6 +416,10 @@ function update_umbrella(a)
     --umbrella
     a.state = 'umbrella'
 
+	debug.ut = a.u_t
+
+	if(a.u_t > 0)a.u_t -= 1
+
     --a.boost_t = 0
 
     if(btn(⬅️) and not btn(➡️) and not a.strafing)then
@@ -432,16 +436,14 @@ function update_umbrella(a)
 
     --player looks in the movement direction
     if(a.dx != 0)a.d = sgn(a.dx)
+	
+	local v = sqrt(a.dx * a.dx + a.dy * a.dy)
+    local c = (a.dx * a.u_d * a.u_ddx - a.dy)
+	local r = 1 - a.u_t/a.u_max
 
-    a.u_x =  sin(-a.u_d * a.u_tilt)
-    a.u_y = -1-- -cos(-a.u_d * a.u_tilt)
-
-    local v = sqrt(a.dx * a.dx + a.dy * a.dy)
-    local c = -(a.dx * a.u_x + a.dy * a.u_y) * a.u_drag * v
-
-    a.dx += c * a.u_x
-    a.dy += c * a.u_y
-end
+    a.dx -= c * a.u_drag * v * r * a.u_d * a.u_ddx
+    a.dy += c * a.u_drag * v * r
+end 
 
 
 function update_walking(a)
@@ -651,8 +653,8 @@ function update_camera_axis(c, p)
 	local target_vel = p - c.target_pos
 	c.target_pos = p
 
-	--if abs(target_vel) > CAMERA_MIN_V and abs(c.vel - target_vel) < CAMERA_LOCK_V then
-	if abs(c.vel - target_vel) < CAMERA_LOCK_V then
+	if abs(c.vel) > CAMERA_MIN_V and abs(c.vel - target_vel) < CAMERA_LOCK_V then
+	--if abs(c.vel - target_vel) < CAMERA_LOCK_V then
 		--> camera is locked on to the target
 		if not c.locked then
 			c.diff = flr(c.pos + c.vel - p + .5)
@@ -667,9 +669,10 @@ function update_camera_axis(c, p)
 	end
 
 	debug.locked = c.locked
-	debug.diff = c.locked and c.diff or nil
 
+	debug.pos1 = c.pos
 	if(c.bounded)c.pos = mid(c.min, c.pos, c.max)
+	debug.pos2 = c.pos
 	c.vel += (p + c.k3 * target_vel - c.pos - c.k1 * c.vel) / c.k2
 end
 

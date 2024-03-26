@@ -108,6 +108,8 @@ function update_camera_axis(c, p)
 		end
 	end
 
+	debug.pos1 = c.pos
 	if(c.bounded)c.pos = mid(c.min, c.pos, c.max)
+	deubug.pos2 = c.pos
 	c.vel += (p + c.k3 * target_vel - c.pos - c.k1 * c.vel) / c.k2
 end

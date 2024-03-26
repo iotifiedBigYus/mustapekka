@@ -6,7 +6,7 @@
 -- | debug / performance constants |
 -- *-------------------------------*
 
-DEBUGGING  = false --show debug info
+DEBUGGING  = true --show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
@@ -26,8 +26,8 @@ G = .02 -- gravitational acceleration
 EF = 0.9 -- exponential deacceleration
 DRAG = .02 --air drag
 U_DRAG = 1.2 --umbrella drag (only downwards)
-U_DRAG_RESPONSE = 10
-U_TILT = 0.08
+U_DRAG_RESPONSE = 20
+U_DDX = 0.5
 --UF = 0.1 --umbrella system
 --UZ = 1
 --UR = 0
@@ -43,7 +43,7 @@ CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 1
 CAMERA_R = 0
 CAMERA_MIN_V = 0.32
-CAMERA_LOCK_V = 0.2
+CAMERA_LOCK_V = 0.32
 NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
