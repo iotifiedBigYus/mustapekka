@@ -127,6 +127,8 @@ function _update60()
 	foreach(actors, update_actor)
     update_camera()
 
+	debug.x = player.x
+
     --debug.camera = tostr(camera_x.pos)..'  '..tostr(camera_y.pos)
 end
 
@@ -352,6 +354,8 @@ function position_player()
             if mget(x,y) == SPR_STILL then
                 player.x = x+0.5+player.cx
                 player.y = y+1
+
+				debug.pl_x = player.x
                 clear_cell(x,y)
                 break
             end

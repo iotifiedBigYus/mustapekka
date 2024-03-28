@@ -40,7 +40,7 @@ FVX = .04 --sprite recentering speed
 MV = .04 --minimum velocity
 --MDV = .02 --minimum difference in velocity (for camera)
 CAMERA_F = 0.01 --camera dynamics
-CAMERA_Z = 1
+CAMERA_Z = 0.8
 CAMERA_R = 0
 CAMERA_MIN_V = 0.32
 CAMERA_LOCK_V = 0.32
@@ -75,7 +75,7 @@ BG = 12 --background color
 -- | sounds |
 -- *--------*
 
-PLAY_MUSIC    = true
+PLAY_MUSIC    = false
 SFX_STEP      = 63
 SFX_JUMP      = 62
 MUSIC         = 0

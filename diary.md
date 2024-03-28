@@ -181,3 +181,18 @@ After many tries I've gotten rid of the gliding jitter. The problem was that the
 Made Benji's map 32 blocks high and added a secret room under the first building.
 
 Tried cleaning up the umbrella physics, still a bit messy. It now activates slowly (20 ticks to full power).
+
+
+## Sam, 27.3.2024, version 0.4.2
+
+TODO:
+- color fade ins and outs
+- inventory
+- checkpoints
+- keys to doors
+- particle system
+- damage system
+- wiener dog
+- clean up sprite code
+- make camera simpler
+- level system
