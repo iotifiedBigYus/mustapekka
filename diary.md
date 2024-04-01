@@ -196,3 +196,12 @@ TODO:
 - clean up sprite code
 - make camera simpler
 - level system
+
+
+## Sam, 31.3.2024
+
+Took a look into the code of jelpi.
+
+## Sam, 1.4.2024
+
+Experimented with new textures.
