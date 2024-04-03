@@ -15,7 +15,6 @@ function bang_puff(mx,my,sp)
 end
 
 function atomize_sprite(s,mx,my,col)
-
 	local sx=(s%16)*8
 	local sy=flr(s/16)*8
 	local w=0.04
@@ -23,9 +22,7 @@ function atomize_sprite(s,mx,my,col)
 	for y=0,7 do
 		for x=0,7 do
 			if (sget(sx+x,sy+y)>0) then
-				local q=make_sparkle(0,
-					mx+x/8,
-					my+y/8)
+				local q=make_sparkle(0, mx+x/8, my+y/8)
 				q.dx=(x-3.5)/32 +rnd(w)-rnd(w)
 				q.dy=(y-7)/32   +rnd(w)-rnd(w)
 				q.max_t=20+rnd(20)
@@ -37,5 +34,4 @@ function atomize_sprite(s,mx,my,col)
 			end
 		end
 	end
-
 end

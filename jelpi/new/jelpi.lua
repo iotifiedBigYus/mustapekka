@@ -1,7 +1,7 @@
 -- jelpi demo
 -- by zep
 
-level=2
+level=1
 
 num_players = 1
 corrupt_mode = false
@@ -11,7 +11,7 @@ play_music = true
 
 function make_actor(k,x,y,d)
 	local a = {
-		k=k,
+		k=k, --kind
 		frame=0,
 		frames=4,
 		life = 1,
@@ -64,12 +64,16 @@ end
 
 function make_sparkle(k,x,y,col)
 	local s = {
-		x=x,y=y,k=k,
+		k=k,
+		x=x,
+		y=y,
+		dx = 0,
+		dy = 0,
+		ddy = 0,
 		frames=1,
 		col=col,
-		t=0, max_t = 8+rnd(4),
-		dx = 0, dy = 0,
-		ddy = 0
+		t=0,
+		max_t = 8+rnd(4)
 	}
 	if (#sparkle < 512) then
 		add(sparkle,s)
@@ -642,10 +646,10 @@ function move_sparkle(sp)
 		del(sparkle,sp)
 	end
 	
-	sp.x = sp.x + sp.dx
-	sp.y = sp.y + sp.dy
-	sp.dy= sp.dy+ sp.ddy
-	sp.t = sp.t + 1
+	sp.x += sp.dx
+	sp.y += sp.dy
+	sp.dy+= sp.ddy
+	sp.t += 1
 end
 
 

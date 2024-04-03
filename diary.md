@@ -205,3 +205,13 @@ Took a look into the code of jelpi.
 ## Sam, 1.4.2024
 
 Experimented with new textures.
+
+## Sam, 3.4.2024
+
+Made a gimp file where I fade each color to black and look what pico-8 color it corresponds to. Not implementing it yet since I might change the color palette.
+
+Made the horizontal and vertical acceleration of the umbrella independent and the horizontal acceleration independent of velocity. It feels more 'natural' in a game-control sense, but it's not very true to nature anymore.
+
+The opening of the umbrella is now animated, but I'm not crazy happy about how it looks in game.
+
+New experimental textures added, and with it a new palette. The palette consists mostly of gloomier colors, but I think it has a vibe that could work. The the wall bricks are too in your face / noisy atm, but the ground bricks look nice. *More testing needed*

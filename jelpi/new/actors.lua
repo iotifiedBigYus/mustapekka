@@ -70,30 +70,27 @@ function init_actor_data()
 end
 	
 	
-	
 function move_builder(a)
-	
 	local x,y=a.x,a.y-0.5
 	local val=mget(x,y)
 	if val==0 then
 		mset(x,y,53)
 		sfx(19)
-	elseif val!=53
-	then
-		del(actor,a)
+	elseif val!=53 then
+		del(actor,a) --> remove itself
 	end
-	a.t += 1
 	
-	if (x<1 or x>126 or a.t > 30)
-	then del(actor,a) end 
+	a.t += 1
+	if (x<1 or x>126 or a.t > 30) then
+		del(actor,a) --> remove itself
+	end 
 	
 	for i=0,0.2,0.1 do
-	local s=make_sparkle(
-			104,a.x,a.y-0.5)   
-	s.dx=cos(i+a.x/4)/8
-	s.dy=sin(i+a.x/4)/8
-	s.col=10
-	s.max_t=10+rnd(10)
+		local s=make_sparkle(104,a.x,a.y-0.5)   
+		s.dx=cos(i+a.x/4)/8
+		s.dy=sin(i+a.x/4)/8
+		s.col=10
+		s.max_t=10+rnd(10)
 	end
 	
 	a.x+=a.dx
@@ -522,17 +519,18 @@ function closest_a(a0,l,attr,maxdx)
 		if not attr or l[i][attr] then
 			local dx=l[i].x-a0.x
 			local dy=l[i].y-a0.y
-			d=dx*dx+dy*dy
+			local d=dx*dx+dy*dy
 			if (not best or d<best_d)
-							and l[i]!=a0
-							and l[i].life > 0
-							and (not  maxdx or 
-											abs(dx)<maxdx)
-			then best=l[i] best_d=d end
+			and l[i]!=a0
+			and l[i].life > 0
+			and (not maxdx or abs(dx)<maxdx)
+			then
+				best=l[i]
+				best_d=d
+			end
 		end
 	end
 
-	
 	return best
 end
 
