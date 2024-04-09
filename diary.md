@@ -219,9 +219,8 @@ New experimental textures added, and with it a new palette. The palette consists
 
 ## Sam, 9.4.2024
 
-Experimented some more with the textures. Simplified them and made room for light gray in the palette. Adding a dark strip at the south-east sides of sprites really makes them pop. I like how its looking B).
+Experimented some more with the textures. Simplified them and made room for light gray in the palette. Nevermind – two. I forgot you don't need one dedicated transparency color. Adding a dark strip at the south-east sides of sprites really makes them pop. I like how its looking B). Made a demo with a house.
+
+had to ditch dark brown to make space for black. Would look slightly better with it, but the roofs really need dark maroon that can't be replaced with gray.
 
 I'm thinking that I could remove the umbrella tilting, making the character accelerate by shear willpower. This would make the graphics and animations smoother. I'm also thinking that the game should check if the player has enough room above to deploy the umbrella so it doesn't deploy into ceilings.
-
-TODO:
-- Roof textures

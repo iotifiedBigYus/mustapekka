@@ -222,11 +222,18 @@ end
 
 function _draw()
     pal(ALT_COLORS,1)
-	cls(BG) 
+
+	--background
+	cls(BG)
+
+	--foreground
+	pal(12, 0,0) --> blue drawn as black
     camera(camera_x.pos-63.5, camera_y.pos-63.5)
     color(10)
     print(info_string, info_x, info_y)
     map()
+
+	--actors
     if (HITBOX) foreach(actors, draw_hitbox)
     foreach(actors, draw_actor)
 

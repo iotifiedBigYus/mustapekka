@@ -149,15 +149,6 @@ function update_umbrella(a)
 
 	if(a.u_t > 0)a.u_t -= 1
 
-	--if(btn(⬅️) and not btn(➡️) and not a.strafing)then
-	--	a.u_d = -1
-	--elseif(btn(➡️) and not btn(⬅️) and not a.strafing)then
-	--	a.u_d = 1
-	--else
-	--	if(not btn(⬅️) and not btn(➡️))a.strafing = false
-	--	a.u_d = 0
-	--end
-
 	if(btn(⬅️) and not btn(➡️))then
 		a.u_d = -1
 	elseif(btn(➡️) and not btn(⬅️))then
@@ -171,6 +162,9 @@ function update_umbrella(a)
 
 	--player looks in the movement direction
 	if(a.dx != 0)a.d = sgn(a.dx)
+
+	--player looks in the acceleration direction
+	--if(a.u_d != 0)a.d = a.u_d
 
 	local r = 1 - a.u_t/a.u_max
 	a.dx += a.u_ddx * a.u_d * r
@@ -296,7 +290,8 @@ function update_body(a)
         end
     elseif a.state == 'umbrella' then
         a.f_y = 0
-		a.frame = (a.u_t > a.u_max-U_OPEN) and SPR_GLIDING or SPR_GLIDING + a.u_d * a.d
+		--a.frame = (a.u_t > a.u_max-U_OPEN) and SPR_GLIDING or SPR_GLIDING + a.u_d * a.d
+		a.frame = SPR_GLIDING
     else
         a.f_y   = 0
         a.frame = SPR_STILL
@@ -344,6 +339,9 @@ function draw_player(a)
 				local ux = a.d>0 and x-2+s or x+2+s
 				sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
 			end
+
+			--local ux = a.d>0 and x-2+s or x+2+s
+			--sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
 		end
 	end
 
