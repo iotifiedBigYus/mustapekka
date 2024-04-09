@@ -215,3 +215,13 @@ Made the horizontal and vertical acceleration of the umbrella independent and th
 The opening of the umbrella is now animated, but I'm not crazy happy about how it looks in game.
 
 New experimental textures added, and with it a new palette. The palette consists mostly of gloomier colors, but I think it has a vibe that could work. The the wall bricks are too in your face / noisy atm, but the ground bricks look nice. *More testing needed*
+
+
+## Sam, 9.4.2024
+
+Experimented some more with the textures. Simplified them and made room for light gray in the palette. Adding a dark strip at the south-east sides of sprites really makes them pop. I like how its looking B).
+
+I'm thinking that I could remove the umbrella tilting, making the character accelerate by shear willpower. This would make the graphics and animations smoother. I'm also thinking that the game should check if the player has enough room above to deploy the umbrella so it doesn't deploy into ceilings.
+
+TODO:
+- Roof textures
