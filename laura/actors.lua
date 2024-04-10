@@ -53,9 +53,7 @@ function make_player(x, y, d)
 	a.u_drag_y = U_DRAG_Y
 	a.u_t      = 0
 	a.u_max    = U_DRAG_RESPONSE
-	a.u_frame  = 0
-	a.u_f_x    = 0
-	a.u_f_y    = 0
+	a.u_h      = 1.375 --> height with umbrella
 	--state
 	a.strafing   = false
 	a.jumped     = false
@@ -90,28 +88,8 @@ end
 
 function update_actor(a)
     if(a.kind == 1)update_player(a)
-end
 
-
-function update_player(a)
-    --umbrella
-	if btn(❎) and not a.standing then
-		if not a.umbrella then
-			a.u_t = a.u_max + 1
-			a.umbrella = true
-		end
-	else
-    	a.umbrella = false
-	end
-
-    if a.umbrella then
-        update_umbrella(a)
-    else
-        update_walking(a)
-    end
-	update_jumping(a)
-
-    a.h = a.standing and a.standing_h or a.falling_h
+	a.h = a.standing and a.standing_h or a.falling_h
 
     -- x movement 
     collide_side(a)
@@ -124,7 +102,7 @@ function update_player(a)
     a.y += a.dy
 
     --sprite
-    update_body(a)
+	if(a.kind == 1)update_body(a)
 
     --gravity
     a.dy += a.ddy
@@ -141,6 +119,32 @@ function update_player(a)
 
     --timers
     a.t += 1
+end
+
+
+function update_player(a)
+    --umbrella
+	local u = false
+	if btn(❎) and not a.standing then
+		local y1 = a.y+a.dy-a.u_h
+		local xl = snap8(a.x+a.dx-a.w*.5)
+		local xr = snap8(a.x+a.dx+a.w*.5)-E
+
+		u = not (solid(xl, y1) or solid(xr, y1))
+	end
+
+	if u then
+		if not a.umbrella then
+			a.u_t = a.u_max + 1
+			a.umbrella = true
+		end
+		update_umbrella(a)
+	else
+		a.umbrella = false
+		update_walking(a)
+	end
+
+	update_jumping(a)
 end
 
 
@@ -188,34 +192,33 @@ function update_walking(a)
     --debug.strafing = a.strafing
 
     if a.strafing then
-        --> inverse exponential
-        --a.r *= EI
-        --a.dx = a.d * a.vx * (1-a.r)
-
-        --> linear
-        --a.r = max(0, a.r-1/DDXT)
-        --a.dx = a.d * a.vx * (1-a.r)
-
-        --> exponential
-        --a.r = min(1/MV, a.r*EA)
-        --a.dx = a.d * a.vx * MV * (a.r-1)
-
-        --> quadratic
-        a.r = max(0, a.r-1/DDXT)
-        a.dx = a.d * max(MV,a.vx * (1-a.r) * (1-a.r))
-
-        --if(a.d * a.dx < 0)a.dx = 0 --> change of direction
-        --if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
-
-        if(a.standing)then
-            if not a.state == 'walking' then
-                sfx(SFX_STEP)
-            end
-            a.state = 'walking'
-        end
+    	--> quadratic
+		if abs(a.dx) > a.vx then
+			--going too fast
+			local dv = (a.dx - a.vx) * EF -- next velocity difference
+			a.dx = abs(dv) > E and a.vx + dv or a.vx
+			a.r = 0 --> no further acceleration needed
+		elseif a.r == 1 and abs(a.dx) < MV then
+			--> initial push
+			a.dx = a.d * (0.0625 + E)
+		else
+			a.dx = a.d * max(MV,a.vx * (1-a.r) * (1-a.r))
+			--a.dx = a.d * a.vx * (1-a.r) * (1-a.r)
+		end
+	
+    	a.r = max(0, a.r-1/DDXT)
+	
+    	--if(a.d * a.dx < 0)a.dx = 0 --> change of direction
+    	--if(a.d * a.dx < a.vx)a.dx += a.d * a.ddx
+	
+    	if(a.standing)then
+    		if not a.state == 'walking' then
+    			sfx(SFX_STEP)
+    		end
+    		a.state = 'walking'
+    	end
     else
         --friction
-
         a.dx *= EF
         if(abs(a.dx) < MV)a.dx = 0
     end
@@ -275,9 +278,10 @@ function update_body(a)
             a.frame = abs(a.dx) > 0 and SPR_WALKING+2 or SPR_WALKING+3
         end
     elseif a.state == 'walking' then
-        a.f_t = flr(a.f_t * 4 + 1.5) / 4 --> four ticks per frame
+		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(a.f_t * 3 + 1.5) / 3 or flr(a.f_t * 4 + 1.5) / 4
+		-->three or four ticks per frame
         if(a.f_t % 4 == 3)sfx(SFX_STEP) --> tip tap
-        if abs(a.dx) < VX and a.f_t%4 == 0 then
+        if abs(a.dx) < a.vx and a.f_t%4 == 0 then
             -- stop
             a.frame = SPR_STILL
             a.f_y = 0
@@ -331,17 +335,17 @@ function draw_player(a)
 				sspr(SPR_UMBRELLA_3_X, SPR_UMBRELLA_3_Y, 5, 4, x-1+s*5, y-3)
 			end
 		else
-			if a.u_d < 0 then
-				sspr(SPR_UMBRELLA_L_X, SPR_UMBRELLA_L_Y, 5, 5, x-4+s, y-2)
-			elseif a.u_d > 0 then
-				sspr(SPR_UMBRELLA_L_X, SPR_UMBRELLA_L_Y, 5, 5, x+6+s, y-2, 5, 5, true)
-			else
-				local ux = a.d>0 and x-2+s or x+2+s
-				sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
-			end
+			--if a.u_d < 0 then
+			--	sspr(SPR_UMBRELLA_L_X, SPR_UMBRELLA_L_Y, 5, 5, x-4+s, y-2)
+			--elseif a.u_d > 0 then
+			--	sspr(SPR_UMBRELLA_L_X, SPR_UMBRELLA_L_Y, 5, 5, x+6+s, y-2, 5, 5, true)
+			--else
+			--	local ux = a.d>0 and x-2+s or x+2+s
+			--	sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
+			--end
 
-			--local ux = a.d>0 and x-2+s or x+2+s
-			--sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
+			local ux = a.d>0 and x-2+s or x+2+s
+			sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, ux, y-3)
 		end
 	end
 

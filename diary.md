@@ -224,3 +224,8 @@ Experimented some more with the textures. Simplified them and made room for ligh
 had to ditch dark brown to make space for black. Would look slightly better with it, but the roofs really need dark maroon that can't be replaced with gray.
 
 I'm thinking that I could remove the umbrella tilting, making the character accelerate by shear willpower. This would make the graphics and animations smoother. I'm also thinking that the game should check if the player has enough room above to deploy the umbrella so it doesn't deploy into ceilings.
+
+
+## Sam, 10.4.2024
+
+Refined the movement a bit. If the player is going faster than the walking speed when beginning to walk the velocity gradually down to the walking speed.
