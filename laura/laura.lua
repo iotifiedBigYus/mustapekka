@@ -96,6 +96,26 @@ function collide_side(a)
     local d = a.dx ~= 0 and sgn(a.dx) or a.d
     local x1 = a.x + a.dx + d * (.5*a.w)
     local xe = d > 0 and 0 or -E --> stay outside edges
+
+	---------------------------------------------
+  
+	--for y1 = snap8(a.y), snap8(a.y+a.dy), sgn(a.dy)*0.125 do
+	--	if not (solid(x1+xe,y1-E) or solid(x1+xe,y1-a.h)) then
+	--		a.y = y1
+	--		return
+	--	end
+	--end
+	---- hit wall
+	---- search for contact point
+	--while not (solid(a.x+d*(a.w*.5+E)+xe, a.y-E) or solid(a.x+d*(a.w*.5+E)+xe, a.y-a.h)) do
+	--	a.x += sgn(a.dx) * E
+	--end
+	--a.x = snap8(a.x,a.cx)
+	--a.dx = 0 --> do this after contact point, because sgn(0) is not 0
+
+	---------------------------
+
+
     if solid(x1+xe,a.y-E) or solid(x1+xe,a.y-a.h) then
         -- hit wall
         -- search for contact point
@@ -103,31 +123,30 @@ function collide_side(a)
             a.x += sgn(a.dx) * E
         end
         a.x = snap8(a.x,a.cx)
-        a.dx = 0 --> do this after contact point, because sgn(0) is not 1
+        a.dx = 0 --> do this after contact point, because sgn(0) is not 0
     end
 end
 
 
 function collide_up(a, d)
-    local y1 = a.y+a.dy-a.h
-    local xl = snap8(a.x+a.dx-a.w*.5)
-    local xr = snap8(a.x+a.dx+a.w*.5)-E
-    local nudges
-    if a.standing then nudges = {0}
-    elseif a.dx > 0 then nudges = NUDGES_RIGHT
-    elseif a.dx < 0 then nudges = NUDGES_LEFT
-    else nudges = NUDGES_CENTER end
+	local y1 = a.y+a.dy-a.h
+	local xl = snap8(a.x+a.dx-a.w*.5)
+	local xr = snap8(a.x+a.dx+a.w*.5)-E
+	local nudges
+	if a.standing then nudges = {0}
+	elseif a.dx > 0 then nudges = NUDGES_RIGHT
+	elseif a.dx < 0 then nudges = NUDGES_LEFT
+	else nudges = NUDGES_CENTER end
 
-    for _,n in ipairs(nudges) do
-        if not (solid(xl+n, y1) or solid(xr+n, y1)) then
-            a.standing = false
-            a.x += n
-            a.f_x -= n
-            a.state = 'falling'
-            --debug.solid_up = false
-            return
-        end
-    end
+	for _,n in ipairs(nudges) do
+		if not (solid(xl+n, y1) or solid(xr+n, y1)) then
+			a.standing = false
+			a.x += n
+			a.f_x -= n
+			--debug.solid_up = false
+			return
+		end
+	end
     --> hit
     -- search up for collision point
     while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
@@ -177,17 +196,15 @@ function collide_down(a)
     if hit then
         a.y = snap8(a.y)
         if not a.standing then
-            a.state = abs(a.dx) < VX and 'still' or 'walking'
+			a.standing=true
             sfx(SFX_STEP)
         end
-        a.standing=true
         a.dy = 0
     else
         --coyote time
         if (a.coyote_t > 0) a.coyote_t -= 1
         if (a.standing) a.coyote_t = a.coyote_max
 
-        a.state = 'falling'
         a.standing = false
     end
 end
@@ -229,7 +246,7 @@ function _draw()
 	--foreground
 	pal(12, 0,0) --> blue drawn as black
     camera(camera_x.pos-63.5, camera_y.pos-63.5)
-    color(10)
+    color(7)
     print(info_string, info_x, info_y)
     map()
 
@@ -242,7 +259,7 @@ function _draw()
     --debug
     camera(0,0)
     cursor(1,1)
-    color(10)
+    color(7)
     print('v'..VERSION)
     if DEBUGGING then
         for k,v in pairs(debug) do

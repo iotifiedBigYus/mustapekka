@@ -8,7 +8,7 @@
 
 DEBUGGING  = true --show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 1 --frames per tick
+SLOWDOWN   = 0 --frames per tick
 HITBOX     = false
 VERSION    = '0.4.2' --version number
 MAX_ACTORS = 128 --maximum amount of actors
@@ -21,17 +21,13 @@ LEVEL_N    = 1
 VX = .125 -- horizontal speed
 VY = 0.2 -- jump speed > when pressing fast (~5 ticks) you jump exactly one block
 G = .02 -- gravitational acceleration
---EI = 0.6 -- inverse exponential acceleration
---EA = 1.1 -- exponential acceleration
 EF = 0.9 -- exponential deacceleration
 DRAG = .02 --air drag
+U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (only downwards)
-U_DRAG_RESPONSE = 10
+U_DRAG_RESPONSE = 20
+U_OPEN_FRAMES = 6
 U_DDX = 0.005
-U_OPEN = 4
---UF = 0.1 --umbrella system
---UZ = 1
---UR = 0
 DDX = VX / 6 --sideways acceleration (thrust / friction)
 DDXT = 6--8--ticks to accelerate
 BOOST = 10 --maximum jump duration (in ticks)
@@ -48,7 +44,7 @@ CAMERA_LOCK_V = 0.32
 NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
-AUTO_JUMP    = false
+AUTO_JUMP     = false
 
 -- *---------------*
 -- | color palette |
@@ -97,7 +93,8 @@ BG = 12 --background color
 
 PLAY_MUSIC    = false
 SFX_STEP      = 63
-SFX_JUMP      = 62
+SFX_JUMP      = nil--62
+SFX_UMBRELLA  = 62
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
 
@@ -106,20 +103,18 @@ MUSIC_FADE_IN = 1000
 -- *---------*
 
 SPR_STILL          = 64
-SPR_WALKING        = 65
-SPR_U_STILL        = 64+16 --> u as in umbrella
-SPR_U_WALKING      = 65+16
-SPR_GLIDING_OFFSET = 16
-SPR_GLIDING        = 70  --> center
+SPR_WALKING        = 80--65
+SPR_U_STILL        = 66 --> u as in umbrella
+SPR_U_WALKING      = 96
 
 
-SPR_UMBRELLA_1_X = 64
+SPR_UMBRELLA_1_X = 64 - 40
 SPR_UMBRELLA_1_Y = 32
-SPR_UMBRELLA_2_X = 64
+SPR_UMBRELLA_2_X = 64 - 40
 SPR_UMBRELLA_2_Y = 36
-SPR_UMBRELLA_3_X = 67
+SPR_UMBRELLA_3_X = 67 - 40
 SPR_UMBRELLA_3_Y = 36
-SPR_UMBRELLA_C_X = 65
+SPR_UMBRELLA_C_X = 65 - 40
 SPR_UMBRELLA_C_Y = 32
-SPR_UMBRELLA_L_X = 72
+SPR_UMBRELLA_L_X = 72 - 40
 SPR_UMBRELLA_L_Y = 32
