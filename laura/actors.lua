@@ -58,7 +58,7 @@ function make_player(x, y, d)
 	a.strafing   = false
 	a.jumped     = false
 	a.descending = false
-	a.umbrella   = false
+	a.gliding   = false
 	a.boost_t    = 0
 	a.boost_max  = BOOST
 	a.coyote_t   = 0
@@ -134,24 +134,25 @@ function update_player(a)
 	end
 
 	if u then
-		if not a.umbrella then
-			a.u_t = a.u_max + 1
-			a.umbrella = true
+		if not a.gliding then
+			a.gliding = true
 		end
-		update_umbrella(a)
+		update_gliding(a)
+		if (a.u_t < a.u_max) a.u_t += 1
 	else
-		a.umbrella = false
+		a.gliding = false
+		if (a.u_t > 0) a.u_t -= 1
 		update_walking(a)
 	end
+
+	debug.gliding = a.gliding
 
 	update_jumping(a)
 end
 
 
-function update_umbrella(a)
-	a.state = 'umbrella'
-
-	if(a.u_t > 0)a.u_t -= 1
+function update_gliding(a)
+	--a.state = 'umbrella'
 
 	if(btn(⬅️) and not btn(➡️))then
 		a.u_d = -1
@@ -170,7 +171,7 @@ function update_umbrella(a)
 	--player looks in the acceleration direction
 	--if(a.u_d != 0)a.d = a.u_d
 
-	local r = 1 - a.u_t/a.u_max
+	local r = a.u_t/a.u_max
 	a.dx += a.u_ddx * a.u_d * r
 	a.dy -= a.dy * a.dy * a.u_drag_y * r
 end 
@@ -239,7 +240,7 @@ function update_jumping(a)
             --begin (trying to) jump
             a.dy = -a.vy
             a.boost_t = a.boost_max
-        --elseif a.umbrella then
+        --elseif a.gliding then
         --    a.boost_t = 0
         elseif not a.standing and a.boost_t > 0 then
             a.boost_t -= 1
@@ -262,43 +263,45 @@ end
 --]]
 
 function update_body(a)
-    --debug.state = a.state
+    --front end logic
 
     --recenter the spirte
     if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
     if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
 
+	--umbrella
+	local umbrella = a.u_t > 0
+
     if a.state == 'falling' then
         a.f_y = 0
-        a.f_t = 3
+		a.f_t = 3
+
+		local s = umbrella and SPR_U_WALKING or SPR_WALKING
         if a.dy < 0 then --> going up
-            a.frame = abs(a.dx) > 0 and SPR_WALKING+1 or SPR_WALKING
-            a.jumped = true
+            a.frame = abs(a.dx) > 0 and s+1 or s
         else --> going down
-            a.frame = abs(a.dx) > 0 and SPR_WALKING+2 or SPR_WALKING+3
+            a.frame = abs(a.dx) > 0 and s+2 or s+3
         end
     elseif a.state == 'walking' then
 		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(a.f_t * 3 + 1.5) / 3 or flr(a.f_t * 4 + 1.5) / 4
 		-->three or four ticks per frame
         if(a.f_t % 4 == 3)sfx(SFX_STEP) --> tip tap
+
         if abs(a.dx) < a.vx and a.f_t%4 == 0 then
-            -- stop
-            a.frame = SPR_STILL
+            -- stop walking
+            a.frame = umbrella and SPR_U_STILL or SPR_STILL
             a.f_y = 0
             a.f_t = 0
             a.walking = false
             a.state = 'still'
         else
-            a.frame = SPR_WALKING + flr(a.f_t%4)
-            a.f_y = a.walking_y[flr(a.f_t%4)+1]
+			local t = flr(a.f_t%4)
+            a.frame = umbrella and SPR_U_WALKING+t or SPR_WALKING+t
+            a.f_y = a.walking_y[t+1]
         end
-    elseif a.state == 'umbrella' then
-        a.f_y = 0
-		--a.frame = (a.u_t > a.u_max-U_OPEN) and SPR_GLIDING or SPR_GLIDING + a.u_d * a.d
-		a.frame = SPR_GLIDING
     else
         a.f_y   = 0
-        a.frame = SPR_STILL
+        a.frame = umbrella and SPR_U_STILL or SPR_STILL
     end
 end
 
@@ -322,16 +325,17 @@ function draw_player(a)
 	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
 	local y = 8*(a.y+a.f_y-1)+.5
 
-	if(a.umbrella)then
+	if (a.u_t > 0) then
 		local s = a.d > 0 and 0 or 1 --> shift
-		if a.u_t > a.u_max-U_OPEN then
-			local n = flr((a.u_max - a.u_t) * .5)
+		local n = flr(a.u_t * .5)
 
-			if n==0 then
+		debug.n = n
+		if n < U_OPEN then
+			if n==1 then
 				sspr(SPR_UMBRELLA_1_X, SPR_UMBRELLA_1_Y, 1, 4, x+1+s*5, y-3)
-			elseif n==1 then
-				sspr(SPR_UMBRELLA_2_X, SPR_UMBRELLA_2_Y, 3, 4, x+s*5, y-3)
 			elseif n==2 then
+				sspr(SPR_UMBRELLA_2_X, SPR_UMBRELLA_2_Y, 3, 4, x+s*5, y-3)
+			elseif n==3 then
 				sspr(SPR_UMBRELLA_3_X, SPR_UMBRELLA_3_Y, 5, 4, x-1+s*5, y-3)
 			end
 		else

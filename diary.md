@@ -229,3 +229,12 @@ I'm thinking that I could remove the umbrella tilting, making the character acce
 ## Sam, 10.4.2024
 
 Refined the movement a bit. If the player is going faster than the walking speed when beginning to walk the velocity gradually down to the walking speed.
+
+
+## Sam, 10.4.2024
+
+Remade the character front end logic so that the umbrella can be put away after landing. I'm happy with the animation.
+
+TODO:
+- make the camera follow the sprite (including offset) and not the hitbox
+- make the umbrella have two timers. One for vfx and one for drag response.

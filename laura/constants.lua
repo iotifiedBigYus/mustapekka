@@ -26,9 +26,9 @@ G = .02 -- gravitational acceleration
 EF = 0.9 -- exponential deacceleration
 DRAG = .02 --air drag
 U_DRAG_Y = 1.2 --umbrella drag (only downwards)
-U_DRAG_RESPONSE = 20
-U_DDX = 0.01
-U_OPEN = 6
+U_DRAG_RESPONSE = 10
+U_DDX = 0.005
+U_OPEN = 4
 --UF = 0.1 --umbrella system
 --UZ = 1
 --UR = 0
@@ -105,9 +105,13 @@ MUSIC_FADE_IN = 1000
 -- | sprites |
 -- *---------*
 
-SPR_STILL        = 1 + 63
-SPR_WALKING      = 2 + 63
-SPR_GLIDING      = 7 + 63 --> center
+SPR_STILL          = 64
+SPR_WALKING        = 65
+SPR_U_STILL        = 64+16 --> u as in umbrella
+SPR_U_WALKING      = 65+16
+SPR_GLIDING_OFFSET = 16
+SPR_GLIDING        = 70  --> center
+
 
 SPR_UMBRELLA_1_X = 64
 SPR_UMBRELLA_1_Y = 32

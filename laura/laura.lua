@@ -123,7 +123,7 @@ function collide_up(a, d)
             a.standing = false
             a.x += n
             a.f_x -= n
-            a.state = a.umbrella and 'umbrella' or 'falling'
+            a.state = 'falling'
             --debug.solid_up = false
             return
         end
@@ -187,7 +187,7 @@ function collide_down(a)
         if (a.coyote_t > 0) a.coyote_t -= 1
         if (a.standing) a.coyote_t = a.coyote_max
 
-        a.state = a.umbrella and 'umbrella' or 'falling'
+        a.state = 'falling'
         a.standing = false
     end
 end
