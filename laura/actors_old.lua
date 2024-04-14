@@ -181,16 +181,13 @@ function update_actor(a)
 	a.t += 1
 end
 
-
-
-function update_player(a)
-	--umbrella
+function update_player_input(a)
+    --umbrella
 	local u = false
 	if btn(❎) and not a.standing then
 		local y1 = a.y+a.dy-a.u_h
 		local xl = snap8(a.x+a.dx-a.w2)
 		local xr = snap8(a.x+a.dx+a.w2)-E
-
 		u = not (solid(xl, y1) or solid(xr, y1))
 	end
 
@@ -199,11 +196,15 @@ function update_player(a)
 		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
 		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
 		if (a.u_f_t == 2) sfx(SFX_UMBRELLA_UP)
+
+		update_gliding(a)
 	else
 		a.gliding = false
 		a.u_t = max(0, a.u_t-5)
 		if (a.u_f_t > 0) a.u_f_t -= .5
 		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
+		
+		update_walking(a)
 	end
 
 	--strafing
@@ -230,6 +231,35 @@ function update_player(a)
 	
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
+end
+
+
+function update_player(a)
+	--umbrella
+	local u = false
+	if btn(❎) and not a.standing then
+		local y1 = a.y+a.dy-a.u_h
+		local xl = snap8(a.x+a.dx-a.w2)
+		local xr = snap8(a.x+a.dx+a.w2)-E
+
+		u = not (solid(xl, y1) or solid(xr, y1))
+	end
+
+	if u then
+		if (not a.gliding) a.gliding = true
+		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
+		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
+		update_gliding(a)
+	else
+		a.gliding = false
+		a.u_t = 0
+		if (a.u_f_t > 0) a.u_f_t -= .5
+		update_walking(a)
+	end
+
+	debug.u_t = a.u_t
+
+	update_jumping(a)
 end
 
 
@@ -332,7 +362,7 @@ end
 
 --]]
 
-function update_player_body(a)
+function update_body(a)
 	--front end logic
 
 	--recenter the spirte
@@ -344,12 +374,12 @@ function update_player_body(a)
 
 	if not a.standing then
 		if a.dy < a.ddy then --> going up
-			a.frame = a.strafing and s+1 or s
+			a.frame = abs(a.dx) > 0 and s+1 or s
 		else --> going down
-			a.frame = a.strafing and s+2 or s+3
+			a.frame = abs(a.dx) > 0 and s+2 or s+3
 		end
 		a.f_y = 0
-		a.f_t = a.strafing and 3 or 4
+		a.f_t = 4
 	else
 		if not a.strafing and abs(a.dx) < a.vx and a.f_t%4 == 0 then
 			-- stop walking
@@ -384,19 +414,26 @@ end
 
 
 function draw_player(a)
-	update_player_body(a)
-
+	update_body(a)
 
 	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
 	local y = 8*(a.y+a.f_y-1)+.5
 
-	--umbrella
 	if (a.u_f_t >= 3) then
-		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
+		local s = a.d > 0 and 0 or 1 --> shift
 		local n = flr(a.u_f_t) - 2
-		
-		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
-			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
+
+		debug.n = n
+
+		if n==1 then
+			sspr(SPR_UMBRELLA_1_X, SPR_UMBRELLA_1_Y, 1, 4, s*5+x+1, y-3)
+		elseif n==2 then
+			sspr(SPR_UMBRELLA_2_X, SPR_UMBRELLA_2_Y, 3, 4, s*5+x, y-3)
+		elseif n==3 then
+			sspr(SPR_UMBRELLA_3_X, SPR_UMBRELLA_3_Y, 5, 4, s*5+x-1, y-3)
+		else
+			sspr(SPR_UMBRELLA_C_X, SPR_UMBRELLA_C_Y, 7, 4, s*5+x-2, y-3)
+		end
 	end
 
 	spr(a.frame, x, y,1,1,a.d<0)

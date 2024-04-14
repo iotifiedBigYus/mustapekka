@@ -6,11 +6,11 @@
 -- | debug / performance constants |
 -- *-------------------------------*
 
-DEBUGGING  = true --show debug info
+DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 0 --frames per tick
+SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
-VERSION    = '0.4.2' --version number
+VERSION    = '0.5.0' --version number
 MAX_ACTORS = 128 --maximum amount of actors
 LEVEL_N    = 1
 
@@ -18,19 +18,16 @@ LEVEL_N    = 1
 -- | physics / physical constants |
 -- *------------------------------*
 
-VX = .125 -- horizontal speed
-VY = 0.2 -- jump speed > when pressing fast (~5 ticks) you jump exactly one block
-G = .02 -- gravitational acceleration
-EF = 0.9 -- exponential deacceleration
-DRAG = .02 --air drag
+SOFA_X = 5
+SOFA_Y = 5
+
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (only downwards)
 U_DRAG_RESPONSE = 20
 U_OPEN_FRAMES = 6
 U_DDX = 0.005
-DDX = VX / 6 --sideways acceleration (thrust / friction)
 DDXT = 6--8--ticks to accelerate
-BOOST = 10 --maximum jump duration (in ticks)
+JUMP_MAX = 10 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
 E = .01 --epsilon (a small number used when finding edges)
 FVX = .04 --sprite recentering speed
@@ -50,26 +47,10 @@ AUTO_JUMP     = false
 -- | color palette |
 -- *---------------*
 
-local c = {}
-c[0]  = 0
-c[1]  = 128
-c[2]  = 4+128
-c[3]  = 3+128
-c[4]  = 4
-c[5]  = 5+128
-c[6]  = 6+128
-c[8]  = 8+128
-c[9]  = 9+128
-c[10] = 10
-c[11] = 3
-c[12] = 13
-c[13] = 5
-c[14] = 13+128
-c[15] = 15+128
 local c2 = {}
 c2[0]  = 0
-c2[1]  = 128+2
-c2[2]  = 128+5
+c2[1]  = 128+5
+c2[2]  = 128+2
 c2[3]  = 128+3
 c2[4]  = 128+4
 c2[5]  = 5
@@ -91,10 +72,11 @@ BG = 12 --background color
 -- | sounds |
 -- *--------*
 
-PLAY_MUSIC    = false
+PLAY_MUSIC    = not DEBUGGING
 SFX_STEP      = 63
 SFX_JUMP      = nil--62
-SFX_UMBRELLA  = 62
+SFX_UMBRELLA_UP = 61
+SFX_UMBRELLA_DOWN = 62
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
 
@@ -107,14 +89,4 @@ SPR_WALKING        = 80--65
 SPR_U_STILL        = 66 --> u as in umbrella
 SPR_U_WALKING      = 96
 
-
-SPR_UMBRELLA_1_X = 64 - 40
-SPR_UMBRELLA_1_Y = 32
-SPR_UMBRELLA_2_X = 64 - 40
-SPR_UMBRELLA_2_Y = 36
-SPR_UMBRELLA_3_X = 67 - 40
-SPR_UMBRELLA_3_Y = 36
-SPR_UMBRELLA_C_X = 65 - 40
-SPR_UMBRELLA_C_Y = 32
-SPR_UMBRELLA_L_X = 72 - 40
-SPR_UMBRELLA_L_Y = 32
+SPR_SOFA = 68

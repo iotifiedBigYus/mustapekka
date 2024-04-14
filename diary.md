@@ -231,10 +231,25 @@ I'm thinking that I could remove the umbrella tilting, making the character acce
 Refined the movement a bit. If the player is going faster than the walking speed when beginning to walk the velocity gradually down to the walking speed.
 
 
-## Sam, 10.4.2024
+## Sam, 11.4.2024
 
 Remade the character front end logic so that the umbrella can be put away after landing. I'm happy with the animation. Refined it further and made a new sprite for the character putting down their hand. Fixed a problem with an acceleration spike when landing at high speed and walking in the opposite direction.
 
 TODO:
 - make the camera follow the sprite (including offset) and not the hitbox
 - add vertical "nudging"
+
+
+## Sam, 12.4.2024
+
+Added approximate vertical "nudging". The character might move back a little bit but it works alright. Added sfx for the umbrella. Almost what I want but it might get a bit annoying in the long run.
+
+## Sam, 13.4.2024
+
+Refined the vertical "nudging" and it's animation.
+
+## Sam, 14.4.2024
+
+I made the code messy. After making collisions with a sofa I noticed the character moved weirdly, most likely due to the friction being calculated in a different spot. Had to go back to an earlier version to fix it, moving aside the newer broken version.
+
+

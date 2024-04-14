@@ -1,7 +1,6 @@
 --actors
 --3.4.2024
 
-
 function init_actor_data()
 	actor_data = {
 	[SPR_STILL] = { --> player
@@ -40,7 +39,7 @@ function init_actor_data()
 		f_vx      = .04,
 		walking_y = {0,-.125,-.125,0},
 		--methods
-		update = update_actor_old,
+		update = update_player,
 		draw   = draw_player
 	},
 	[SPR_SOFA] = {
@@ -119,41 +118,11 @@ function spawn_sofa(x,y)
 	return make_actor(SPR_SOFA,x,y,1)
 end
 
-function update_actor_old(a)
-	if(a.k == SPR_STILL)update_player(a)
-
-	debug.d = a.d
-	debug.dx = a.dx
-
-	-- x movement 
-	collide_side(a)
-	-- y movement
-	if(a.dy < 0)collide_up(a)
-	if(a.dy >= 0)collide_down(a)
-
-	--jumping
-	if(a.dy < 0) a.jumped = true
-
-	--moving
-	a.x += a.dx
-	a.y += a.dy
-
-	--gravity
-	a.dy += a.ddy
-
-	--air resistance
-	a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
-
-	--snapping
-	if(a.dx == 0)a.x = snap8(a.x,a.cx)
-	if(a.dy == 0)a.y = snap8(a.y,0)
-
-	--timers
-	a.t += 1
-end
-
 
 function update_actor(a)
+	--> velocity needs to be counted before collisions
+	local v = sqrt(a.dx * a.dx + a.dy * a.dy)
+
 	-- x movement 
 	collide_side(a)
 	-- y movement
@@ -174,23 +143,33 @@ function update_actor(a)
 	--gravity
 	a.dy += a.ddy
 
+	--friction
+	if (a.standing) a.dx *= a.friction
+
 	--air resistance
 	a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
 
 	--timers
 	a.t += 1
 end
-
 
 
 function update_player(a)
-	--umbrella
+	update_player_input(a)
+	update_actor(a)
+
+	--minimum velocity
+	if(a.standing and abs(a.dx) < MV)a.dx = 0
+end
+
+
+function update_player_input(a)
+    --umbrella
 	local u = false
 	if btn(❎) and not a.standing then
 		local y1 = a.y+a.dy-a.u_h
 		local xl = snap8(a.x+a.dx-a.w2)
 		local xr = snap8(a.x+a.dx+a.w2)-E
-
 		u = not (solid(xl, y1) or solid(xr, y1))
 	end
 
@@ -251,6 +230,7 @@ function update_gliding(a)
 	--player looks in the acceleration direction
 	--if(a.u_d != 0)a.d = a.u_d
 
+	debug.ut = a.u_t
 	local r = a.u_t/U_DRAG_RESPONSE
 	a.dx += a.u_ddx * a.u_d * r - sgn(a.dx) * a.dx * a.dx * a.u_drag_x
 	a.dy -= a.dy * a.dy * a.u_drag_y * r
@@ -270,8 +250,6 @@ function update_walking(a)
 		a.strafing = false
 	end
 
-	--debug.strafing = a.strafing
-
 	if a.strafing then
 		if a.d * a.dx > a.vx then
 			--going too fast
@@ -280,55 +258,27 @@ function update_walking(a)
 			a.r = 1 --> no further acceleration needed
 		elseif a.d * a.dx < 0 then
 			--going the worng direction
-			a.dx = abs(dv) > E and a.dx * EF or 0
+			a.dx = abs(dv) > E and a.dx * a.friction or 0
 			a.r = 0
 		else
-			--> quadratic
+			--> quadratic acceleration curve
 			a.dx = a.d * max(MV,a.vx * a.r * a.r)
 		end
 
 		a.r = min(a.r+1/DDXT, 1)
 	else
-		--friction
-		a.dx *= a.friction
 		if(abs(a.dx) < MV)a.dx = 0
-	end
-
-	--going down platforms
-	if btn(⬇️) then
-		if (a.standing) a.descending = true
-	else
-		a.descending = false
-	end
-end
-
-
-function update_jumping(a)
-	--jumping
-	if btn(🅾️) then
-		if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
-			--begin (trying to) jump
-			a.dy = -a.vy
-			a.jump_t = JUMP_MAX
-		--elseif a.gliding then
-		--    a.jump_t = 0
-		elseif not a.standing and a.jump_t > 0 then
-			a.jump_t -= 1
-			a.dy = -a.vy
-		end
-	else
-		a.jumped = false
-		a.jump_t = 0
+		a.r = 0
 	end
 end
 
 
 --[[
 
-.    O       O       O       O    
-. --@@@-- --@@@-- --@@@-- --@@@-- 
-.   @@@\    @@@\   _@@@    _@@@  
-.   |      /           \      |   
+   O       O       O       O    
+--@@@-- --@@@-- --@@@-- --@@@-- 
+  @@@\    @@@\   _@@@    _@@@  
+  |      /           \      |   
 
 --]]
 
@@ -371,7 +321,7 @@ end
 --[[
 
 actor position is center bottom
-_______
+ _______
 |       |
 | (x,y) |
 |___.___|
@@ -379,7 +329,7 @@ _______
 --]]
 
 function draw_actor(a)
-	if(a.k == SPR_STILL)draw_player(a)
+
 end
 
 
@@ -403,6 +353,15 @@ function draw_player(a)
 end
 
 
+function draw_sofa(a)
+	local x = 8*(a.x-1)+.5
+	local y = 8*(a.y-1)+.5
+
+	spr(a.k, x,   y)
+	spr(a.k, x+8, y,1,1,true)
+end
+
+
 function draw_hitbox(a)
 	rect(
 		8*snap8(a.x-a.w2),
@@ -410,5 +369,5 @@ function draw_hitbox(a)
 		8*(snap8(a.x+a.w2)-E),
 		8*(snap8(a.y)-E),
 		8
-	)  
+	)
 end
