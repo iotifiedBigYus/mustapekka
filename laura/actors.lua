@@ -40,7 +40,7 @@ function init_actor_data()
 		f_vx      = .04,
 		walking_y = {0,-.125,-.125,0},
 		--methods
-		update = update_actor_old,
+		update = update_player,
 		draw   = draw_player
 	},
 	[SPR_SOFA] = {
@@ -119,37 +119,55 @@ function spawn_sofa(x,y)
 	return make_actor(SPR_SOFA,x,y,1)
 end
 
-function update_actor_old(a)
-	if(a.k == SPR_STILL)update_player(a)
+function update_player(a)
+	--umbrella
+	local u = false
+	if btn(❎) and not a.standing then
+		local y1 = a.y+a.dy-a.u_h
+		local xl = snap8(a.x+a.dx-a.w2)
+		local xr = snap8(a.x+a.dx+a.w2)-E
 
-	debug.d = a.d
-	debug.dx = a.dx
+		u = not (solid(xl, y1) or solid(xr, y1))
+	end
 
-	-- x movement 
-	collide_side(a)
-	-- y movement
-	if(a.dy < 0)collide_up(a)
-	if(a.dy >= 0)collide_down(a)
+	if u then
+		if (not a.gliding) a.gliding = true
+		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
+		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
+		if (a.u_f_t == 2) sfx(SFX_UMBRELLA_UP)
+	else
+		a.gliding = false
+		a.u_t = max(0, a.u_t-5)
+		if (a.u_f_t > 0) a.u_f_t -= .5
+		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
+	end
+
+	--strafing
+	if a.gliding then
+		update_gliding(a)
+	else
+		update_walking(a)
+	end
 
 	--jumping
-	if(a.dy < 0) a.jumped = true
+	if btn(🅾️) then
+		if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
+			--begin (trying to) jump
+			a.dy = -a.vy
+			a.jump_t = JUMP_MAX
+		elseif not a.standing and a.jump_t > 0 then
+			a.jump_t -= 1
+			a.dy = -a.vy
+		end
+	else
+		a.jumped = false
+		a.jump_t = 0
+	end
+	
+	--going down platforms
+	a.descending = btn(⬇️) and a.standing
 
-	--moving
-	a.x += a.dx
-	a.y += a.dy
-
-	--gravity
-	a.dy += a.ddy
-
-	--air resistance
-	a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
-
-	--snapping
-	if(a.dx == 0)a.x = snap8(a.x,a.cx)
-	if(a.dy == 0)a.y = snap8(a.y,0)
-
-	--timers
-	a.t += 1
+	update_actor(a)
 end
 
 
@@ -171,6 +189,12 @@ function update_actor(a)
 	if(a.dx == 0)a.x = snap8(a.x,a.cx)
 	if(a.dy == 0)a.y = snap8(a.y,0)
 
+	--friction
+	if not a.gliding and not a.strafing then
+		a.dx *= a.friction
+		if (abs(a.dx) < MV)a.dx = 0
+	end
+
 	--gravity
 	a.dy += a.ddy
 
@@ -183,7 +207,7 @@ end
 
 
 
-function update_player(a)
+function update_player_input(a)
 	--umbrella
 	local u = false
 	if btn(❎) and not a.standing then
@@ -289,9 +313,9 @@ function update_walking(a)
 
 		a.r = min(a.r+1/DDXT, 1)
 	else
-		--friction
-		a.dx *= a.friction
-		if(abs(a.dx) < MV)a.dx = 0
+		----friction
+		--a.dx *= a.friction
+		--if(abs(a.dx) < MV)a.dx = 0
 	end
 
 	--going down platforms
@@ -325,12 +349,47 @@ end
 
 --[[
 
+actor position is center bottom
+.   _______
+.  |       |
+.  | (x,y) |
+.  |___.___|
+
+--]]
+
+function draw_actor(a)
+	if(a.k == SPR_STILL)draw_player(a)
+end
+
+--[[
+
 .    O       O       O       O    
 . --@@@-- --@@@-- --@@@-- --@@@-- 
 .   @@@\    @@@\   _@@@    _@@@  
 .   |      /           \      |   
 
 --]]
+
+
+function draw_player(a)
+	update_player_body(a)
+
+
+	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
+	local y = 8*(a.y+a.f_y-1)+.5
+
+	--umbrella
+	if (a.u_f_t >= 3) then
+		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
+		local n = flr(a.u_f_t) - 2
+		
+		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
+			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
+	end
+
+	spr(a.frame, x, y,1,1,a.d<0)
+end
+
 
 function update_player_body(a)
 	--front end logic
@@ -368,38 +427,12 @@ function update_player_body(a)
 end
 
 
---[[
+function draw_sofa(a)
+	local x = 8*(a.x-1)+.5
+	local y = 8*(a.y-1)+.5
 
-actor position is center bottom
-_______
-|       |
-| (x,y) |
-|___.___|
-
---]]
-
-function draw_actor(a)
-	if(a.k == SPR_STILL)draw_player(a)
-end
-
-
-function draw_player(a)
-	update_player_body(a)
-
-
-	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
-	local y = 8*(a.y+a.f_y-1)+.5
-
-	--umbrella
-	if (a.u_f_t >= 3) then
-		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
-		local n = flr(a.u_f_t) - 2
-		
-		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
-			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
-	end
-
-	spr(a.frame, x, y,1,1,a.d<0)
+	spr(a.k, x,   y)
+	spr(a.k, x+8, y,1,1,true)
 end
 
 

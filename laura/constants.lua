@@ -18,8 +18,8 @@ LEVEL_N    = 1
 -- | physics / physical constants |
 -- *------------------------------*
 
-SOFA_X = 5
-SOFA_Y = 5
+SOFA_X = 14
+SOFA_Y = 13
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (only downwards)

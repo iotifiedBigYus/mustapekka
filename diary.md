@@ -250,6 +250,10 @@ Refined the vertical "nudging" and it's animation.
 
 ## Sam, 14.4.2024
 
-I made the code messy. After making collisions with a sofa I noticed the character moved weirdly, most likely due to the friction being calculated in a different spot. Had to go back to an earlier version to fix it, moving aside the newer broken version.
+I made the code messy. After making collisions with a sofa I noticed the character moved weirdly, most likely due to the friction being calculated in a different spot. Had to go back to an earlier version to fix it, moving aside the newer broken version. Note to self: Commit when it works.
+
+There is now a movable sofa! It moves physics based, but it could be simplified.
+
+I think the friction still needs fixing.
 
 

@@ -24,8 +24,7 @@ function _init()
 	init_actor_data()
 
 	player = spawn_player()
-	--sofa = spawn_sofa(SOFA_X, SOFA_Y)
-	sofa = {}
+	sofa = spawn_sofa(SOFA_X, SOFA_Y)
 
     make_camera()
 
