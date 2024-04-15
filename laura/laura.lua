@@ -98,6 +98,8 @@ function _update60()
 	--debug.dx2 = sofa.dx
 	update_spawning(player.x,player.y)
 
+	if (player.gliding and player.standing) debug.both = true
+
 	--debug.cx, debug.cy  = get_collision_direction(player, sofa)
 	--debug.sofa_coll = aabb(player, sofa)
 

@@ -84,9 +84,12 @@ MUSIC_FADE_IN = 1000
 -- | sprites |
 -- *---------*
 
-SPR_STILL          = 64
+SPR_PLAYER          = 64
 SPR_WALKING        = 80--65
 SPR_U_STILL        = 66 --> u as in umbrella
 SPR_U_WALKING      = 96
+
+FRAME_WALK      = 16
+FRAME_UMBR_WALK = 32
 
 SPR_SOFA = 68

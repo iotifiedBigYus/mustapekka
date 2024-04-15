@@ -256,4 +256,8 @@ There is now a movable sofa! It moves physics based, but it could be simplified.
 
 I think the friction still needs fixing.
 
+## Sam, 15.4.2024
+
+It feels like the front end code for the character was too complex, so I'm trying to dumb it down. I'm gonna have to leave it in a visually broken state for now.
+
 

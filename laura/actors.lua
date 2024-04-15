@@ -4,7 +4,7 @@
 
 function init_actor_data()
 	actor_data = {
-	[SPR_STILL] = { --> player
+	[SPR_PLAYER] = { --> player
 		--size
 		cx = -1/16, --> sprite center deviation
 		w2 = 5/8 * .5, --> half width
@@ -94,11 +94,11 @@ end
 
 
 function spawn_player()
-	local a = make_actor(SPR_STILL, world_x+.5, world_y+1, 1)
+	local a = make_actor(SPR_PLAYER, world_x+.5, world_y+1, 1)
 
 	for x=world_x,world_x+world_w-1 do
 		for y=world_y,world_y+world_h-1 do
-			if mget(x,y) == SPR_STILL then
+			if mget(x,y) == SPR_PLAYER then
 				a.x = x+0.5+a.cx
 				a.y = y+1
 
@@ -167,6 +167,33 @@ function update_player(a)
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
 
+	--frame
+
+	--recenter the spirte
+	a.f_x = a.f_x > 0 and max(0, a.f_x - a.f_vx) or min(0, a.f_x + a.f_vx)
+
+	--umbrella
+	--local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
+	if not a.standing then
+		--1 going up, 2 going down
+		a.frame = a.dy < a.ddy and 17 or 18
+		--a.f_t = a.strafing and 3 or 4
+	else
+		if not a.strafing and abs(a.dx) < a.vx and a.f_t % 4 == 0 then
+			-- stop walking
+			a.frame = min(2, a.u_f_t)
+			a.f_y = 0
+			a.f_t = 0
+		else
+			local t = flr(a.f_t%4)
+			a.frame = 16+t
+			a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
+			-- sfx
+			if (a.f_t % 4 == 3) sfx(SFX_STEP)
+		end
+	end
+
+	--> apply world collisions and velocities
 	update_actor(a)
 end
 
@@ -190,7 +217,10 @@ function update_actor(a)
 	if(a.dy == 0)a.y = snap8(a.y,0)
 
 	--friction
-	if not a.gliding and not a.strafing then
+	--if not a.gliding and not a.strafing then
+	if (a == player) debug.friction = false
+	if not a.gliding then
+		if (a == player) debug.friction = true
 		a.dx *= a.friction
 		if (abs(a.dx) < MV)a.dx = 0
 	end
@@ -207,7 +237,7 @@ end
 
 
 
-function update_player_input(a)
+function update_player_input(a) -->UNUSED
 	--umbrella
 	local u = false
 	if btn(❎) and not a.standing then
@@ -257,7 +287,7 @@ function update_player_input(a)
 end
 
 
-function update_gliding(a)
+function update_gliding(a) -->UNUSED
 	if(btn(⬅️) and not btn(➡️))then
 		a.u_d = -1
 	elseif(btn(➡️) and not btn(⬅️))then
@@ -281,7 +311,7 @@ function update_gliding(a)
 end 
 
 
-function update_walking(a)
+function update_walking(a) -->UNUSED
 	--side movement
 	if(btn(➡️) and not btn(⬅️))then
 		a.d = 1
@@ -304,7 +334,7 @@ function update_walking(a)
 			a.r = 1 --> no further acceleration needed
 		elseif a.d * a.dx < 0 then
 			--going the worng direction
-			a.dx = abs(dv) > E and a.dx * EF or 0
+			--a.dx = abs(dv) > E and a.dx * EF or 0
 			a.r = 0
 		else
 			--> quadratic
@@ -327,7 +357,7 @@ function update_walking(a)
 end
 
 
-function update_jumping(a)
+function update_jumping(a) -->UNUSED
 	--jumping
 	if btn(🅾️) then
 		if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
@@ -355,14 +385,6 @@ actor position is center bottom
 .  | (x,y) |
 .  |___.___|
 
---]]
-
-function draw_actor(a)
-	if(a.k == SPR_STILL)draw_player(a)
-end
-
---[[
-
 .    O       O       O       O    
 . --@@@-- --@@@-- --@@@-- --@@@-- 
 .   @@@\    @@@\   _@@@    _@@@  
@@ -372,11 +394,46 @@ end
 
 
 function draw_player(a)
-	update_player_body(a)
+	----front end logic
+--
+	----recenter the spirte
+	--if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
+	--if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
+--
+	----umbrella
+	--local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
+	--if not a.standing then
+	--	if a.dy < a.ddy then --> going up
+	--		a.frame = a.strafing and s+1 or s
+	--	else --> going down
+	--		a.frame = a.strafing and s+2 or s+3
+	--	end
+	--	a.f_y = 0
+	--	a.f_t = a.strafing and 3 or 4
+	--else
+	--	if not a.strafing and abs(a.dx) < a.vx and a.f_t%4 == 0 then
+	--		-- stop walking
+	--		a.frame = SPR_PLAYER + min(2, a.u_f_t)
+	--		a.f_y = 0
+	--		a.f_t = 0
+	--	else
+	--		local t = flr(a.f_t%4)
+	--		a.frame = s+t
+	--		a.f_y = a.walking_y[t+1]
+	--		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
+	--		-- sfx
+	--		if (a.f_t % 4 == 3) sfx(SFX_STEP)
+	--	end
+	--end
 
+	fr = a.k + a.frame
 
 	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
 	local y = 8*(a.y+a.f_y-1)+.5
+
+	-- sprite flag 3 (green):
+	-- draw one pixel up
+	if (fget(fr,3)) y-=1
 
 	--umbrella
 	if (a.u_f_t >= 3) then
@@ -387,11 +444,12 @@ function draw_player(a)
 			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
 	end
 
-	spr(a.frame, x, y,1,1,a.d<0)
+
+	spr(fr, x,y,1,1,a.d<0)
 end
 
 
-function update_player_body(a)
+function draw_player_old(a)
 	--front end logic
 
 	--recenter the spirte
@@ -400,7 +458,6 @@ function update_player_body(a)
 
 	--umbrella
 	local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
-
 	if not a.standing then
 		if a.dy < a.ddy then --> going up
 			a.frame = a.strafing and s+1 or s
@@ -412,7 +469,7 @@ function update_player_body(a)
 	else
 		if not a.strafing and abs(a.dx) < a.vx and a.f_t%4 == 0 then
 			-- stop walking
-			a.frame = SPR_STILL + min(2, a.u_f_t)
+			a.frame = SPR_PLAYER + min(2, a.u_f_t)
 			a.f_y = 0
 			a.f_t = 0
 		else
@@ -424,6 +481,21 @@ function update_player_body(a)
 			if (a.f_t % 4 == 3) sfx(SFX_STEP)
 		end
 	end
+
+	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
+	local y = 8*(a.y+a.f_y-1)+.5
+	
+
+	--umbrella
+	if (a.u_f_t >= 3) then
+		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
+		local n = flr(a.u_f_t) - 2
+		
+		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
+			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
+	end
+
+	spr(a.frame, x, y,1,1,a.d<0)
 end
 
 
