@@ -504,8 +504,6 @@ function move_actor(a)
 	if (a.standing) then
 		a.dx *= a.friction
 	end
-
---end
 	
 	-- counters
 	a.t = a.t + 1

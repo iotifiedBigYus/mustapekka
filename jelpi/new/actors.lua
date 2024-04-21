@@ -235,7 +235,7 @@ function draw_glitch_mushroom(a)
 			cos(d/5-time()*2)>.4) then
 		pset(x,y,pget(x+dx,y+dy)
 		+rnd(1.5))
---  pset(x,y,rnd(16))
+	--  pset(x,y,rnd(16))
 		end
 	end
 	end
@@ -548,13 +548,13 @@ end
 ]]
 function move_bird(a)
 
---[[
+	--[[
 	-- spawn with gem
 	if (a.t==0) then
 		gem=make_actor(67,a.x,a.y)
 		a.holding=gem
 	end
-]]
+	]]
 
 	move_actor(a)
 	
@@ -596,8 +596,8 @@ function move_bird(a)
 	end
 
 	-- debug
--- a.tx=tx
--- a.ty=ty
+	-- a.tx=tx
+	-- a.ty=ty
 
 	local dx,dy=tx-a.x,ty-a.y 
 	local dd=sqrt(dx*dx+dy*dy)

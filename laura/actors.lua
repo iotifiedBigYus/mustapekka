@@ -31,6 +31,7 @@ function init_actor_data()
 		jumped     = false,
 		descending = false,
 		gliding    = false,
+		walking    = false,
 		jump_t     = 0,
 		coyote_t   = 0,
 		--drawing
@@ -167,30 +168,26 @@ function update_player(a)
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
 
-	--frame
+	--walking animation
+	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.f_t % 4 != 0))
 
 	--recenter the spirte
 	a.f_x = a.f_x > 0 and max(0, a.f_x - a.f_vx) or min(0, a.f_x + a.f_vx)
 
-	--umbrella
-	--local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
 	if not a.standing then
 		--1 going up, 2 going down
 		a.frame = a.dy < a.ddy and 17 or 18
-		--a.f_t = a.strafing and 3 or 4
+		if (a.u_t > 0) a.frame += 16
+		a.f_t = 4;
+	elseif a.walking then
+		local t = flr(a.f_t%4)
+		a.frame = a.u_t > 0 and 32+t or 16+t
+		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
+		-- sfx
+		if (a.f_t % 4 == 3) sfx(SFX_STEP)
 	else
-		if not a.strafing and abs(a.dx) < a.vx and a.f_t % 4 == 0 then
-			-- stop walking
-			a.frame = min(2, a.u_f_t)
-			a.f_y = 0
-			a.f_t = 0
-		else
-			local t = flr(a.f_t%4)
-			a.frame = 16+t
-			a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
-			-- sfx
-			if (a.f_t % 4 == 3) sfx(SFX_STEP)
-		end
+		--standing still
+		a.frame = min(2, a.u_f_t)
 	end
 
 	--> apply world collisions and velocities
@@ -394,42 +391,10 @@ actor position is center bottom
 
 
 function draw_player(a)
-	----front end logic
---
-	----recenter the spirte
-	--if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
-	--if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
---
-	----umbrella
-	--local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
-	--if not a.standing then
-	--	if a.dy < a.ddy then --> going up
-	--		a.frame = a.strafing and s+1 or s
-	--	else --> going down
-	--		a.frame = a.strafing and s+2 or s+3
-	--	end
-	--	a.f_y = 0
-	--	a.f_t = a.strafing and 3 or 4
-	--else
-	--	if not a.strafing and abs(a.dx) < a.vx and a.f_t%4 == 0 then
-	--		-- stop walking
-	--		a.frame = SPR_PLAYER + min(2, a.u_f_t)
-	--		a.f_y = 0
-	--		a.f_t = 0
-	--	else
-	--		local t = flr(a.f_t%4)
-	--		a.frame = s+t
-	--		a.f_y = a.walking_y[t+1]
-	--		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
-	--		-- sfx
-	--		if (a.f_t % 4 == 3) sfx(SFX_STEP)
-	--	end
-	--end
+	local fr = a.k + a.frame
 
-	fr = a.k + a.frame
-
-	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
-	local y = 8*(a.y+a.f_y-1)+.5
+	local x = .5+8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)
+	local y = .5+8*(a.y+a.f_y-1)
 
 	-- sprite flag 3 (green):
 	-- draw one pixel up

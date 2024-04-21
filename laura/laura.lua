@@ -172,8 +172,3 @@ function _draw()
 	end
 end
 
-
--- *------------------*
--- | player functions |
--- *------------------*
-

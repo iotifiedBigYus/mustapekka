@@ -19,7 +19,6 @@ function collide_side(a)
 	end
 
 	if a.dx != 0 then
-		--> approximate inteval, previous a.dy could be smaller than current
 		for y1 = snap8(a.y), snap8(a.y+a.dy), sgn(a.dy)*0.125 do
 			if not (solid(x1+xe,y1-E) or solid(x1+xe,y1-a.h)) then
 				a.dy = y1 - a.y
