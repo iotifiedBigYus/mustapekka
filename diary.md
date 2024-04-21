@@ -260,4 +260,11 @@ I think the friction still needs fixing.
 
 It feels like the front end code for the character was too complex, so I'm trying to dumb it down. I'm gonna have to leave it in a visually broken state for now.
 
+## Sam, 21.4.2024
+
+The player code is somewhat cleaner now, but still bloated. I dislike that there is two umbrella timers, one for the drag and one for the sprite.
+
+There is a bug where the sofa starts pushing you if you change direction beside it. I'm thinking of making actor collisions not physics based, so it will get fixed later.
+
+Friction is now applied separate from running, so changing direction feels sluggish.
 
