@@ -39,7 +39,6 @@ function init_actor_data()
 		f_y       = 0,
 		f_x       = 0,
 		f_vx      = .04,
-		walking_y = {0,-.125,-.125,0},
 		--methods
 		update = update_player,
 		draw   = draw_player
@@ -120,6 +119,7 @@ function spawn_sofa(x,y)
 	return make_actor(SPR_SOFA,x,y,1)
 end
 
+
 function update_player(a)
 	--umbrella
 	local u = false
@@ -164,9 +164,6 @@ function update_player(a)
 		a.jumped = false
 		a.jump_t = 0
 	end
-	
-	--going down platforms
-	a.descending = btn(⬇️) and a.standing
 
 	--walking animation
 	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.f_t % 4 != 0))
@@ -233,58 +230,7 @@ function update_actor(a)
 end
 
 
-
-function update_player_input(a) -->UNUSED
-	--umbrella
-	local u = false
-	if btn(❎) and not a.standing then
-		local y1 = a.y+a.dy-a.u_h
-		local xl = snap8(a.x+a.dx-a.w2)
-		local xr = snap8(a.x+a.dx+a.w2)-E
-
-		u = not (solid(xl, y1) or solid(xr, y1))
-	end
-
-	if u then
-		if (not a.gliding) a.gliding = true
-		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
-		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
-		if (a.u_f_t == 2) sfx(SFX_UMBRELLA_UP)
-	else
-		a.gliding = false
-		a.u_t = max(0, a.u_t-5)
-		if (a.u_f_t > 0) a.u_f_t -= .5
-		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
-	end
-
-	--strafing
-	if a.gliding then
-		update_gliding(a)
-	else
-		update_walking(a)
-	end
-
-	--jumping
-	if btn(🅾️) then
-		if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
-			--begin (trying to) jump
-			a.dy = -a.vy
-			a.jump_t = JUMP_MAX
-		elseif not a.standing and a.jump_t > 0 then
-			a.jump_t -= 1
-			a.dy = -a.vy
-		end
-	else
-		a.jumped = false
-		a.jump_t = 0
-	end
-	
-	--going down platforms
-	a.descending = btn(⬇️) and a.standing
-end
-
-
-function update_gliding(a) -->UNUSED
+function update_gliding(a)
 	if(btn(⬅️) and not btn(➡️))then
 		a.u_d = -1
 	elseif(btn(➡️) and not btn(⬅️))then
@@ -308,7 +254,7 @@ function update_gliding(a) -->UNUSED
 end 
 
 
-function update_walking(a) -->UNUSED
+function update_walking(a)
 	--side movement
 	if(btn(➡️) and not btn(⬅️))then
 		a.d = 1
@@ -331,7 +277,6 @@ function update_walking(a) -->UNUSED
 			a.r = 1 --> no further acceleration needed
 		elseif a.d * a.dx < 0 then
 			--going the worng direction
-			--a.dx = abs(dv) > E and a.dx * EF or 0
 			a.r = 0
 		else
 			--> quadratic
@@ -339,18 +284,10 @@ function update_walking(a) -->UNUSED
 		end
 
 		a.r = min(a.r+1/DDXT, 1)
-	else
-		----friction
-		--a.dx *= a.friction
-		--if(abs(a.dx) < MV)a.dx = 0
 	end
 
 	--going down platforms
-	if btn(⬇️) then
-		if (a.standing) a.descending = true
-	else
-		a.descending = false
-	end
+	a.descending = btn(⬇️) and a.standing
 end
 
 
