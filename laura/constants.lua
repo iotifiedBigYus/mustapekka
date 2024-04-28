@@ -22,7 +22,7 @@ SOFA_X = 14
 SOFA_Y = 13
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
-U_DRAG_Y = 1.2 --umbrella drag (only downwards)
+U_DRAG_Y = 1.2 --umbrella drag (when going down)
 U_DRAG_RESPONSE = 20
 U_OPEN_FRAMES = 6
 U_DDX = 0.005

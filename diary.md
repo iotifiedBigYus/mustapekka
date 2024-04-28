@@ -268,3 +268,14 @@ There is a bug where the sofa starts pushing you if you change direction beside 
 
 Friction is now applied separate from running, so changing direction feels sluggish.
 
+## Sam, 28.4.24
+
+Added Sidner Olin to the team to give ideas and to help develop concepts.
+
+Right now I'm thinking that the game should be about solving puzzles to get your cat. I'm focusing on making the character movement feel just right, after which I will start working on the game mechanics. The first one being collisions between actors, which should not be too physics based.
+
+I'm realizing that exponential curves could generally be the move. By making umbrella drag exponential instead of quadratic the response feels better and the need for timers is removed. Determining a terminal velocity is also much easier since the drag (friction) is reduced to terminal velocity and how fast you approach it. The approaching starts only when descending faster than the terminal velocity.
+
+I'm going to try to use friction when something slows down exponentially, and drag when the speed reduction is quadratically proportional to the speed.
+
+

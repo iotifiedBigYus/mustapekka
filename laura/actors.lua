@@ -14,20 +14,24 @@ function init_actor_data()
 		vx = .125, -- walking speed
 		vy = .2, -- jump speed
 		--umbrella
-		u_d      = 0,
-		u_ddx    = U_DDX,
-		u_drag_x = U_DRAG_X,
-		u_drag_y = U_DRAG_Y,
-		u_t      = 0,
-		u_f_t    = 0,
-		u_h      = 1.375, --> height with umbrella
-		u_s_x    = {24, 24, 27, 25},
-		u_s_y    = {34, 37, 36, 32},
-		u_s_w    = {1, 3, 5, 7},
-		u_s_h    = {2, 3, 4, 4},
+		u_d        = 0,
+		u_v        = 0.125,
+		u_diff     = nil, --> initial difference to terminal speed
+		u_friction = 0.9,
+		u_ddx      = U_DDX,
+		u_drag_x   = U_DRAG_X,
+		u_drag_y   = U_DRAG_Y,
+		u_t        = 0,
+		u_f_t      = 0,
+		u_h        = 1.375, --> height with umbrella
+		u_s_x      = {24, 24, 27, 25},
+		u_s_y      = {34, 37, 36, 32},
+		u_s_w      = {1, 3, 5, 7},
+		u_s_h      = {2, 3, 4, 4},
 		--state
 		is_player  = true,
 		strafing   = false,
+		traction   = true, --> false when sliding on ground
 		jumped     = false,
 		descending = false,
 		gliding    = false,
@@ -69,7 +73,7 @@ function make_actor(k,x,y,d)
 		y        = y,
 		dx       = 0,
 		dy       = 0,
-		ddy      = 0.02, -- gravity
+		ddy      = .02, -- gravity
 		drag     = .02, --air drag
 		friction = .9, -- exponential deacceleration
 		d        = d or -1, --(looking direction)
@@ -132,12 +136,15 @@ function update_player(a)
 	end
 
 	if u then
-		if (not a.gliding) a.gliding = true
+		if (not a.gliding) then
+			a.gliding = true
+		end
 		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
 		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
 		if (a.u_f_t == 2) sfx(SFX_UMBRELLA_UP)
 	else
 		a.gliding = false
+		a.u_diff = nil
 		a.u_t = max(0, a.u_t-5)
 		if (a.u_f_t > 0) a.u_f_t -= .5
 		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
@@ -231,6 +238,34 @@ end
 
 
 function update_gliding(a)
+	if(btn(⬅️) and not btn(➡️))then
+		a.u_d = -1
+	elseif(btn(➡️) and not btn(⬅️))then
+		a.u_d = 1
+	else
+		a.u_d = 0
+	end
+
+	--only apply drag when descending too fast
+	if(a.dy < a.u_v)return
+
+	--speed difference
+	if(not a.u_diff)a.u_diff = a.dy - a.u_v
+
+	--player looks in the movement direction
+	if(a.dx != 0)a.d = sgn(a.dx)
+
+	--player looks in the acceleration direction
+	--if(a.u_d != 0)a.d = a.u_d
+
+	a.dx += a.u_ddx * a.u_d - sgn(a.dx) * a.dx * a.dx * a.u_drag_x
+	
+	a.u_diff *= a.u_friction
+	a.dy = a.u_v + a.u_diff
+end
+
+
+function update_gliding_old(a) --> unused
 	if(btn(⬅️) and not btn(➡️))then
 		a.u_d = -1
 	elseif(btn(➡️) and not btn(⬅️))then
