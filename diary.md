@@ -278,4 +278,10 @@ I'm realizing that exponential curves could generally be the move. By making umb
 
 I'm going to try to use friction when something slows down exponentially, and drag when the speed reduction is quadratically proportional to the speed.
 
+## Sam, 29.4.24
+
+Kinda stuck with the movement, so I took a loot at the celeste 2 running (implemented it in the game). They use linear acceleration and it feels alright. It has a very sudden stop so the walking animation might continue a little too long.
+
+TODO:
+	- separate input update from player update
 

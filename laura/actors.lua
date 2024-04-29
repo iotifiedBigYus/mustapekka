@@ -11,6 +11,9 @@ function init_actor_data()
 		h  = 1,
 		--motion
 		r  = 0,
+		vt = 0,
+		vt1 = 0,
+		vt2 = 0,
 		vx = .125, -- walking speed
 		vy = .2, -- jump speed
 		--umbrella
@@ -31,7 +34,7 @@ function init_actor_data()
 		--state
 		is_player  = true,
 		strafing   = false,
-		traction   = true, --> false when sliding on ground
+		traction   = false, --> false when sliding on ground
 		jumped     = false,
 		descending = false,
 		gliding    = false,
@@ -138,6 +141,7 @@ function update_player(a)
 	if u then
 		if (not a.gliding) then
 			a.gliding = true
+			a.traction = false
 		end
 		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
 		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
@@ -171,6 +175,9 @@ function update_player(a)
 		a.jumped = false
 		a.jump_t = 0
 	end
+
+	--going down platforms
+	a.descending = btn(⬇️) and a.standing
 
 	--walking animation
 	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.f_t % 4 != 0))
@@ -217,14 +224,18 @@ function update_actor(a)
 	if(a.dx == 0)a.x = snap8(a.x,a.cx)
 	if(a.dy == 0)a.y = snap8(a.y,0)
 
+	--[[
 	--friction
 	--if not a.gliding and not a.strafing then
-	if (a == player) debug.friction = false
 	if not a.gliding then
 		if (a == player) debug.friction = true
 		a.dx *= a.friction
-		if (abs(a.dx) < MV)a.dx = 0
+		if (abs(a.dx) < MV) a.dx = 0
 	end
+	--]]
+
+	--friction
+	if (a.standing and not a.traction) a.dx *= a.friction
 
 	--gravity
 	a.dy += a.ddy
@@ -294,6 +305,131 @@ function update_walking(a)
 	if(btn(➡️) and not btn(⬅️))then
 		a.d = 1
 		a.strafing = true
+		input_x = 1
+	elseif(btn(⬅️)and not btn(➡️))then
+		a.d = -1
+		a.strafing = true
+		input_x = -1
+	else
+		a.r = 0
+		a.strafing = false
+		input_x = 0
+	end
+
+	a.strafing = input_x != 0
+
+	if(input_x != 0)a.d = input_x
+
+	--[
+	-- running
+	local target, accel = 0, 0.2/16
+	if abs(a.dx) > 2/16 and a.strafing then
+		target,accel = 2/16, 0.1/16
+	elseif a.standing then
+		target, accel = 2/16, 0.8/16
+	elseif a.strafing then
+		target, accel = 2/16, 0.4/16
+	end
+
+	a.dx = approach(a.dx, input_x * target, accel)
+
+	debug.dx = a.dx
+	--]]
+
+	--[[
+	if a.strafing then
+		if a.d > 0 then
+			a.vt1 = max(0, a.vt1-1)
+			a.vt2 = min(RUN_MAX, a.vt2+1)
+		else
+			a.vt1 = min(RUN_MAX, a.vt1+1)
+			a.vt2 = max(0, a.vt2-1)
+		end
+	else
+		a.vt1 = max(0, a.vt1-1)
+		a.vt2 = max(0, a.vt2-1)
+	end
+
+	local c1
+	if a.vt1 == RUN_MAX then
+		c1 = 0
+	else
+		c1 = 1
+		for _ = 1,a.vt1 do
+			c1 *= a.friction
+		end
+	end
+
+	local c2
+	if a.vt2 == RUN_MAX then
+		c2 = 0
+	else
+		c2 = 1
+		for _ = 1,a.vt2 do
+			c2 *= a.friction
+		end
+	end
+
+	debug.c1 = c1
+	debug.c2 = c2
+
+	a.dx = c1 * a.vx - c2 * a.vx
+	--]]
+
+	--[[]
+	if a.strafing then
+		a.vt = max(0, a.vt-1)
+	else
+		a.vt = min(RUN_MAX, a.vt+1)
+	end
+
+	local c
+	if a.vt == RUN_MAX then
+		c = 0
+	else
+		c = 1
+		for _ = 1,a.vt do
+			c *= a.friction
+		end
+	end
+
+	a.dx = a.d * c * a.vx
+
+	debug.dx = a.dx
+
+	--]]
+
+
+	--[[
+	--if (abs(a.d * a.vx - a.dx) < 2 * a.vx) a.traction = true
+	--a.traction = abs(a.d * a.vx - a.dx) < 2 * a.vx
+
+	if a.strafing then
+		if a.d * a.dx > a.vx then
+			--going too fast
+			local dv = (a.dx - a.vx) * a.friction -- next velocity difference
+			a.dx = abs(dv) > E and a.vx + dv or a.vx
+			a.r = 1 --> no further acceleration needed
+		elseif a.d * a.dx < 0 then
+			--going the worng direction
+			a.r = 0
+		else
+			--> quadratic
+			a.dx = a.d * max(MV,a.vx * a.r * a.r)
+		end
+
+		a.r = min(a.r+1/DDXT, 1)
+	end
+	
+	--]]
+end
+
+
+function update_walking_old(a) --> unused
+	--side movement
+	if(btn(➡️) and not btn(⬅️))then
+		a.d = 1
+		a.strafing = true
 	elseif(btn(⬅️)and not btn(➡️))then
 		a.d = -1
 		a.strafing = true
@@ -323,26 +459,6 @@ function update_walking(a)
 
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
-end
-
-
-function update_jumping(a) -->UNUSED
-	--jumping
-	if btn(🅾️) then
-		if (a.standing or a.coyote_t > 0) and (not a.jumped or AUTO_JUMP) then
-			--begin (trying to) jump
-			a.dy = -a.vy
-			a.jump_t = JUMP_MAX
-		--elseif a.gliding then
-		--    a.jump_t = 0
-		elseif not a.standing and a.jump_t > 0 then
-			a.jump_t -= 1
-			a.dy = -a.vy
-		end
-	else
-		a.jumped = false
-		a.jump_t = 0
-	end
 end
 
 

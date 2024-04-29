@@ -85,10 +85,9 @@ end
 
 
 function _update60()
-    t += 1
+	debug.t += 1
     if FREEZE and not btnp(🅾️,1) then return end
-    if t % SLOWDOWN ~= 0 then return end
-    debug.t += 1
+    if debug.t % SLOWDOWN ~= 0 then return end
 
 	for a in all(actors) do a:update() end
     update_camera()
@@ -98,7 +97,7 @@ function _update60()
 	--debug.dx2 = sofa.dx
 	update_spawning(player.x,player.y)
 
-	if (player.gliding and player.standing) debug.both = true
+	--if (player.gliding and player.standing) debug.both = true
 
 	--debug.cx, debug.cy  = get_collision_direction(player, sofa)
 	--debug.sofa_coll = aabb(player, sofa)
@@ -134,6 +133,11 @@ function update_spawning(x0, y0)
 	end
 end
 
+
+function approach(x, target, max_delta)
+	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
+end
+
 -- *-------------------*
 -- | drawing functions |
 -- *-------------------*
@@ -141,7 +145,7 @@ end
 
 function _draw()
 	if FREEZE and not btnp(🅾️,1) then return end
-    if t % SLOWDOWN ~= 0 then return end
+    if debug.t % SLOWDOWN ~= 0 then return end
 	
 	--background
 	cls(BG)

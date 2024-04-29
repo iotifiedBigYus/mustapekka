@@ -12,7 +12,7 @@ SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 VERSION    = '0.5.0' --version number
 MAX_ACTORS = 128 --maximum amount of actors
-LEVEL_N    = 1
+LEVEL_N    = 2
 
 -- *------------------------------*
 -- | physics / physical constants |
@@ -26,6 +26,7 @@ U_DRAG_Y = 1.2 --umbrella drag (when going down)
 U_DRAG_RESPONSE = 20
 U_OPEN_FRAMES = 6
 U_DDX = 0.005
+RUN_MAX = 8
 DDXT = 6--8--ticks to accelerate
 JUMP_MAX = 10 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
