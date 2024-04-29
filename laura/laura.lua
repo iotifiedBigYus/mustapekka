@@ -89,6 +89,8 @@ function _update60()
     if FREEZE and not btnp(🅾️,1) then return end
     if debug.t % SLOWDOWN ~= 0 then return end
 
+	update_input()
+
 	for a in all(actors) do a:update() end
     update_camera()
 

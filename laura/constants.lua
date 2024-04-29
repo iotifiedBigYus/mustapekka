@@ -12,7 +12,7 @@ SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 VERSION    = '0.5.0' --version number
 MAX_ACTORS = 128 --maximum amount of actors
-LEVEL_N    = 2
+LEVEL_N    = 1
 
 -- *------------------------------*
 -- | physics / physical constants |

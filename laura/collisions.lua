@@ -63,8 +63,9 @@ function collide_up(a, d)
 	end
 
 	a.dy=0
-	a.jump_t = 0
-	--debug.solid_up = true
+	a.t_jump = 0
+	consume_jump_press()
+	--deb	ug.solid_up = true
 end
 
 
@@ -109,9 +110,9 @@ function collide_down(a)
 		a.dy = 0
 	else
 		--coyote time
-		if (not a.coyote_t) return
-		if (a.coyote_t > 0) a.coyote_t -= 1
-		if (a.standing) a.coyote_t = COYOTE
+		if (not a.t_coyote) return
+		if (a.t_coyote > 0) a.t_coyote -= 1
+		if (a.standing) a.t_coyote = COYOTE
 
 		a.standing = false
 	end

@@ -4,6 +4,7 @@ __lua__
 --mustapekka
 --sam w. and benjamin r.
 
+#include input.lua
 #include levels.lua
 #include constants.lua
 #include laura.lua
