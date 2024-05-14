@@ -9,62 +9,76 @@
 
 
 function _init()
-    t = 0
+	t = 0
 
-    --debug object / namespace
-    debug = {t=0}   
-    
+	--debug object / namespace
+	debug = {t=0}   
+	
 	actors = {}
-    local l = levels[LEVEL_N]
-    world_x = l[1]
-    world_y = l[2]
-    world_w = l[3]
-    world_h = l[4]
+	local l = levels[LEVEL_N]
+	world_x = l[1]
+	world_y = l[2]
+	world_w = l[3]
+	world_h = l[4]
 
 	init_actor_data()
 
 	player = spawn_player()
 	sofa = spawn_sofa(SOFA_X, SOFA_Y)
 
-    make_camera()
+	make_camera()
 
-    info_string = '🅾️/z jump\n❎/x glide'
-    info_x = player.x*8-16
-    info_y = player.y*8-16
-    music_playing = PLAY_MUSIC
+	info_string = '🅾️/z jump\n❎/x glide'
+	info_x = player.x*8-16
+	info_y = player.y*8-16
 
-    make_menu()
 
-    pal(ALT_COLORS,1)
+
+	music_playing = PLAY_MUSIC
+
+	make_menu()
+
+	pal(ALT_COLORS,1)
 end
 
 
 function clear_cell(x, y)
-    --straight up copied from jelpi
-    local val0 = mget(x-1,y)
-    local val1 = mget(x+1,y)
-    if ((x>world_x and val0 == 0) or (x<world_x+world_w-1 and val1 == 0)) then
-        mset(x,y,0)
-    elseif (not fget(val1,1)) then
-        mset(x,y,val1)
-    elseif (not fget(val0,1)) then
-        mset(x,y,val0)
-    else
-        mset(x,y,0)
-    end
+	--straight up copied from jelpi
+	local val0 = mget(x-1,y)
+	local val1 = mget(x+1,y)
+	if ((x>world_x and val0 == 0) or (x<world_x+world_w-1 and val1 == 0)) then
+		mset(x,y,0)
+	elseif (not fget(val1,1)) then
+		mset(x,y,val1)
+	elseif (not fget(val0,1)) then
+		mset(x,y,val0)
+	else
+		mset(x,y,0)
+	end
 end
 
 
 function make_menu()
-    menuitem( 1, '', music_toggle)
-    update_music()
+	menuitem( 1, '', music_toggle)
+	update_music()
+
+	linear_umbrella = true
+	menuitem( 2, '', umbrella_toggle)
+	update_umbrella()
 end
 
 
 function music_toggle()
-    music_playing = not music_playing
-    update_music()
-    return true
+	music_playing = not music_playing
+	update_music()
+	return true
+end
+
+
+function umbrella_toggle()
+	linear_umbrella = not linear_umbrella
+	update_umbrella()
+	return true
 end
 
 
@@ -74,25 +88,38 @@ end
 
 
 function update_music()
-    if music_playing then
-        music(MUSIC, MUSIC_FADE_IN)
-        menuitem( 1, 'music: on', music_toggle)
-    else
-        music(-1)
-        menuitem( 1, 'music: off', music_toggle)
-    end
+	local title
+	if music_playing then
+		title = 'music: on'
+		music(MUSIC, MUSIC_FADE_IN)
+	else
+		title = 'music: off'
+		music(-1)
+	end
+	menuitem( 1, title, music_toggle)
+end
+
+
+function update_umbrella()
+	local title
+	if linear_umbrella then
+		title = 'umbrella: linear'
+	else
+		title = 'umbrella: quadr.'
+	end
+	menuitem( 2, title, umbrella_toggle)
 end
 
 
 function _update60()
 	debug.t += 1
-    if FREEZE and not btnp(🅾️,1) then return end
-    if debug.t % SLOWDOWN ~= 0 then return end
+	if FREEZE and not btnp(🅾️,1) then return end
+	if debug.t % SLOWDOWN ~= 0 then return end
 
 	update_input()
 
 	for a in all(actors) do a:update() end
-    update_camera()
+	update_camera()
 
 	--debug.dx1 = sofa.dx
 	collisions()
@@ -104,13 +131,13 @@ function _update60()
 	--debug.cx, debug.cy  = get_collision_direction(player, sofa)
 	--debug.sofa_coll = aabb(player, sofa)
 
-    --debug.camera = tostr(camera_x.pos)..'  '..tostr(camera_y.pos)
+	--debug.camera = tostr(camera_x.pos)..'  '..tostr(camera_y.pos)
 end
 
 
 function snap8(val, shift)
-    shift = shift or 0
-    return flr(8*(val+shift)+.5) * .125 - shift
+	shift = shift or 0
+	return flr(8*(val+shift)+.5) * .125 - shift
 end
 
 
@@ -147,7 +174,7 @@ end
 
 function _draw()
 	if FREEZE and not btnp(🅾️,1) then return end
-    if debug.t % SLOWDOWN ~= 0 then return end
+	if debug.t % SLOWDOWN ~= 0 then return end
 	
 	--background
 	cls(BG)

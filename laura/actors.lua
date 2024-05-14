@@ -155,7 +155,7 @@ function update_player(a)
 	end
 
 	--strafing
-	if a.gliding then
+	if a.gliding and a.dy >= a.u_v then
 		update_gliding(a)
 	else
 		update_walking(a)
@@ -190,7 +190,6 @@ function update_player(a)
 	a.f_x = a.f_x > 0 and max(0, a.f_x - a.f_vx) or min(0, a.f_x + a.f_vx)
 
 	if not a.standing then
-		--1 going up, 2 going down
 		a.frame = a.dy < a.ddy and 17 or 18
 		if (a.u_t > 0) a.frame += 16
 		a.f_t = 4;
@@ -253,36 +252,47 @@ end
 
 
 function update_gliding(a)
-	--[[
-	if(btn(⬅️) and not btn(➡️))then
-		a.u_d = -1
-	elseif(btn(➡️) and not btn(⬅️))then
-		a.u_d = 1
-	else
-		a.u_d = 0
-	end
-	--]]
 
-	a.u_d = input_x
-
-	--only apply drag when descending too fast
-	if(a.dy < a.u_v)return
+	-- vertical movement
 
 	--speed difference
 	if(not a.u_diff)a.u_diff = a.dy - a.u_v
-
-	--player looks in the movement direction
-	if(a.dx != 0)a.d = sgn(a.dx)
-
-	--player looks in the acceleration direction
-	--if(a.u_d != 0)a.d = a.u_d
-
-	a.dx += a.u_ddx * a.u_d
-
-	a.dx -= sgn(a.dx) * a.dx * a.dx * a.u_drag_x
-	
-	a.u_diff *= a.u_friction
 	a.dy = a.u_v + a.u_diff
+	a.u_diff *= a.u_friction
+
+	-- horzontal movement			
+	if linear_umbrella then
+		if(input_x != 0)a.d = input_x
+
+		a.strafing = input_x != 0
+
+		if (not a.strafing) return
+
+		local target, accel
+		if abs(a.dx) > 2/16 then
+			--> going too fast
+			target, accel = 2/16, 0.4/16
+		else
+			target, accel = 2/16, 0.2/16
+		end
+
+		debug.accel = accel
+
+		a.dx = approach(a.dx, input_x * target, accel)
+
+		debug.dx = a.dx
+	else
+		a.u_d = input_x
+
+		a.dx += a.u_ddx * a.u_d
+		a.dx -= sgn(a.dx) * a.dx * a.dx * a.u_drag_x
+
+		--player looks in the movement direction
+		if(a.dx != 0)a.d = sgn(a.dx)
+
+		--player looks in the acceleration direction
+		--if(a.u_d != 0)a.d = a.u_d
+	end
 end
 
 
@@ -317,14 +327,19 @@ function update_walking(a)
 
 	--[
 	-- running
-	local target, accel = 0, 0.2/16
+	local target, accel = 0, 0.2/16 --> air friction
 	if abs(a.dx) > 2/16 and a.strafing then
-		target,accel = 2/16, 0.1/16
+		--> going too fast
+		target, accel = 2/16, 0.1/16
 	elseif a.standing then
-		target, accel = 2/16, 0.8/16
+		--> on ground
+		target, accel = 2/16, 0.5/16
 	elseif a.strafing then
+		--> in air
 		target, accel = 2/16, 0.4/16
 	end
+
+	debug.accel = accel
 
 	a.dx = approach(a.dx, input_x * target, accel)
 

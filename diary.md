@@ -284,3 +284,6 @@ Kinda stuck with the movement, so I took a loot at the celeste 2 running and imp
 
 I took the input code from celeste 2 with global input variables.
 
+## Sam, 14.5.24
+
+Made the linear player acceleration a little smaller. Tried making the gliding linear and added a menu item to toggle between the two gliding modes.
