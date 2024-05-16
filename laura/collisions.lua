@@ -63,9 +63,8 @@ function collide_up(a, d)
 	end
 
 	a.dy=0
-	a.t_jump = 0
-	consume_jump_press()
-	--deb	ug.solid_up = true
+	a.jump_t = 0
+	--debug.solid_up = true
 end
 
 

@@ -287,3 +287,7 @@ I took the input code from celeste 2 with global input variables.
 ## Sam, 14.5.24
 
 Made the linear player acceleration a little smaller. Tried making the gliding linear and added a menu item to toggle between the two gliding modes.
+
+## Sam, 16.5.24
+
+Less is more. Made the horizontal umbrella movement linear and the jump height the same height each jump. I also made the jump only two blocks high. The couch is still buggy.

@@ -15,7 +15,7 @@ function init_actor_data()
 		vt1 = 0,
 		vt2 = 0,
 		vx = .125, -- walking speed
-		vy = .2, -- jump speed
+		vy = .3, -- jump speed
 		--umbrella
 		u_d        = 0,
 		u_v        = 0.125,
@@ -34,7 +34,7 @@ function init_actor_data()
 		--state
 		is_player  = true,
 		strafing   = false,
-		traction   = false, --> false when sliding on ground
+		traction   = false, --> false: no friction
 		jumped     = false,
 		descending = false,
 		gliding    = false,
@@ -79,6 +79,7 @@ function make_actor(k,x,y,d)
 		ddy      = .02, -- gravity
 		drag     = .02, --air drag
 		friction = .9, -- exponential deacceleration
+		traction = true,
 		d        = d or -1, --(looking direction)
 		--sprite
 		cx = 0,
@@ -129,6 +130,7 @@ end
 
 function update_player(a)
 	--umbrella
+
 	local u = false
 	if btn(❎) and not a.standing then
 		local y1 = a.y+a.dy-a.u_h
@@ -154,34 +156,72 @@ function update_player(a)
 		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
 	end
 
-	--strafing
+
+	--falling
+
 	if a.gliding and a.dy >= a.u_v then
-		update_gliding(a)
-	else
-		update_walking(a)
+		if(not a.u_diff)a.u_diff = a.dy - a.u_v
+		a.dy = a.u_v + a.u_diff
+		a.u_diff *= a.u_friction
 	end
 
+	--strafing
+
+	a.strafing = input_x != 0
+	if(input_x != 0)a.d = input_x
+
+	local target, accel = 0, 0.2/16 --> air friction
+	debug.state = "in air"
+	if abs(a.dx) > 2/16 and a.d == sgn(a.dx) then
+		--> going too fast (probably wont happen)
+		target, accel = 2/16, 0.1/16
+	elseif a.gliding then
+		--> gliding
+		debug.state = "gliding"
+		target, accel = 2/16, 0.2/16
+	elseif a.standing then
+		--> on ground
+		debug.state = "on ground"
+		target, accel = 2/16, 0.5/16
+	elseif a.strafing then
+		--> in air
+		debug.state = "strafing in air"
+		target, accel = 2/16, 0.4/16
+	end
+
+	if a.strafing or not a.gliding then
+		a.dx = approach(a.dx, input_x * target, accel)
+	end
+
+
 	--jumping
-	if btn(🅾️) then
+
+	debug.grace = input_jump_grace
+	if input_jump or input_jump_grace > 0 then
 		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
 			--begin (trying to) jump
 			a.dy = -a.vy
 			a.t_jump = JUMP_MAX
 		elseif not a.standing and a.t_jump > 0 then
 			a.t_jump -= 1
-			a.dy = -a.vy
+			--a.dy = -a.vy
 		end
 	else
-		consume_jump_press()
 		a.jumped = false
 		a.t_jump = 0
 	end
 
-	debug.in_jump = input_jump
-	debug.in_jump = input_jump
+
+	--> apply world collisions and velocities
+	update_actor(a)
+
 
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
+
+
+	--sprite
+
 
 	--walking animation
 	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.f_t % 4 != 0))
@@ -196,16 +236,13 @@ function update_player(a)
 	elseif a.walking then
 		local t = flr(a.f_t%4)
 		a.frame = a.u_t > 0 and 32+t or 16+t
-		a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
+		a.f_t = flr(4*a.f_t+1.5)/4 -->four ticks per frame
 		-- sfx
 		if (a.f_t % 4 == 3) sfx(SFX_STEP)
 	else
 		--standing still
 		a.frame = min(2, a.u_f_t)
 	end
-
-	--> apply world collisions and velocities
-	update_actor(a)
 end
 
 
@@ -227,18 +264,8 @@ function update_actor(a)
 	if(a.dx == 0)a.x = snap8(a.x,a.cx)
 	if(a.dy == 0)a.y = snap8(a.y,0)
 
-	--[[
 	--friction
-	--if not a.gliding and not a.strafing then
-	if not a.gliding then
-		if (a == player) debug.friction = true
-		a.dx *= a.friction
-		if (abs(a.dx) < MV) a.dx = 0
-	end
-	--]]
-
-	--friction
-	if (a.standing and not a.traction) a.dx *= a.friction
+	if (a.standing and a.traction) a.dx *= a.friction
 
 	--gravity
 	a.dy += a.ddy
@@ -248,139 +275,6 @@ function update_actor(a)
 
 	--timers
 	a.t += 1
-end
-
-
-function update_gliding(a)
-
-	-- vertical movement
-
-	--speed difference
-	if(not a.u_diff)a.u_diff = a.dy - a.u_v
-	a.dy = a.u_v + a.u_diff
-	a.u_diff *= a.u_friction
-
-	-- horzontal movement			
-	if linear_umbrella then
-		if(input_x != 0)a.d = input_x
-
-		a.strafing = input_x != 0
-
-		if (not a.strafing) return
-
-		local target, accel
-		if abs(a.dx) > 2/16 then
-			--> going too fast
-			target, accel = 2/16, 0.4/16
-		else
-			target, accel = 2/16, 0.2/16
-		end
-
-		debug.accel = accel
-
-		a.dx = approach(a.dx, input_x * target, accel)
-
-		debug.dx = a.dx
-	else
-		a.u_d = input_x
-
-		a.dx += a.u_ddx * a.u_d
-		a.dx -= sgn(a.dx) * a.dx * a.dx * a.u_drag_x
-
-		--player looks in the movement direction
-		if(a.dx != 0)a.d = sgn(a.dx)
-
-		--player looks in the acceleration direction
-		--if(a.u_d != 0)a.d = a.u_d
-	end
-end
-
-
-function update_gliding_old(a) --> unused
-	if(btn(⬅️) and not btn(➡️))then
-		a.u_d = -1
-	elseif(btn(➡️) and not btn(⬅️))then
-		a.u_d = 1
-	else
-		a.u_d = 0
-	end
-
-	--only apply drag when descending
-	if(a.dy <= 0)return
-
-	--player looks in the movement direction
-	if(a.dx != 0)a.d = sgn(a.dx)
-
-	--player looks in the acceleration direction
-	--if(a.u_d != 0)a.d = a.u_d
-
-	local r = a.u_t/U_DRAG_RESPONSE
-	a.dx += a.u_ddx * a.u_d * r - sgn(a.dx) * a.dx * a.dx * a.u_drag_x
-	a.dy -= a.dy * a.dy * a.u_drag_y * r
-end 
-
-
-function update_walking(a)
-	a.strafing = input_x != 0
-
-	if(input_x != 0)a.d = input_x
-
-	--[
-	-- running
-	local target, accel = 0, 0.2/16 --> air friction
-	if abs(a.dx) > 2/16 and a.strafing then
-		--> going too fast
-		target, accel = 2/16, 0.1/16
-	elseif a.standing then
-		--> on ground
-		target, accel = 2/16, 0.5/16
-	elseif a.strafing then
-		--> in air
-		target, accel = 2/16, 0.4/16
-	end
-
-	debug.accel = accel
-
-	a.dx = approach(a.dx, input_x * target, accel)
-
-	debug.dx = a.dx
-end
-
-
-function update_walking_old(a) --> unused
-	--side movement
-	if(btn(➡️) and not btn(⬅️))then
-		a.d = 1
-		a.strafing = true
-	elseif(btn(⬅️)and not btn(➡️))then
-		a.d = -1
-		a.strafing = true
-	else
-		a.r = 0
-		a.strafing = false
-	end
-
-	--debug.strafing = a.strafing
-
-	if a.strafing then
-		if a.d * a.dx > a.vx then
-			--going too fast
-			local dv = (a.dx - a.vx) * a.friction -- next velocity difference
-			a.dx = abs(dv) > E and a.vx + dv or a.vx
-			a.r = 1 --> no further acceleration needed
-		elseif a.d * a.dx < 0 then
-			--going the worng direction
-			a.r = 0
-		else
-			--> quadratic
-			a.dx = a.d * max(MV,a.vx * a.r * a.r)
-		end
-
-		a.r = min(a.r+1/DDXT, 1)
-	end
-
-	--going down platforms
-	a.descending = btn(⬇️) and a.standing
 end
 
 
@@ -408,7 +302,7 @@ function draw_player(a)
 
 	-- sprite flag 3 (green):
 	-- draw one pixel up
-	if (fget(fr,3)) y-=1
+	if (fget(fr,3) and a.standing) y-=1
 
 	--umbrella
 	if (a.u_f_t >= 3) then
@@ -421,56 +315,6 @@ function draw_player(a)
 
 
 	spr(fr, x,y,1,1,a.d<0)
-end
-
-
-function draw_player_old(a)
-	--front end logic
-
-	--recenter the spirte
-	if (a.f_x > 0) a.f_x = max(0, a.f_x - a.f_vx)
-	if (a.f_x < 0) a.f_x = min(0, a.f_x + a.f_vx)
-
-	--umbrella
-	local s = a.u_f_t >= 2 and SPR_U_WALKING or SPR_WALKING
-	if not a.standing then
-		if a.dy < a.ddy then --> going up
-			a.frame = a.strafing and s+1 or s
-		else --> going down
-			a.frame = a.strafing and s+2 or s+3
-		end
-		a.f_y = 0
-		a.f_t = a.strafing and 3 or 4
-	else
-		if not a.strafing and abs(a.dx) < a.vx and a.f_t%4 == 0 then
-			-- stop walking
-			a.frame = SPR_PLAYER + min(2, a.u_f_t)
-			a.f_y = 0
-			a.f_t = 0
-		else
-			local t = flr(a.f_t%4)
-			a.frame = s+t
-			a.f_y = a.walking_y[t+1]
-			a.f_t = abs(a.dx) > 1.25 * a.vx and flr(3*a.f_t+1.5)/3 or flr(4*a.f_t+1.5)/4 -->three or four ticks per frame
-			-- sfx
-			if (a.f_t % 4 == 3) sfx(SFX_STEP)
-		end
-	end
-
-	local x = 8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)+.5
-	local y = 8*(a.y+a.f_y-1)+.5
-	
-
-	--umbrella
-	if (a.u_f_t >= 3) then
-		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
-		local n = flr(a.u_f_t) - 2
-		
-		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
-			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
-	end
-
-	spr(a.frame, x, y,1,1,a.d<0)
 end
 
 
