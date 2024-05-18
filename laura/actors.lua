@@ -10,12 +10,9 @@ function init_actor_data()
 		w2 = 5/8 * .5, --> half width
 		h  = 1,
 		--motion
-		r  = 0,
-		vt = 0,
-		vt1 = 0,
-		vt2 = 0,
-		vx = .125, -- walking speed
-		vy = .3, -- jump speed
+		vx   = .125, -- walking speed
+		vy   = .3, -- jump speed
+		mass = 1,
 		--umbrella
 		u_d        = 0,
 		u_v        = 0.125,
@@ -24,8 +21,7 @@ function init_actor_data()
 		u_ddx      = U_DDX,
 		u_drag_x   = U_DRAG_X,
 		u_drag_y   = U_DRAG_Y,
-		u_t        = 0,
-		u_f_t      = 0,
+		t_u_frame  = 0,
 		u_h        = 1.375, --> height with umbrella
 		u_s_x      = {24, 24, 27, 25},
 		u_s_y      = {34, 37, 36, 32},
@@ -39,20 +35,22 @@ function init_actor_data()
 		descending = false,
 		gliding    = false,
 		walking    = false,
-		t_jump     = 0,
 		t_coyote   = 0,
 		--drawing
-		f_t       = 0,
+		t_frame   = 0,
 		f_y       = 0,
 		f_x       = 0,
 		f_vx      = .04,
 		--methods
 		update = update_player,
+		update_sprite = update_player_sprite,
 		draw   = draw_player
+		
 	},
 	[SPR_SOFA] = {
 		w2 = 1,
 		h  = 1,
+		mass = 2,
 		friction = 0.05,
 		is_furniture = true,
 		draw = draw_sofa
@@ -81,14 +79,22 @@ function make_actor(k,x,y,d)
 		friction = .9, -- exponential deacceleration
 		traction = true,
 		d        = d or -1, --(looking direction)
+		mass     = 1,
 		--sprite
-		cx = 0,
-		w2 = .5,
-		h  = 1,
+		cx  = 0,
+		w2  = .5,
+		h   = 1,
+		f_x = 0,
+		--pushing
+		pushing_actors = {},
+		pushing_actor = nil,
+		pushed_by_actor = nil,
+
 		--methods
-		update = update_actor,
-		draw   = draw_actor,
-		clear  = clear_cell
+		update        = update_actor,
+		update_sprite = function() end,
+		draw          = draw_actor,
+		clear         = clear_cell
 	}
 
 	for attr,v in pairs(actor_data[k]) do
@@ -145,70 +151,70 @@ function update_player(a)
 			a.gliding = true
 			a.traction = false
 		end
-		if (a.u_t < U_DRAG_RESPONSE) a.u_t += 1
-		if (a.u_f_t < U_OPEN_FRAMES) a.u_f_t += .5
-		if (a.u_f_t == 2) sfx(SFX_UMBRELLA_UP)
+		if (a.t_u_frame < U_OPEN_FRAMES) a.t_u_frame += .5
+		if (a.t_u_frame == 2) sfx(SFX_UMBRELLA_UP)
 	else
 		a.gliding = false
 		a.u_diff = nil
-		a.u_t = max(0, a.u_t-5)
-		if (a.u_f_t > 0) a.u_f_t -= .5
-		if (a.u_f_t == 4) sfx(SFX_UMBRELLA_DOWN)
+		if (a.t_u_frame > 0) a.t_u_frame -= .5
+		if (a.t_u_frame == 4) sfx(SFX_UMBRELLA_DOWN)
 	end
 
 
 	--falling
 
+	--[
 	if a.gliding and a.dy >= a.u_v then
 		if(not a.u_diff)a.u_diff = a.dy - a.u_v
 		a.dy = a.u_v + a.u_diff
 		a.u_diff *= a.u_friction
 	end
+	--]]
+
 
 	--strafing
 
 	a.strafing = input_x != 0
 	if(input_x != 0)a.d = input_x
 
-	local target, accel = 0, 0.2/16 --> air friction
-	debug.state = "in air"
-	if abs(a.dx) > 2/16 and a.d == sgn(a.dx) then
-		--> going too fast (probably wont happen)
-		target, accel = 2/16, 0.1/16
-	elseif a.gliding then
-		--> gliding
-		debug.state = "gliding"
-		target, accel = 2/16, 0.2/16
+	local accel = .1 --> airborn
+	if abs(a.dx) > a.vx and a.d == sgn(a.dx) then
+		accel = .05 --> going too fast (probably wont happen)
 	elseif a.standing then
-		--> on ground
-		debug.state = "on ground"
-		target, accel = 2/16, 0.5/16
+		accel = .25 --> on ground
+	elseif a.strafing and a.gliding then
+		accel = .1 --> strafing while gliding
 	elseif a.strafing then
-		--> in air
-		debug.state = "strafing in air"
-		target, accel = 2/16, 0.4/16
+		accel = .2 --> strafing while airborn
+	elseif a.gliding then
+		accel = 0 --> gliding
 	end
 
-	if a.strafing or not a.gliding then
-		a.dx = approach(a.dx, input_x * target, accel)
+
+	-- velocity
+
+	local mass_mul = 1 / a.mass
+	if a.pushing_actor then
+		mass_mul = 1 / (a.mass + a.pushing_actor.mass)
 	end
 
+	a.dx = approach(a.dx, input_x * a.vx, accel * a.vx) * mass_mul
+
+	b = a.pushing_actor
+	while b do
+		b.dx = a.dx
+		b = b.pushing_actor
+	end
 
 	--jumping
 
-	debug.grace = input_jump_grace
 	if input_jump or input_jump_grace > 0 then
 		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
 			--begin (trying to) jump
 			a.dy = -a.vy
-			a.t_jump = JUMP_MAX
-		elseif not a.standing and a.t_jump > 0 then
-			a.t_jump -= 1
-			--a.dy = -a.vy
 		end
 	else
 		a.jumped = false
-		a.t_jump = 0
 	end
 
 
@@ -218,31 +224,6 @@ function update_player(a)
 
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
-
-
-	--sprite
-
-
-	--walking animation
-	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.f_t % 4 != 0))
-
-	--recenter the spirte
-	a.f_x = a.f_x > 0 and max(0, a.f_x - a.f_vx) or min(0, a.f_x + a.f_vx)
-
-	if not a.standing then
-		a.frame = a.dy < a.ddy and 17 or 18
-		if (a.u_t > 0) a.frame += 16
-		a.f_t = 4;
-	elseif a.walking then
-		local t = flr(a.f_t%4)
-		a.frame = a.u_t > 0 and 32+t or 16+t
-		a.f_t = flr(4*a.f_t+1.5)/4 -->four ticks per frame
-		-- sfx
-		if (a.f_t % 4 == 3) sfx(SFX_STEP)
-	else
-		--standing still
-		a.frame = min(2, a.u_f_t)
-	end
 end
 
 
@@ -278,6 +259,33 @@ function update_actor(a)
 end
 
 
+function update_player_sprite(a)
+	--walking animation
+	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.t_frame % 4 != 0))
+
+	--recenter the spirte
+	a.f_x = approach(a.f_x, 0, a.f_vx)
+
+	if not a.standing then
+		a.frame = a.dy < a.ddy and 17 or 18
+		a.t_frame = 3
+		if (a.t_u_frame > 0) a.frame += 16
+	elseif a.walking then
+		if (a.t_frame % 4 == 3) sfx(SFX_STEP)
+		local t = flr(a.t_frame%4)
+		a.frame = a.t_u_frame > 0 and 32+t or 16+t
+		a.t_frame = (a.t_frame + 0.25) % 4--flr(4*a.t_frame+1.5)/4 -->four ticks per frame
+		-- sfx
+	else
+		--standing still
+		a.frame = min(2, a.t_u_frame)
+	end
+
+	debug.walk = a.walking
+	debug.ft4 = a.t_frame % 4
+end
+
+
 --[[
 
 actor position is center bottom
@@ -305,9 +313,9 @@ function draw_player(a)
 	if (fget(fr,3) and a.standing) y-=1
 
 	--umbrella
-	if (a.u_f_t >= 3) then
+	if (a.t_u_frame >= 3) then
 		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
-		local n = flr(a.u_f_t) - 2
+		local n = flr(a.t_u_frame) - 2
 		
 		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
 			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])

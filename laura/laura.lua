@@ -25,14 +25,13 @@ function _init()
 
 	player = spawn_player()
 	sofa = spawn_sofa(SOFA_X, SOFA_Y)
+	sofa2 = spawn_sofa(SOFA2_X, SOFA2_Y)
 
 	make_camera()
 
 	info_string = '🅾️/z jump\n❎/x glide'
 	info_x = player.x*8-16
 	info_y = player.y*8-16
-
-
 
 	music_playing = PLAY_MUSIC
 
@@ -61,10 +60,6 @@ end
 function make_menu()
 	menuitem( 1, '', music_toggle)
 	update_music()
-
-	linear_umbrella = true
-	menuitem( 2, '', umbrella_toggle)
-	update_umbrella()
 end
 
 
@@ -73,14 +68,6 @@ function music_toggle()
 	update_music()
 	return true
 end
-
-
-function umbrella_toggle()
-	linear_umbrella = not linear_umbrella
-	update_umbrella()
-	return true
-end
-
 
 -- *------------------*
 -- | update functions |
@@ -100,17 +87,6 @@ function update_music()
 end
 
 
-function update_umbrella()
-	local title
-	if linear_umbrella then
-		title = 'umbrella: linear'
-	else
-		title = 'umbrella: quadr.'
-	end
-	menuitem( 2, title, umbrella_toggle)
-end
-
-
 function _update60()
 	debug.t += 1
 	if FREEZE and not btnp(🅾️,1) then return end
@@ -121,17 +97,13 @@ function _update60()
 	for a in all(actors) do a:update() end
 	update_camera()
 
-	--debug.dx1 = sofa.dx
+	debug.dx = player.dx
+
 	collisions()
-	--debug.dx2 = sofa.dx
+
+	for a in all(actors) do a:update_sprite() end
+
 	update_spawning(player.x,player.y)
-
-	--if (player.gliding and player.standing) debug.both = true
-
-	--debug.cx, debug.cy  = get_collision_direction(player, sofa)
-	--debug.sofa_coll = aabb(player, sofa)
-
-	--debug.camera = tostr(camera_x.pos)..'  '..tostr(camera_y.pos)
 end
 
 

@@ -291,3 +291,11 @@ Made the linear player acceleration a little smaller. Tried making the gliding l
 ## Sam, 16.5.24
 
 Less is more. Made the horizontal umbrella movement linear and the jump height the same height each jump. I also made the jump only two blocks high. The couch is still buggy.
+
+## Sam, 18.5.24
+
+Cleaned up the code somewhat. Have been trying to get pushing to work. I could make the player the only accelerating thing in the game, but it feels restricting, so I'm making every actor push the same way. I'm wondering if the game should be more about moving stuff around than moving oneself.
+
+At some point my warning bells went off, but I was too stubborn. A universal pushing mechanic turned out to be a technical rabbit hole into which I dug myself deeper and deeper. I got myself out in the end but not without a fight with my inner perfectionist. The pushing of sofas now work without any noticeable bugs (limited testing) but you can only move one thing at a time. Pushing two sofas stops the player movement.
+
+I did do some sprites of the character pushing things to the side, but I don't think they'll be used.

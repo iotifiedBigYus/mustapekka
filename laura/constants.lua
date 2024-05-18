@@ -18,12 +18,13 @@ LEVEL_N    = 1
 -- | physics / physical constants |
 -- *------------------------------*
 
-SOFA_X = 14
+SOFA_X = 13
 SOFA_Y = 13
+SOFA2_X = 18
+SOFA2_Y = 13
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)
-U_DRAG_RESPONSE = 20
 U_OPEN_FRAMES = 6
 U_DDX = 0.005
 RUN_MAX = 8
@@ -81,6 +82,7 @@ SFX_UMBRELLA_UP = 61
 SFX_UMBRELLA_DOWN = 62
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
+FALL_SFX_V    = 0.1
 
 -- *---------*
 -- | sprites |
