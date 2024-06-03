@@ -10,8 +10,8 @@ function init_actor_data()
 		w2 = 5/8 * .5, --> half width
 		h  = 1,
 		--motion
-		vx   = .125, -- walking speed
-		vy   = .3, -- jump speed
+		walk_speed = .125, -- walking speed
+		jump_speed = .3, -- jump speed
 		mass = 1,
 		--umbrella
 		u_d        = 0,
@@ -37,7 +37,6 @@ function init_actor_data()
 		walking    = false,
 		t_coyote   = 0,
 		--drawing
-		t_frame   = 0,
 		f_y       = 0,
 		f_x       = 0,
 		f_vx      = .04,
@@ -54,6 +53,15 @@ function init_actor_data()
 		friction = 0.05,
 		is_furniture = true,
 		draw = draw_sofa
+	},
+	[SPR_DOG] = {
+		w2 = .375,
+		h  = .875,
+		walk_speed = .1875,
+		traction = false,
+		update = update_dog,
+		update_sprite = update_dog_sprite,
+		draw = draw_dog
 	}
 	}
 end
@@ -68,6 +76,7 @@ function make_actor(k,x,y,d)
 		k = k, --> sprite id of actor
 		standing = true,
 		frame = 0,
+		t_frame = 0,
 		t = 0,
 		--motion
 		x        = x,
@@ -94,7 +103,7 @@ function make_actor(k,x,y,d)
 		--methods
 		update        = update_actor,
 		update_sprite = function() end,
-		draw          = draw_actor,
+		draw          = function() end,
 		clear         = clear_cell
 	}
 
@@ -132,6 +141,11 @@ end
 
 function spawn_sofa(x,y)
 	return make_actor(SPR_SOFA,x,y,1)
+end
+
+
+function spawn_dog(x,y)
+	return make_actor(SPR_DOG,x,y,1)
 end
 
 
@@ -179,7 +193,7 @@ function update_player(a)
 	if(input_x != 0)a.d = input_x
 
 	local accel = .1 --> airborn
-	if abs(a.dx) > a.vx and a.d == sgn(a.dx) then
+	if abs(a.dx) > a.walk_speed and a.d == sgn(a.dx) then
 		accel = .05 --> going too fast (probably wont happen)
 	elseif a.standing then
 		accel = .25 --> on ground
@@ -199,7 +213,7 @@ function update_player(a)
 		mass_mul = 1 / (a.mass + a.pushing_actor.mass)
 	end
 
-	a.dx = approach(a.dx, input_x * a.vx, accel * a.vx) * mass_mul
+	a.dx = approach(a.dx, input_x * a.walk_speed, accel * a.walk_speed) * mass_mul
 
 	b = a.pushing_actor
 	while b do
@@ -212,7 +226,7 @@ function update_player(a)
 	if input_jump or input_jump_grace > 0 then
 		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
 			--begin (trying to) jump
-			a.dy = -a.vy
+			a.dy = -a.jump_speed
 		end
 	else
 		a.jumped = false
@@ -225,6 +239,42 @@ function update_player(a)
 
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
+end
+
+
+function update_dog(a)
+
+	local strafing_x = 0
+	if btn(0,1) then
+		strafing_x = -1
+	elseif btn(1,1) then
+		strafing_x = 1
+	end
+
+	debug.straf = strafing_x
+
+	--strafing
+
+	a.strafing = strafing_x != 0
+	if(strafing_x != 0)a.d = strafing_x
+
+	local accel = .1 --> airborn
+	if abs(a.dx) > a.walk_speed and a.d == sgn(a.dx) then
+		accel = .05 --> going too fast (probably wont happen)
+	elseif a.standing then
+		accel = .25 --> on ground
+	elseif a.strafing and a.gliding then
+		accel = .1 --> strafing while gliding
+	elseif a.strafing then
+		accel = .2 --> strafing while airborn
+	elseif a.gliding then
+		accel = 0 --> gliding
+	end
+
+	a.dx = approach(a.dx, strafing_x * a.walk_speed, accel * a.walk_speed)
+
+	--> apply world collisions and velocities
+	update_actor(a)
 end
 
 
@@ -262,7 +312,7 @@ end
 
 function update_player_sprite(a)
 	--walking animation
-	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.vx or a.t_frame % 4 != 0))
+	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.walk_speed or a.t_frame % 4 != 0))
 
 	--recenter the spirte
 	a.f_x = approach(a.f_x, 0, a.f_vx)
@@ -272,8 +322,8 @@ function update_player_sprite(a)
 		a.t_frame = 3
 		if (a.t_u_frame > 0) a.frame += 16
 	elseif a.walking then
-		if (a.t_frame % 4 == 3) sfx(SFX_STEP)
-		local t = flr(a.t_frame%4)
+		if (a.t_frame == 3) sfx(SFX_STEP)
+		local t = flr(a.t_frame)
 		a.frame = a.t_u_frame > 0 and 32+t or 16+t
 		a.t_frame = (a.t_frame + 0.25) % 4--flr(4*a.t_frame+1.5)/4 -->four ticks per frame
 		-- sfx
@@ -281,10 +331,24 @@ function update_player_sprite(a)
 		--standing still
 		a.frame = min(2, a.t_u_frame)
 	end
-
-	debug.walk = a.walking
-	debug.ft4 = a.t_frame % 4
 end
+
+
+function update_dog_sprite(a)
+	--walking animation
+	a.walking = (a.standing and (a.strafing or abs(a.dx) >= a.walk_speed or a.t_frame % 4 != 0))
+
+	if a.walking then
+		--if (a.t_frame % 4 == 3) sfx(SFX_STEP)
+		local t = flr(a.t_frame)
+		a.frame = 16+t
+		a.t_frame = flr(3*a.t_frame+1.5)/3 % 4 -->four ticks per frame
+	else
+		--standing still
+		a.frame = 0
+	end
+end
+
 
 
 --[[
@@ -338,11 +402,15 @@ function draw_player(a)
 		end
 	end
 
+	--draw body
 	spr(fr, x,y,1,1,a.d<0)
 
 	--palette reset
-	pal()
-	pal(ALT_COLORS,1)
+	if a.fade < 1 then
+		for i = 1,4 do
+			pal(c[i][5], c[i][5], 0)
+		end
+	end
 end
 
 
@@ -352,6 +420,18 @@ function draw_sofa(a)
 
 	spr(a.k, x,   y)
 	spr(a.k, x+8, y,1,1,true)
+end
+
+
+function draw_dog(a)
+	local fr = a.k + a.frame
+
+	local x = .5+8*(a.x-.5)
+	local y = .5+8*(a.y-1)
+
+	spr(fr, x, y,1,1,a.d<0)
+
+	if( a.walking) spr(a.k+1, x+a.d, y+1,1,1,a.d<0)
 end
 
 

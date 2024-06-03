@@ -22,6 +22,8 @@ SOFA_X = 13
 SOFA_Y = 13
 SOFA2_X = 18
 SOFA2_Y = 13
+DOG_X = 8
+DOG_Y = 13
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)
@@ -97,3 +99,5 @@ FRAME_WALK      = 16
 FRAME_UMBR_WALK = 32
 
 SPR_SOFA = 68
+
+SPR_DOG = 100

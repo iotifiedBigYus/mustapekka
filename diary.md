@@ -302,4 +302,6 @@ I did do some sprites of the character pushing things to the side, but I don't t
 
 ## Sam, 3.6.24
 
-Added a fade function to the player that might be used when going up stairs. I'm pretty unsure of what the game is going to play, but the umbrella mechanic might have to go. Its either going to be some kind of a puzzle game, or a game with enemies (like dogs and parrots - pets) that hinder the player. The core idea is still to get to your missing cat.
+Added a function that fades the player to black. It might be used when going up stairs. Also added a dog with running a animation. It looks kinda goody but it will do.
+
+I'm pretty unsure of what the game is going to play, but the umbrella mechanic might have to go. Its either going to be some kind of a puzzle game, or a game with enemies (like dogs and parrots - pets) that hinder the player. The core idea is still to get to your missing cat.

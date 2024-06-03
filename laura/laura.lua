@@ -26,6 +26,7 @@ function _init()
 	player = spawn_player()
 	sofa = spawn_sofa(SOFA_X, SOFA_Y)
 	sofa2 = spawn_sofa(SOFA2_X, SOFA2_Y)
+	dog = spawn_dog(DOG_X, DOG_Y)
 
 	make_camera()
 
@@ -104,13 +105,6 @@ function _update60()
 	for a in all(actors) do a:update_sprite() end
 
 	update_spawning(player.x,player.y)
-
-
-	if btn(3,1) then
-		player.fade = approach(player.fade,0,.2)
-	else
-		player.fade = approach(player.fade,1,.2)
-	end
 end
 
 
