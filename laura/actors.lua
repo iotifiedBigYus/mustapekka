@@ -85,6 +85,7 @@ function make_actor(k,x,y,d)
 		w2  = .5,
 		h   = 1,
 		f_x = 0,
+		fade = 1,
 		--pushing
 		pushing_actors = {},
 		pushing_actor = nil,
@@ -321,8 +322,27 @@ function draw_player(a)
 			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
 	end
 
+	--fade to black
+	if a.fade < 1 do
+		local n = flr(a.fade * 4 + 1.5)
+
+		local c = {
+			{0,1,5,15,10},
+			{0,2,1,6,15},
+			{0,2,2,14,9},
+			{0,0,0,2,1}
+		}
+
+		for i = 1,4 do
+			pal(c[i][5], c[i][n], 0)
+		end
+	end
 
 	spr(fr, x,y,1,1,a.d<0)
+
+	--palette reset
+	pal()
+	pal(ALT_COLORS,1)
 end
 
 

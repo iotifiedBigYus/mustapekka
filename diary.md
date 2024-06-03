@@ -299,3 +299,7 @@ Cleaned up the code somewhat. Have been trying to get pushing to work. I could m
 At some point my warning bells went off, but I was too stubborn. A universal pushing mechanic turned out to be a technical rabbit hole into which I dug myself deeper and deeper. I got myself out in the end but not without a fight with my inner perfectionist. The pushing of sofas now work without any noticeable bugs (limited testing) but you can only move one thing at a time. Pushing two sofas stops the player movement.
 
 I did do some sprites of the character pushing things to the side, but I don't think they'll be used.
+
+## Sam, 3.6.24
+
+Added a fade function to the player that might be used when going up stairs. I'm pretty unsure of what the game is going to play, but the umbrella mechanic might have to go. Its either going to be some kind of a puzzle game, or a game with enemies (like dogs and parrots - pets) that hinder the player. The core idea is still to get to your missing cat.

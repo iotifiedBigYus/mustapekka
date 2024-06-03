@@ -104,6 +104,13 @@ function _update60()
 	for a in all(actors) do a:update_sprite() end
 
 	update_spawning(player.x,player.y)
+
+
+	if btn(3,1) then
+		player.fade = approach(player.fade,0,.2)
+	else
+		player.fade = approach(player.fade,1,.2)
+	end
 end
 
 
@@ -137,6 +144,28 @@ end
 
 function approach(x, target, max_delta)
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
+end
+
+
+function fade_out(a)
+
+	dpal={0,1,1, 2,1,13,6,
+	   4,4,9,3, 13,1,13,14}
+	
+	
+					
+	-- palette fade
+	for i=0,40 do
+		for j=1,15 do
+			col = j
+			for k=1,((i+(j%5))/4) do
+				col=dpal[col]
+			end
+			pal(j,col,1)
+		end
+		flip()
+	end
+	
 end
 
 -- *-------------------*

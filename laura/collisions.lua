@@ -73,7 +73,7 @@ function collide_down(a)
 	local xr = a.x+a.w2+a.dx-E
 	local nudges = a.dx == 0 and NUDGES_CENTER or {0}
 
-	if a.descending then
+	if a.descending and (solid(xl, y1) or solid(xr, y1)) then
 		--> look for platforms nearby nudge player above them
 		for _,n in ipairs(nudges) do
 			if platform(xl+n, y1) and platform(xr+n, y1) then
