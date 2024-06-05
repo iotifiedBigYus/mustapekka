@@ -117,10 +117,13 @@ function collide_down(a)
 end
 
 
+function is_outside(x,y)
+	return x < world_x or x >= world_x+world_w or y < world_y or y >= world_y+world_h
+end
+
+
 function solid(x, y)
-	if (x < world_x or x >= world_x+world_w) then
-		return true
-	end
+	if (is_outside(x,y) )return true
 				
 	local val = mget(x, y)
 	return fget(val, 1)
@@ -405,4 +408,45 @@ function check_pushing(a1, a2)
 			end
 		end
 	end
+end
+
+
+function dda(x1, y1, x2, y2)
+	--digital differential analysis
+	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
+	local map_x = flr(x1)
+	local map_y = flr(y1)
+	local dx = x2 - x1
+	local dy = y2 - y1
+	local sx = sqrt(1 + dy / dx * dy / dx)
+	local sy = sqrt(1 + dx / dy * dx / dy)
+	local step_x = dx < 0 and -1 or 1
+	local step_y = dy < 0 and -1 or 1
+	local ray_x = dx < 0 and (x1 - map_x) * sx or (map_x + 1 - x1) * sx
+	local ray_y = dy < 0 and (y1 - map_y) * sy or (map_y + 1 - y1) * sy
+	local dist = 0
+	local len = sqrt(dx * dx + dy * dy)
+	local found = false
+
+	while not found and dist < len do
+		if sx != 0 and (sy == 0 or ray_x < ray_y) then
+			map_x += step_x
+			dist = ray_x
+			ray_x += sx
+		else
+			map_y += step_y
+			dist = ray_y
+			ray_y += sy
+		end
+
+		if solid(map_x, map_y) then
+			found = true
+		end
+	end
+	
+	local blocked = found and dist / len < 1
+	local bx = blocked and x1 + dist / len * dx or x2
+	local by = blocked and y1 + dist / len * dy or y2
+
+	return blocked, bx, by
 end

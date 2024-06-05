@@ -57,6 +57,10 @@ function init_actor_data()
 	[SPR_DOG] = {
 		w2 = .375,
 		h  = .875,
+		eye_pos_x =  .25,
+		eye_pos_y = -.75,
+		eye_global_x = 0,
+		eye_global_y = 0,
 		walk_speed = .1875,
 		traction = false,
 		update = update_dog,
@@ -251,8 +255,6 @@ function update_dog(a)
 		strafing_x = 1
 	end
 
-	debug.straf = strafing_x
-
 	--strafing
 
 	a.strafing = strafing_x != 0
@@ -275,6 +277,10 @@ function update_dog(a)
 
 	--> apply world collisions and velocities
 	update_actor(a)
+
+	--eye
+	a.eye_global_x = a.x + a.d * a.eye_pos_x
+	a.eye_global_y = a.y + a.eye_pos_y
 end
 
 
@@ -426,12 +432,14 @@ end
 function draw_dog(a)
 	local fr = a.k + a.frame
 
-	local x = .5+8*(a.x-.5)
-	local y = .5+8*(a.y-1)
+	local x = pos8(a.x-.5)--.5+8*(a.x-.5)
+	local y = pos8(a.y-1)
 
 	spr(fr, x, y,1,1,a.d<0)
 
 	if( a.walking) spr(a.k+1, x+a.d, y+1,1,1,a.d<0)
+
+	pset(pos8(a.eye_global_x), pos8(a.eye_global_y), 8)
 end
 
 
