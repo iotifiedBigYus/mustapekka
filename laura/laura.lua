@@ -189,11 +189,6 @@ function _draw()
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
 
-	--eye line
-	local f, tx, ty = dda(dog.eye_global_x, dog.eye_global_y, player.x, player.y-.5)
-	debug.found = f
-	line(pos8(dog.eye_global_x), pos8(dog.eye_global_y), pos8(tx), pos8(ty), 8)
-
 	--pset(camera_x.pos+.5, camera_y.pos+.5,7)
 
 	--debug

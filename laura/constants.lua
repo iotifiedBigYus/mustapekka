@@ -24,6 +24,8 @@ SOFA2_X = 18
 SOFA2_Y = 13
 DOG_X = 8
 DOG_Y = 13
+DOG_SIGHT_DIST = 10
+DOG_TARGET_TIME = 40
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)
@@ -82,6 +84,7 @@ SFX_STEP      = 63
 SFX_JUMP      = nil--62
 SFX_UMBRELLA_UP = 61
 SFX_UMBRELLA_DOWN = 62
+SFX_BARK      = 60
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
 FALL_SFX_V    = 0.1

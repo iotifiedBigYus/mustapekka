@@ -308,4 +308,11 @@ I'm pretty unsure of what the game is going to play, but the umbrella mechanic m
 
 ## Sam, 5.6.24
 
-Added eyesight using digital differential analysis (DDA). Taking inspiration from games like Robbery Bob, the dog will react when it sees the player. 
+Added eye sight using digital differential analysis (DDA). Taking inspiration from games like Robbery Bob, the dog will react when it sees the player. 
+
+## Sam, 6.6.24
+
+The dog now runs towards the player if it sees it. I took a bark sound effect made by Gruber from the pico8 game secret santa.
+
+TODO:
+- the dog should not notice the player if the slope of the sight line is big.
