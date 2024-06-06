@@ -10,7 +10,11 @@ __lua__
 #include laura.lua
 #include camera.lua
 #include actors.lua
+#include player.lua
+#include dog.lua
 #include collisions.lua
+
+
 
 __gfx__
 0000000066666665666666656555555c6555555ccccccccccccccccc42424242424242424242424244444444eeeeeeee00000000000000000000000000000000

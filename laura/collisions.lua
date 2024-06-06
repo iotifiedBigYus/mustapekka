@@ -444,7 +444,7 @@ function dda(x1, y1, x2, y2)
 		end
 	end
 	
-	local blocked = found and dist / len < 1
+	local blocked = found and dist < len
 	local bx = blocked and x1 + dist / len * dx or x2
 	local by = blocked and y1 + dist / len * dy or y2
 
