@@ -316,3 +316,8 @@ The dog now runs towards the player if it sees it. I took a bark sound effect ma
 
 TODO:
 - the dog should not notice the player if the slope of the sight line is big.
+
+
+## Sam, 22.6.24
+
+Made a mountain in the background and added slope to the dog target code.

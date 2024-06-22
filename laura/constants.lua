@@ -26,6 +26,7 @@ DOG_X = 8
 DOG_Y = 13
 DOG_SIGHT_DIST = 10
 DOG_TARGET_TIME = 40
+DOG_SIGHT_SLOPE = 2
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)
@@ -92,6 +93,9 @@ FALL_SFX_V    = 0.1
 -- *---------*
 -- | sprites |
 -- *---------*
+ 
+BACKGROUND_X = 0
+BACKGROUND_Y = 48
 
 SPR_PLAYER          = 64
 SPR_WALKING        = 80--65

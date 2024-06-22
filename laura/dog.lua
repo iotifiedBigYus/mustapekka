@@ -47,8 +47,10 @@ function update_dog(a)
 	local accel = .1 --> airborn
 	if abs(a.dx) > a.walk_speed and a.d == sgn(a.dx) then
 		accel = .05 --> going too fast (probably wont happen)
+	elseif a.standing and a.has_target then
+		accel = .25 --> on ground with target
 	elseif a.standing then
-		accel = .25 --> on ground
+		accel = .05 --> on ground
 	elseif strafing then
 		accel = .2 --> strafing while airborn
 	end
@@ -58,30 +60,9 @@ function update_dog(a)
 	--> apply world collisions and velocities
 	update_actor(a)
 
-	--eye sight
-	a.eye_global_x = a.x + a.d * a.eye_pos_x
-	a.eye_global_y = a.y + a.eye_pos_y
-
-	local x1, y1 = a.eye_global_x, a.eye_global_y
-	local x2, y2 = player.x, player.y-.5
-	local dx = x2 -x1
-	local dy = y2 -y1
-
-	--eye line
-	local blocked, dist, tx, ty, dir = dda(x1,y1,x2,y2)
-
-
-	local target_prev = a.has_target
-	a.has_target = not blocked and dist < DOG_SIGHT_DIST
-	if a.has_target and not target_prev then
-		a.d = dir
-	end
-
-	a.target_x, a.target_y = tx, ty
-	a.target_dir_x = dir
+	update_target(a)
 
 	if a.has_target then
-
 		if a.t_target == 30 then
 			sfx(SFX_BARK)
 		elseif a.t_target == 0 then
@@ -95,44 +76,60 @@ function update_dog(a)
 end
 
 
-function dda(x1, y1, x2, y2)
+function update_target(a)
+	--eye sight
+	a.eye_global_x = a.x + a.d * a.eye_pos_x
+	a.eye_global_y = a.y + a.eye_pos_y
+
+	local x1, y1 = a.eye_global_x, a.eye_global_y
+	local x2, y2 = player.x, player.y-.5
+	local dx = x2 - x1
+	local dy = y2 - y1
+	local slope = dy / dx
+
+	if abs(slope) > DOG_SIGHT_SLOPE then
+		a.has_target = false
+		return
+	end
+
 	--digital differential analysis
 	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
 	local map_x = flr(x1)
 	local map_y = flr(y1)
-	local dx = x2 - x1
-	local dy = y2 - y1
-	local sx = sqrt(1 + dy / dx * dy / dx)
-	local sy = sqrt(1 + dx / dy * dx / dy)
 	local step_x = sgn(dx)
 	local step_y = sgn(dy)
-	local ray_x = dx < 0 and (x1 - map_x) * sx or (map_x + 1 - x1) * sx
-	local ray_y = dy < 0 and (y1 - map_y) * sy or (map_y + 1 - y1) * sy
+	local sec_x = sqrt(1 + dy / dx * dy / dx) --secant
+	local sec_y = sqrt(1 + dx / dy * dx / dy) --cosecant
+	local ray_x = dx < 0 and (x1 - map_x) * sec_x or (map_x + 1 - x1) * sec_x
+	local ray_y = dy < 0 and (y1 - map_y) * sec_y or (map_y + 1 - y1) * sec_y
 	local dist = 0
 	local len = sqrt(dx * dx + dy * dy)
-	local found = false
+	local blocked = false
 
-	while not found and dist < len do
-		if sx != 0 and (sy == 0 or ray_x < ray_y) then
+	while not blocked and dist < len do
+		if sec_x != 0 and (sec_y == 0 or ray_x < ray_y) then
 			map_x += step_x
 			dist = ray_x
-			ray_x += sx
+			ray_x += sec_x
 		else
 			map_y += step_y
 			dist = ray_y
-			ray_y += sy
+			ray_y += sec_y
 		end
 
 		if solid(map_x, map_y) then
-			found = true
+			blocked = true
 		end
 	end
 	
-	local blocked = found and dist < len
-	local bx = blocked and x1 + dist / len * dx or x2
-	local by = blocked and y1 + dist / len * dy or y2
+	blocked = blocked and dist < len
+	a.has_target = not blocked and (a.has_target or dist < DOG_SIGHT_DIST)
+	if (not a.has_target) return
 
-	return blocked, min(dist, len), bx, by, step_x
+	a.target_x = blocked and x1 + dist / len * dx or x2
+	a.target_y = blocked and y1 + dist / len * dy or y2
+	a.target_dir_x = step_x
+	a.d = step_x
 end
 
 
