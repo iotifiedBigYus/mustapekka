@@ -68,22 +68,6 @@ function make_actor(k,x,y,d)
 end
 
 
-function spawn_player()
-	local a = make_actor(SPR_PLAYER, world_x+.5, world_y+1, 1)
-
-	for x=world_x,world_x+world_w-1 do
-		for y=world_y,world_y+world_h-1 do
-			if mget(x,y) == SPR_PLAYER then
-				a.x = x+0.5+a.cx
-				a.y = y+1
-
-				clear_cell(x,y)
-			end
-		end
-	end
-	return a
-end
-
 
 function spawn_actor(k,x,y,d)
 	return make_actor(k,x,y,d)
