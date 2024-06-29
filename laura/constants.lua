@@ -25,11 +25,11 @@ SOFA2_X = 18
 SOFA2_Y = 13
 DOG_X = 8
 DOG_Y = 13
-DOG_SIGHT_HEIGHT = 5
+DOG_SIGHT_HEIGHT = 4.5
 DOG_SIGHT_WIDTH = 20
 DOG_SIGHT_DIST = 20
 DOG_TARGET_TIME = 20
-DOG_SIGHT_SLOPE = 2
+DOG_SIGHT_SLOPE = 5
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)
