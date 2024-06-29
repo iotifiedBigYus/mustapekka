@@ -27,8 +27,21 @@ function init_dog_data()
 end
 
 
-function spawn_dog(x,y)
-	return make_actor(SPR_DOG,x,y,1)
+function spawn_dogs()
+	local spr = SPR_DOG
+	local dogs = {}
+
+	for x=world_x,world_x+world_w-1 do
+		for y=world_y,world_y+world_h-1 do
+			if mget(x,y) == spr then
+				local a = make_actor(spr, x+.5, y+1, -1)
+				add(dogs, a)
+				clear_cell(x,y)
+			end
+		end
+	end
+
+	return dogs
 end
 
 
@@ -41,7 +54,6 @@ function update_dog(a)
 
 	--strafing
 
-	local strafing = strafing_x != 0
 	if(a.strafing_x != 0)a.d = a.strafing_x
 
 	local accel = .1 --> airborn
@@ -51,7 +63,7 @@ function update_dog(a)
 		accel = .25 --> on ground with target
 	elseif a.standing then
 		accel = .05 --> on ground
-	elseif strafing then
+	elseif strafing_x != 0 then
 		accel = .2 --> strafing while airborn
 	end
 
@@ -63,9 +75,7 @@ function update_dog(a)
 	update_target(a)
 
 	if a.has_target then
-		if a.t_target == 30 then
-			sfx(SFX_BARK)
-		elseif a.t_target == 0 then
+		if a.t_target == 0 then
 			a.strafing_x = a.target_dir_x
 		end
 		a.t_target = max(a.t_target - 1)
@@ -161,7 +171,7 @@ function draw_dog(a)
 
 	--eye line
 
-	pset(pos8(a.eye_global_x), pos8(a.eye_global_y), 8)
+	--pset(pos8(a.eye_global_x), pos8(a.eye_global_y), 8)
 
 	--debug.tx = a.target_x
 

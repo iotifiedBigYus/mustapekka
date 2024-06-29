@@ -26,7 +26,7 @@ function _init()
 	player = spawn_player()
 	sofa = spawn_sofa(SOFA_X, SOFA_Y)
 	sofa2 = spawn_sofa(SOFA2_X, SOFA2_Y)
-	dog = spawn_dog(DOG_X, DOG_Y)
+	dogs = spawn_dogs()
 
 	make_camera()
 
@@ -216,9 +216,7 @@ function _draw()
 	if debug.t % SLOWDOWN ~= 0 then return end
 	
 	--background
-	cls(BG)
-	camera(0,0)
-	map(BACKGROUND_X, BACKGROUND_Y, 0, 0)
+	draw_background(camera_x.pos-63.5, camera_y.pos-63.5)
 
 
 	--foreground
@@ -246,3 +244,9 @@ function _draw()
 	end
 end
 
+
+function draw_background(x, y)
+	cls(BG)
+	camera(0,0)
+	map(BACKGROUND_X, BACKGROUND_Y, 0, 0)
+end

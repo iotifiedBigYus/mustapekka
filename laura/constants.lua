@@ -12,7 +12,7 @@ SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 VERSION    = '0.5.0' --version number
 MAX_ACTORS = 128 --maximum amount of actors
-LEVEL_N    = 1
+LEVEL_N    = 4
 
 -- *------------------------------*
 -- | physics / physical constants |
@@ -25,7 +25,7 @@ SOFA2_Y = 13
 DOG_X = 8
 DOG_Y = 13
 DOG_SIGHT_DIST = 20
-DOG_TARGET_TIME = 30
+DOG_TARGET_TIME = 20
 DOG_SIGHT_SLOPE = 2
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
@@ -96,6 +96,8 @@ FALL_SFX_V    = 0.1
  
 BACKGROUND_X = 0
 BACKGROUND_Y = 48
+BACKGROUND_W = 20
+BACKGROUND_H = 20
 
 SPR_PLAYER          = 64
 SPR_WALKING        = 80--65
