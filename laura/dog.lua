@@ -96,6 +96,7 @@ function update_target(a)
 	local dx = x2 - x1
 	local dy = y2 - y1
 	local slope = dy / dx
+	local len = sqrt(dx * dx + dy * dy)
 
 	if abs(slope) > DOG_SIGHT_SLOPE then
 		a.has_target = false
@@ -103,6 +104,16 @@ function update_target(a)
 	end
 	
 	if abs(dy) > DOG_SIGHT_HEIGHT then
+		a.has_target = false
+		return
+	end
+
+	if abs(dx) > DOG_SIGHT_WIDTH then
+		a.has_target = false
+		return
+	end
+
+	if len > DOG_SIGHT_DIST then
 		a.has_target = false
 		return
 	end
@@ -119,7 +130,6 @@ function update_target(a)
 	local ray_x = dx < 0 and (x1 - map_x) * sec_x or (map_x + 1 - x1) * sec_x
 	local ray_y = dy < 0 and (y1 - map_y) * sec_y or (map_y + 1 - y1) * sec_y
 	local dist = 0
-	local len = sqrt(dx * dx + dy * dy)
 	local blocked = false
 
 	while not blocked and dist < len do
