@@ -101,6 +101,12 @@ function update_target(a)
 		a.has_target = false
 		return
 	end
+	
+	if abs(dy) > DOG_SIGHT_HEIGHT then
+		a.has_target = false
+		return
+	end
+
 
 	--digital differential analysis
 	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
@@ -169,15 +175,7 @@ function draw_dog(a)
 
 	if( a.walking) spr(a.k+1, x+a.d, y+1,1,1,a.d<0)
 
-	--eye line
-
-	--pset(pos8(a.eye_global_x), pos8(a.eye_global_y), 8)
-
-	--debug.tx = a.target_x
-
-	if a.has_target then
-		--line(pos8(a.eye_global_x), pos8(a.eye_global_y), pos8(a.target_x), pos8(a.target_y), 11)
-	else
-		--line(pos8(a.eye_global_x), pos8(a.eye_global_y), pos8(a.target_x), pos8(a.target_y), 8)
+	if SIGTHLINES and a.has_target then
+		line(pos8(a.eye_global_x), pos8(a.eye_global_y), pos8(a.target_x), pos8(a.target_y),11)
 	end
 end

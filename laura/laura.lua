@@ -214,14 +214,20 @@ end
 function _draw()
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
+
+	--camera coords
+	local cx = camera_x.pos-63.5
+	local cy = camera_y.pos-63.5
 	
 	--background
-	draw_background(camera_x.pos-63.5, camera_y.pos-63.5)
+	draw_background(cx, cy)
+
+	debug.cx = cx
 
 
 	--foreground
 	pal(12,0,0) --> blue drawn as black
-	camera(camera_x.pos-63.5, camera_y.pos-63.5)
+	camera(cx, cy)
 	color(7)
 	print(info_string, info_x, info_y)
 	map()
