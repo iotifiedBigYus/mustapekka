@@ -91,21 +91,33 @@ function collide_down(a)
 		--hit solid
 		hit = true
 		while not (solid(xl, a.y+E) or solid(xr, a.y+E)) do a.y += E end
-	elseif (platform(xl, y1) or platform(xr, y1))
-	and ceil(a.y) == flr(y1)
-	and not a.descending then
+	elseif (platform(xl, y1) or platform(xr, y1)) and ceil(a.y) == (y1) and not a.descending then
 		--hit platform
+		debug.plat = true
 		hit = true
 		while not(platform(xl, a.y+E) or platform(xr, a.y+E)) do a.y += E end
 		a.descending=false
 	end
 
 	if hit then
-		if not a.standing then
+		if not a.standing and a.bounce > 0 then
+			local coll_speed = sqrt(a.dy * a.dy - 2 * a.ddy * (a.y - (y1)))
+			local bounce_time = 1 - (coll_speed - a.dy) / a.ddy
+			local bounce_speed = a.ddy * bounce_time - a.bounce * coll_speed
+
+			if abs(bounce_speed) > MIN_BOUNCE_SPEED then
+				a.dy = bounce_speed
+				a.y = a.ddy * bounce_time * bounce_time - a.bounce * coll_speed * bounce_time + flr(y1)
+			else
+				a.dy = 0
+				a.y = flr(y1)
+				a.standing=true
+			end
+		else
+			a.dy = 0
+			a.y = flr(y1)
 			a.standing=true
-			--if (a.dy > FALL_SFX_V) sfx(SFX_STEP)
 		end
-		a.dy = 0
 	else
 		--coyote time
 		if (not a.t_coyote) return
@@ -236,6 +248,7 @@ end
 function collide_event(a1, a2)
 	local x, y, overlap = get_collision_direction(a1,a2)
 
+	--[[
 	if y < 0 and overlap >= 0 and a2.standing then
 		while aabb(a1,a2) do
 			a1.y += y * E
@@ -245,6 +258,7 @@ function collide_event(a1, a2)
 		a1.standing = true
 		a1.dy = 0
 	end
+	--]]
 
 	x, y, overlap = get_collision_direction(a1,a2)
 
@@ -322,7 +336,7 @@ function collide_event(a1, a2)
 
 			-- bridge builder
 			if (a2.k==99) then
-				local x,y=flr(a2.x)+.5,flr(a2.y+0.5)
+				local x,y=(a2.x)+.5,(a2.y+0.5)
 				for xx=-1,1 do
 				if (mget(x+xx,y)==0) then
 					local a=make_actor(53,x+xx,y+1)
@@ -370,7 +384,7 @@ end
 
 
 function check_pushing(a1, a2)
-	--[[]]
+	--[[
 	local x, y, overlap = get_collision_direction(a1,a2)
 
 	if a1.is_player and a2.is_furniture then
@@ -408,4 +422,5 @@ function check_pushing(a1, a2)
 			end
 		end
 	end
+	--]]
 end

@@ -13,7 +13,7 @@ HITBOX     = false
 SIGTHLINES = true
 VERSION    = '0.5.0' --version number
 MAX_ACTORS = 128 --maximum amount of actors
-LEVEL_N    = 4
+LEVEL_N    = 1
 
 -- *------------------------------*
 -- | physics / physical constants |
@@ -53,6 +53,7 @@ NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
 AUTO_JUMP     = false
+MIN_BOUNCE_SPEED  = 0.001 --minimum bounce speed
 
 -- *---------------*
 -- | color palette |

@@ -222,8 +222,6 @@ function _draw()
 	--background
 	draw_background(cx, cy)
 
-	debug.cx = cx
-
 
 	--foreground
 	pal(12,0,0) --> blue drawn as black

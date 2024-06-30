@@ -14,6 +14,7 @@ function init_player_data()
 	a.walk_speed = .125 -- walking speed
 	a.jump_speed = .3 -- jump speed
 	a.mass = 1
+	a.bounce = 0
 	--umbrella
 	a.u_d        = 0
 	a.u_v        = 0.125

@@ -42,6 +42,7 @@ function make_actor(k,x,y,d)
 	a.traction = true
 	a.d        = d or -1 --(looking direction)
 	a.mass     = 1
+	a.bounce   = 0
 	--sprite
 	a.cx  = 0
 	a.w2  = .5
@@ -80,6 +81,9 @@ end
 
 
 function update_actor(a)
+	--first half of gravity
+	a.dy += .5 * a.ddy
+
 	-- x movement 
 	collide_side(a)
 	-- y movement
@@ -100,11 +104,11 @@ function update_actor(a)
 	--friction
 	if (a.standing and a.traction) a.dx *= a.friction
 
-	--gravity
-	a.dy += a.ddy
-
 	--air resistance
 	a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
+
+	--second half of gravity
+	a.dy += .5 * a.ddy
 
 	--timers
 	a.t += 1
