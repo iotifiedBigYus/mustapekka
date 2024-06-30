@@ -42,6 +42,8 @@ function make_actor(k,x,y,d)
 	a.traction = true
 	a.d        = d or -1 --(looking direction)
 	a.mass     = 1
+	a.bounce   = 0
+	a.min_bounce_speed = 1
 	--sprite
 	a.cx  = 0
 	a.w2  = .5

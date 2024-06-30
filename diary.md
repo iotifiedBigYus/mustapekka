@@ -321,3 +321,39 @@ TODO:
 ## Sam, 22.6.24
 
 Made a mountain in the background and added slope to the dog target code.
+
+## Sam, 29.6.24
+
+Sidner is now on the team. We tweaked the dog enemy and Sidner started making a level. A possible direction for the game is to have the dog appear in every level and making the levels increasingly clever / harder. To outwit the dog the player would find gadgets.
+
+## Sam, 30.6.24
+
+While working on bounce during collision I found an interesting thing. The bounce is quantized using the ratio of the speed after collision compared to the speed before (coefficient of restitution). When a thing hits the ground it is snapped to the ground and given an upwards velocity timed by bounce. When a thing is dropped, the jump height should decrease exponentially, but it instead approaches a set height and speed during takeoff. Here are the values I found.
+
+| bounce | approaches speed  |
+|--------|-------------------|
+| 1      |            0.2691 |
+| 0.95   |            0.1843 |
+| 0.9    |            0.1052 |
+| 0.85   |            0.0757 |
+| 0.8    |            0.0556 |
+| 0.75   |            0.0458 |
+| 0.7    |            0.047  |
+| 0.65   |            0.0363 |
+| 0.6    |            0.0375 |
+| 0.55   |            0.0258 |
+| 0.5    |            0.0267 |
+| 0.45   |            0.0276 |
+| 0.4    |            0.0143 |
+| 0.35   |            0.0148 |
+| 0.3    |            0.0154 |
+| 0.25   |            0.016  |
+| 0.2    |            0.0166 |
+| 0.15   |            0.0174 |
+| 0.1    |            0.0182 |
+| 0.05   |            0.02   |
+| 0      |            0.02   |
+
+The wonkiness is most likely due to air resistance. 0.02 is the gravitational acceleration.
+
+I never learn. I once again got myself into a technical rabbit hole. My thought was that using integration you could get the exact position and velocity after a bounce. I did the math and implemented it in code, but it does not line up, so I'm going to skip it and go with the _stop and flip speed_ approach.

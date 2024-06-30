@@ -53,6 +53,7 @@ NUDGES_CENTER = {0,-.125,.125,-.25,.25,-.375,.375}
 NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
 AUTO_JUMP     = false
+MIN_BOUNCE_SPEED = 0.2
 
 -- *---------------*
 -- | color palette |

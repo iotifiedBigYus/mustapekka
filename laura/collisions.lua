@@ -101,11 +101,13 @@ function collide_down(a)
 	end
 
 	if hit then
-		if not a.standing then
-			a.standing=true
-			--if (a.dy > FALL_SFX_V) sfx(SFX_STEP)
+		a.y = ceil(a.y)
+		if a.bounce > 0 and abs(a.dy) > a.min_bounce_speed then
+			a.dy = -a.bounce * a.dy
+		else
+			a.dy = 0
+			a.standing = true
 		end
-		a.dy = 0
 	else
 		--coyote time
 		if (not a.t_coyote) return
