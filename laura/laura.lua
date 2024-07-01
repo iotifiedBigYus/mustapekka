@@ -140,6 +140,8 @@ end
 
 
 function approach(x, target, max_delta)
+	target = target or 0
+	max_delta = max_delta or 1
 	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
 end
 

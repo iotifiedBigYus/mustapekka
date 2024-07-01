@@ -11,17 +11,23 @@
 function collide_side(a)
 	--> true if touching wall
 	local d = a.dx ~= 0 and sgn(a.dx) or a.d
-	local x1 = a.x + a.dx + d * a.w2
-	local xe = d > 0 and 0 or -E --> stay outside edge
-
-	if not (solid(x1+xe,a.y-E) or solid(x1+xe,a.y-a.h)) then
+	local e = d > 0 and 0 or -E --> stay outside edge
+	local x1 = a.x + a.dx + d * a.w2 + e
+	
+	if not (solid(x1,a.y-E) or solid(x1,a.y-a.h)) then
 		return
 	end
 
 	if a.dx != 0 then
-		for y1 = snap8(a.y), snap8(a.y+a.dy), sgn(a.dy)*0.125 do
-			if not (solid(x1+xe,y1-E) or solid(x1+xe,y1-a.h)) then
-				a.dy = y1 - a.y
+		local y1 = a.dy > 0 and  flr(8*(a.y+a.dy))*.125 or ceil(8*(a.y+a.dy))*.125
+		local y0 = a.dy > 0 and ceil(8* a.y      )*.125 or  flr(8* a.y      )*.125
+		local step = sgn(a.dy)
+		for yy = y0, y1, step*.125 do
+			if not (solid(x1,yy-E) or solid(x1,yy-a.h)) then
+				if (solid(x1,yy-E+step) or solid(x1,yy-a.h+step)) then
+					a.y = yy
+					a.dy = 0
+				end
 				return
 			end
 		end
@@ -29,10 +35,16 @@ function collide_side(a)
 
 	-- hit wall
 	-- search for contact point
-	while not (solid(a.x+d*(a.w2+E)+xe, a.y-E) or solid(a.x+d*(a.w2+E)+xe, a.y-a.h)) do
+	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
 		a.x += sgn(a.dx) * E
 	end
-	a.dx = 0 --> do this after contact point, because sgn(0) is not 0
+
+	if a.bounce > 0 then
+		a.dx = -a.bounce * a.dx
+		sfx(a.bounce_sfx)
+	else
+		a.dx = 0
+	end
 end
 
 
@@ -56,13 +68,32 @@ function collide_up(a, d)
 			return
 		end
 	end
+
 	--> hit
+
+	-- search up for collision point
+	while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
+		a.y = a.y - E
+	end
+	
+	--a.y = flr(a.y - a.h) + a.h
+
+	if a.bounce > 0 then
+		a.dy = -a.bounce * a.dy
+		sfx(a.bounce_sfx)
+	else
+		a.dy = 0
+	end
+
+	--[[
+
 	-- search up for collision point
 	while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
 		a.y = a.y - E
 	end
 
 	a.dy=0
+	--]]
 	--debug.solid_up = true
 end
 
@@ -71,39 +102,29 @@ function collide_down(a)
 	local y1 = a.y+a.dy
 	local xl = a.x-a.w2+a.dx
 	local xr = a.x+a.w2+a.dx-E
-	local nudges = a.dx == 0 and NUDGES_CENTER or {0}
-
-	if a.descending and (solid(xl, y1) or solid(xr, y1)) then
-		--> look for platforms nearby nudge player above them
-		for _,n in ipairs(nudges) do
-			if platform(xl+n, y1) and platform(xr+n, y1) then
-				a.x   += n
-				a.f_x -= n
-				xl    += n
-				xr    += n
-				break
-			end
-		end
-	end
 
 	local hit = false
 	if(solid(xl, y1) or solid(xr, y1))then
 		--hit solid
 		hit = true
-		while not (solid(xl, a.y+E) or solid(xr, a.y+E)) do a.y += E end
-	elseif (platform(xl, y1) or platform(xr, y1))
-	and ceil(a.y) == flr(y1)
-	and not a.descending then
+		-- search down for collision point
+		while (not (solid(xl, a.y+E) or solid(xr, a.y+E))) do
+			a.y = a.y + E
+		end
+	elseif ceil(a.y) == flr(y1) and (platform(xl, y1) or platform(xr, y1)) and not a.descending then
 		--hit platform
 		hit = true
-		while not(platform(xl, a.y+E) or platform(xr, a.y+E)) do a.y += E end
-		a.descending=false
+		a.descending = false
+		-- search down for collision point
+		while (not (platform(xl, a.y+E) or platform(xr, a.y+E))) do
+			a.y = a.y + E
+		end
 	end
 
 	if hit then
-		a.y = ceil(a.y)
 		if a.bounce > 0 and abs(a.dy) > a.min_bounce_speed then
 			a.dy = -a.bounce * a.dy
+			sfx(a.bounce_sfx)
 		else
 			a.dy = 0
 			a.standing = true
@@ -111,7 +132,8 @@ function collide_down(a)
 	else
 		--coyote time
 		if (not a.t_coyote) return
-		if (a.t_coyote > 0) a.t_coyote -= 1
+		a.t_coyote = approach(a.t_coyote)
+		--if (a.t_coyote > 0) a.t_coyote -= 1
 		if (a.standing) a.t_coyote = COYOTE
 
 		a.standing = false
@@ -152,8 +174,8 @@ function collisions()
 
 	for i=1,#actors do
 		for j=i+1,#actors do
-			check_pushing(actors[i],actors[j])
-			check_pushing(actors[j],actors[i])
+			--check_pushing(actors[i],actors[j])
+			--check_pushing(actors[j],actors[i])
 		end
 	end
 end
@@ -169,75 +191,10 @@ function collide(a1, a2)
 end
 
 
-function aabb_gravity(a1, a2)
-	--axis-aligned bounding box collision
-	--using strict interior and gravity
-	return (
-		a1.x - a1.w2         < a2.x + a2.w2 and
-		a1.x + a1.w2         > a2.x - a2.w2 and
-		a1.y + a1.ddy - a1.h < a2.y         and
-		a1.y + a1.ddy        > a2.y - a2.h
-	)
-end
-
-
-function aabb_vel(a1, a2)
-	--axis-aligned bounding box collision
-	--using strict interior and applying the horizontal velocity of a1
-	return (
-		a1.x + a1.dx - a1.w2 < a2.x + a2.w2 and
-		a1.x + a1.dx + a1.w2 > a2.x - a2.w2 and
-		a1.y - a1.h          < a2.y         and
-		a1.y                 > a2.y - a2.h
-	)
-end
-
-
-function aabb(a1, a2)
-	--axis-aligned bounding box collision
-	--using strict interior
-	return (
-		a1.x - a1.w2 < a2.x + a2.w2 and
-		a1.x + a1.w2 > a2.x - a2.w2 and
-		a1.y - a1.h  < a2.y         and
-		a1.y         > a2.y - a2.h
-	)
-end
-
-
-function get_collision_direction(a1, a2)
-	--source: https://stackoverflow.com/questions/5062833/detecting-the-direction-of-a-collision
-
-	local b = a2.y - (a1.y - a1.h)
-	local t = a1.y - (a2.y - a2.h) --> this identifier needs to be local
-	local l = a1.x + a1.w2 - (a2.x - a2.w2)
-	local r = a2.x + a2.w2 - (a1.x - a1.w2)
-
-	--debug.top = (t < b and t < l and t < r )
-	--debug.bottom = (b < t and b < l and b < r)
-	--debug.left = (l < r and l < t and l < b)
-	--debug.right = (r < l and r < t and r < b )
-
-	if (t < b and t < l and t < r) return  0, -1, t --top collision
-	if (b < t and b < l and b < r) return  0,  1, b --bottom collision
-	if (l < r and l < t and l < b) return -1,  0, l --left collision
-	if (r < l and r < t and r < b) return  1,  0, r --right collision
-	return 0, 0, 0
-end
-
-
-function nudge_pushing(a, nudge_x, nudge_y)
-	a.x += nudge_x
-	a.y += nudge_y
-	for b in all(a.pushing_actors) do
-		nudge_pushing(b, nudge_x, nudge_y)
-	end
-end
-
-
 function collide_event(a1, a2)
 	local x, y, overlap = get_collision_direction(a1,a2)
 
+	--[[
 	if y < 0 and overlap >= 0 and a2.standing then
 		while aabb(a1,a2) do
 			a1.y += y * E
@@ -247,6 +204,7 @@ function collide_event(a1, a2)
 		a1.standing = true
 		a1.dy = 0
 	end
+	--]]
 
 	x, y, overlap = get_collision_direction(a1,a2)
 
@@ -371,6 +329,11 @@ function collide_event(a1, a2)
 end
 
 
+-- *---------*
+-- | pushing |
+-- *---------*
+
+
 function check_pushing(a1, a2)
 	--[[]]
 	local x, y, overlap = get_collision_direction(a1,a2)
@@ -409,5 +372,71 @@ function check_pushing(a1, a2)
 				a1.pushed_by_actor.dx = 0
 			end
 		end
+	end
+end
+
+
+function aabb_gravity(a1, a2)
+	--axis-aligned bounding box collision
+	--using strict interior and gravity
+	return (
+		a1.x - a1.w2         < a2.x + a2.w2 and
+		a1.x + a1.w2         > a2.x - a2.w2 and
+		a1.y + a1.ddy - a1.h < a2.y         and
+		a1.y + a1.ddy        > a2.y - a2.h
+	)
+end
+
+
+function aabb_vel(a1, a2)
+	--axis-aligned bounding box collision
+	--using strict interior and applying the horizontal velocity of a1
+	return (
+		a1.x + a1.dx - a1.w2 < a2.x + a2.w2 and
+		a1.x + a1.dx + a1.w2 > a2.x - a2.w2 and
+		a1.y - a1.h          < a2.y         and
+		a1.y                 > a2.y - a2.h
+	)
+end
+
+
+function aabb(a1, a2)
+	--axis-aligned bounding box collision
+	--using strict interior
+	return (
+		a1.x - a1.w2 < a2.x + a2.w2 and
+		a1.x + a1.w2 > a2.x - a2.w2 and
+		a1.y - a1.h  < a2.y         and
+		a1.y         > a2.y - a2.h
+	)
+end
+
+
+function get_collision_direction(a1, a2)
+	--source: https://stackoverflow.com/questions/5062833/detecting-the-direction-of-a-collision
+
+	local b = a2.y - (a1.y - a1.h)
+	local t = a1.y - (a2.y - a2.h) --> this identifier needs to be local
+	local l = a1.x + a1.w2 - (a2.x - a2.w2)
+	local r = a2.x + a2.w2 - (a1.x - a1.w2)
+
+	--debug.top = (t < b and t < l and t < r )
+	--debug.bottom = (b < t and b < l and b < r)
+	--debug.left = (l < r and l < t and l < b)
+	--debug.right = (r < l and r < t and r < b )
+
+	if (t < b and t < l and t < r) return  0, -1, t --top collision
+	if (b < t and b < l and b < r) return  0,  1, b --bottom collision
+	if (l < r and l < t and l < b) return -1,  0, l --left collision
+	if (r < l and r < t and r < b) return  1,  0, r --right collision
+	return 0, 0, 0
+end
+
+
+function nudge_pushing(a, nudge_x, nudge_y)
+	a.x += nudge_x
+	a.y += nudge_y
+	for b in all(a.pushing_actors) do
+		nudge_pushing(b, nudge_x, nudge_y)
 	end
 end

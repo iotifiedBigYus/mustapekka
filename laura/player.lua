@@ -70,6 +70,7 @@ end
 function update_player(a)
 	--umbrella
 
+	--[[
 	local u = false
 	if btn(❎) and not a.standing then
 		local y1 = a.y+a.dy-a.u_h
@@ -78,6 +79,7 @@ function update_player(a)
 
 		u = not (solid(xl, y1) or solid(xr, y1))
 	end
+	--]]
 
 	if u then
 		if (not a.gliding) then
@@ -151,12 +153,28 @@ function update_player(a)
 	end
 
 
+	--balls
+
+	if input_alt_pressed == 1 then
+		throw_ball(a)
+	end
+
 	--> apply world collisions and velocities
 	update_actor(a)
 
 
 	--going down platforms
 	a.descending = btn(⬇️) and a.standing
+end
+
+
+function throw_ball(a)
+	ball = spawn_ball(
+		a.x+BALL_POS_X*a.d,
+		a.y+BALL_POS_Y,
+		a.dx+BALL_SPEED_X*a.d,
+		a.dy+BALL_SPEED_Y
+	)
 end
 
 

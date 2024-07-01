@@ -13,17 +13,16 @@ function init_actor_data()
 		friction = 0.05,
 		is_furniture = true,
 		draw = draw_sofa
-	}
+	},
+	[SPR_BALL] = init_ball_data()
 	}
 end
 
 
 function make_actor(k,x,y,d)
 	if (count(actors) >= MAX_ACTORS) then
-		return
+		return {}
 	end
-
-	debug.actors_n = count(actors)
 
 	local a = {}
 	a.k = k --> sprite id of actor
@@ -66,7 +65,16 @@ function make_actor(k,x,y,d)
 
 	add(actors, a)
 
+	debug.actors_n = count(actors)
+
 	return a
+end
+
+
+function delete_actor(a)
+	del(actors, a)
+
+	debug.actors_n = count(actors)
 end
 
 
@@ -100,7 +108,10 @@ function update_actor(a)
 	if(a.dy == 0)a.y = snap8(a.y,0)
 
 	--friction
-	if (a.standing and a.traction) a.dx *= a.friction
+	if a.standing and a.traction then
+		a.dx *= a.friction
+		if (abs(a.dx) < MIN_SPEED) a.dx = 0
+	end
 
 	--gravity
 	a.dy += a.ddy
@@ -131,8 +142,8 @@ actor position is center bottom
 
 
 function draw_sofa(a)
-	local x = 8*(a.x-1)+.5
-	local y = 8*(a.y-1)+.5
+	local x = pos8(a.x-1)
+	local y = pos8(a.y-1)
 
 	spr(a.k, x,   y)
 	spr(a.k, x+8, y,1,1,true)

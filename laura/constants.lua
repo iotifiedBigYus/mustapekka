@@ -8,11 +8,11 @@
 
 DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 1 --frames per tick
+SLOWDOWN   = 0 --frames per tick
 HITBOX     = false
 SIGTHLINES = true
 VERSION    = '0.5.0' --version number
-MAX_ACTORS = 128 --maximum amount of actors
+MAX_ACTORS = 30 --maximum amount of actors
 LEVEL_N    = 4
 
 -- *------------------------------*
@@ -40,9 +40,10 @@ DDXT = 6--8--ticks to accelerate
 JUMP_MAX = 5 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
 JUMP_GRACE = 4
+ALT_GRACE = 4
 E = .01 --epsilon (a small number used when finding edges)
 FVX = .04 --sprite recentering speed
-MV = .04 --minimum velocity
+MIN_SPEED = .04 --minimum velocity
 --MDV = .02 --minimum difference in velocity (for camera)
 CAMERA_F = 0.01 --camera dynamics
 CAMERA_Z = 0.8
@@ -54,6 +55,12 @@ NUDGES_RIGHT  = {0, .125, .25, .375, 0.5}
 NUDGES_LEFT   = {0,-.125,-.25,-.375,-0.5}
 AUTO_JUMP     = false
 MIN_BOUNCE_SPEED = 0.2
+
+BALL_POS_X = 3/8
+BALL_POS_Y = -.5
+BALL_SPEED_X = .05
+BALL_SPEED_Y = -.15
+BALL_LIFETIME = 300
 
 -- *---------------*
 -- | color palette |
@@ -90,6 +97,7 @@ SFX_JUMP      = nil--62
 SFX_UMBRELLA_UP = 61
 SFX_UMBRELLA_DOWN = 62
 SFX_BARK      = 60
+SFX_BALL_BOUNCE = 59
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
 FALL_SFX_V    = 0.1

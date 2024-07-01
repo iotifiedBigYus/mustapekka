@@ -9,6 +9,8 @@ input_jump = false
 input_jump_pressed = 0
 input_jump_grace = 0
 input_alt = false
+input_alt_pressed = 0
+input_alt_grace = 0
 axis_x_value = 0
 axis_x_turned = false
 
@@ -41,19 +43,27 @@ function update_input()
 		input_x = 0
 	end
 
-	-- input_jump
+	-- jump
 	local jump = btn(🅾️)
-	input_jump_grace = max(0, input_jump_grace - 1)
+	input_jump_grace = approach(input_jump_grace)
 	if jump and not input_jump then		
-		input_jump_pressed = 4
+		input_jump_pressed += 1
 		input_jump_grace = JUMP_GRACE
 	else
-		--input_jump_pressed = jump and max(0, input_jump_pressed - 1) or 0
+		input_jump_pressed = 0
 	end
 	input_jump = jump
 
 	-- alternative
-	input_alt = btn(❎)
+	local alt = btn(❎)
+	input_alt_grace = approach(input_alt_grace)
+	if alt then
+		input_alt_pressed += 1
+		input_alt_grace = ALT_GRACE
+	else
+		input_alt_pressed = 0
+	end
+	input_alt = alt
 end
 
 

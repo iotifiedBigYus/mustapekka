@@ -78,7 +78,8 @@ function update_dog(a)
 		if a.t_target == 0 then
 			a.strafing_x = a.target_dir_x
 		end
-		a.t_target = max(a.t_target - 1)
+		a.t_target = approach(a.t_target)
+		--a.t_target = max(a.t_target - 1)
 	else
 		a.t_target = DOG_TARGET_TIME
 		a.strafing_x = 0
@@ -88,11 +89,20 @@ end
 
 function update_target(a)
 	--eye sight
-	a.eye_global_x = a.x + a.d * a.eye_pos_x
-	a.eye_global_y = a.y + a.eye_pos_y
+	a.eye_global_x = a.x
+	a.eye_global_y = a.y - .5 * a.h
 
 	local x1, y1 = a.eye_global_x, a.eye_global_y
+	
+	--> choose player if no ball is present
 	local x2, y2 = player.x, player.y-.5
+	for a2 in all(actors) do
+		if a2.k == SPR_BALL then
+			x2, y2 = a2.x, a2.y-.5*a2.h
+			break
+		end
+	end
+
 	local dx = x2 - x1
 	local dy = y2 - y1
 	local slope = dy / dx
