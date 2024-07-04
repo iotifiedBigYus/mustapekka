@@ -1,7 +1,7 @@
 -- jelpi demo
 -- by zep
 
-level=1
+level=2
 
 num_players = 1
 corrupt_mode = false

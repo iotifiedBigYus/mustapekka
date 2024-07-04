@@ -357,3 +357,14 @@ While working on bounce during collision I found an interesting thing. The bounc
 The wonkiness is most likely due to air resistance. 0.02 is the gravitational acceleration.
 
 I never learn. I once again got myself into a technical rabbit hole. My thought was that using integration you could get the exact position and velocity after a bounce. I did the math and implemented it in code, but it does not line up, so I'm going to skip it and go with the _stop and flip speed_ approach.
+
+## Sam, 2.6.24
+
+The player now throws tennis balls instead of gliding with the umbrella. The dog prefers to chase the balls, but a ball has a limited life time so it eventually goes after the player.
+
+There was a bug when climbing onto a 2m block. The player would get a boost due to the game nudging the player onto the edge. The game now only nudges if there is a 1m opening and it will stop vertical speed when nudging.
+
+
+## Sam, 4.6.24
+
+Started on some forest graphics.
