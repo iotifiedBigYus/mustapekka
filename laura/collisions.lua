@@ -37,7 +37,7 @@ function collide_side(a)
 	--> hit wall
 	-- search for contact point
 	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
-		a.x += sgn(a.speed_x) * E
+		a.x += d * E
 	end
 
 	if a.bounce > 0 then
