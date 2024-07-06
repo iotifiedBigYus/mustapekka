@@ -93,8 +93,8 @@ function update_actor(a)
 	-- x movement 
 	collide_side(a)
 	-- y movement
-	if(a.dy < 0)collide_up(a)
-	if(a.dy >= 0)collide_down(a)
+	collide_up(a)
+	collide_down(a)
 
 	--jumping
 	if(a.dy < 0) a.jumped = true

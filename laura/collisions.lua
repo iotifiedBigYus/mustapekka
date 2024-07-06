@@ -9,7 +9,6 @@
 
 
 function collide_side(a)
-	--> true if touching wall
 	local d = a.dx ~= 0 and sgn(a.dx) or a.d
 	local e = d > 0 and 0 or -E --> stay outside edge
 	local x1 = a.x + a.dx + d * a.w2 + e
@@ -24,7 +23,9 @@ function collide_side(a)
 		local step = sgn(a.dy)
 		for yy = y0, y1, step*.125 do
 			if not (solid(x1,yy-E) or solid(x1,yy-a.h)) then
+				--> opening
 				if (solid(x1,yy-E+step) or solid(x1,yy-a.h+step)) then
+					--> opening is a gap
 					a.y = yy
 					a.dy = 0
 				end
@@ -33,7 +34,7 @@ function collide_side(a)
 		end
 	end
 
-	-- hit wall
+	--> hit wall
 	-- search for contact point
 	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
 		a.x += sgn(a.dx) * E
@@ -48,23 +49,25 @@ function collide_side(a)
 end
 
 
-function collide_up(a, d)
+function collide_up(a)
+	if (a.dy > 0) return --> going down
+
 	local y1 = a.y+a.dy-a.h
 	local xl = snap8(a.x+a.dx-a.w2)
 	local xr = snap8(a.x+a.dx+a.w2)-E
+
 	local nudges
 	if a.standing then nudges = {0}
 	elseif a.dx > 0 then nudges = NUDGES_RIGHT
 	elseif a.dx < 0 then nudges = NUDGES_LEFT
 	else nudges = NUDGES_CENTER end
 
-	for _,n in ipairs(nudges) do
+	for n in all(nudges) do
 		if not (solid(xl+n, y1) or solid(xr+n, y1)) then
 			a.standing = false
 			a.t_coyote = 0
 			a.x += n
 			a.f_x -= n
-			--debug.solid_up = false
 			return
 		end
 	end
@@ -75,8 +78,6 @@ function collide_up(a, d)
 	while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
 		a.y = a.y - E
 	end
-	
-	--a.y = flr(a.y - a.h) + a.h
 
 	if a.bounce > 0 then
 		a.dy = -a.bounce * a.dy
@@ -84,39 +85,30 @@ function collide_up(a, d)
 	else
 		a.dy = 0
 	end
-
-	--[[
-
-	-- search up for collision point
-	while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
-		a.y = a.y - E
-	end
-
-	a.dy=0
-	--]]
-	--debug.solid_up = true
 end
 
 
 function collide_down(a)
+	if (a.dy < 0) return --> going up
+
 	local y1 = a.y+a.dy
-	local xl = a.x-a.w2+a.dx
-	local xr = a.x+a.w2+a.dx-E
+	local xl = a.x+a.dx-a.w2
+	local xr = a.x+a.dx+a.w2-E
 
 	local hit = false
 	if(solid(xl, y1) or solid(xr, y1))then
-		--hit solid
+		--> hit solid
 		hit = true
 		-- search down for collision point
-		while (not (solid(xl, a.y+E) or solid(xr, a.y+E))) do
+		while not solid(xl, a.y) and not solid(xr, a.y) do
 			a.y = a.y + E
 		end
 	elseif ceil(a.y) == flr(y1) and (platform(xl, y1) or platform(xr, y1)) and not a.descending then
-		--hit platform
+		--> hit platform
 		hit = true
 		a.descending = false
 		-- search down for collision point
-		while (not (platform(xl, a.y+E) or platform(xr, a.y+E))) do
+		while not platform(xl, a.y) and not platform(xr, a.y) do
 			a.y = a.y + E
 		end
 	end
@@ -133,7 +125,6 @@ function collide_down(a)
 		--coyote time
 		if (not a.t_coyote) return
 		a.t_coyote = approach(a.t_coyote)
-		--if (a.t_coyote > 0) a.t_coyote -= 1
 		if (a.standing) a.t_coyote = COYOTE
 
 		a.standing = false
@@ -329,53 +320,6 @@ function collide_event(a1, a2)
 end
 
 
--- *---------*
--- | pushing |
--- *---------*
-
-
-function check_pushing(a1, a2)
-	--[[]]
-	local x, y, overlap = get_collision_direction(a1,a2)
-
-	if a1.is_player and a2.is_furniture then
-		if aabb(a1,a2) then
-			while aabb(a1,a2) do
-				a1.x += x * E
-				a1.y += y * E
-				x, y, overlap = get_collision_direction(a1,a2)
-			end
-		end
-
-		if aabb_vel(a1,a2) then
-			a1.pushing_actor = a2
-			a2.pushed_by_actor = a1
-		elseif a1.pushing_actor == a2 then
-			a1.pushing_actor = nil
-			a2.pushed_by_actor = nil
-		end
-	end
-
-	if a1.is_furniture and a2.is_furniture
-	and a1.pushed_by_actor then
-		--> a2 is not pushed by player
-
-		if aabb(a1, a2) then
-			while overlap >= E do
-				a1.x += x * E
-				a1.y += y * E
-				x, y, overlap = get_collision_direction(a1,a2)
-			end
-			
-			if a1.pushed_by_actor and a1.pushed_by_actor.is_player then
-				a1.dx = 0
-				a1.pushed_by_actor.dx = 0
-			end
-		end
-	end
-end
-
-
 function aabb_gravity(a1, a2)
 	--axis-aligned bounding box collision
 	--using strict interior and gravity
@@ -384,30 +328,6 @@ function aabb_gravity(a1, a2)
 		a1.x + a1.w2         > a2.x - a2.w2 and
 		a1.y + a1.ddy - a1.h < a2.y         and
 		a1.y + a1.ddy        > a2.y - a2.h
-	)
-end
-
-
-function aabb_vel(a1, a2)
-	--axis-aligned bounding box collision
-	--using strict interior and applying the horizontal velocity of a1
-	return (
-		a1.x + a1.dx - a1.w2 < a2.x + a2.w2 and
-		a1.x + a1.dx + a1.w2 > a2.x - a2.w2 and
-		a1.y - a1.h          < a2.y         and
-		a1.y                 > a2.y - a2.h
-	)
-end
-
-
-function aabb(a1, a2)
-	--axis-aligned bounding box collision
-	--using strict interior
-	return (
-		a1.x - a1.w2 < a2.x + a2.w2 and
-		a1.x + a1.w2 > a2.x - a2.w2 and
-		a1.y - a1.h  < a2.y         and
-		a1.y         > a2.y - a2.h
 	)
 end
 
@@ -430,13 +350,4 @@ function get_collision_direction(a1, a2)
 	if (l < r and l < t and l < b) return -1,  0, l --left collision
 	if (r < l and r < t and r < b) return  1,  0, r --right collision
 	return 0, 0, 0
-end
-
-
-function nudge_pushing(a, nudge_x, nudge_y)
-	a.x += nudge_x
-	a.y += nudge_y
-	for b in all(a.pushing_actors) do
-		nudge_pushing(b, nudge_x, nudge_y)
-	end
 end

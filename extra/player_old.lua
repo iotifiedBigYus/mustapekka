@@ -70,7 +70,6 @@ end
 function update_player(a)
 	--umbrella
 
-	--[[
 	local u = false
 	if btn(❎) and not a.standing then
 		local y1 = a.y+a.dy-a.u_h
@@ -79,7 +78,6 @@ function update_player(a)
 
 		u = not (solid(xl, y1) or solid(xr, y1))
 	end
-	--]]
 
 	if u then
 		if (not a.gliding) then
@@ -153,28 +151,12 @@ function update_player(a)
 	end
 
 
-	--balls
-
-	if input_alt_pressed == 1 then
-		throw_ball(a)
-	end
-
 	--> apply world collisions and velocities
 	update_actor(a)
 
 
 	--going down platforms
-	a.descending = input_down and a.standing
-end
-
-
-function throw_ball(a)
-	ball = spawn_ball(
-		a.x+BALL_POS_X*a.d,
-		a.y+BALL_POS_Y,
-		a.dx+BALL_SPEED_X*a.d,
-		a.dy+BALL_SPEED_Y
-	)
+	a.descending = btn(⬇️) and a.standing
 end
 
 
@@ -249,96 +231,3 @@ function draw_player(a)
 end
 
 
---[[
-function update_player_old(a)
-	--umbrella
-
-	local u = false
-	if input_alt and not a.standing then
-		local y1 = a.y+a.dy-a.u_h
-		local xl = snap8(a.x+a.dx-a.w2)
-		local xr = snap8(a.x+a.dx+a.w2)-E
-
-		u = not (solid(xl, y1) or solid(xr, y1))
-	end
-
-	if u then
-		if (not a.gliding) then
-			a.gliding = true
-			a.traction = false
-		end
-		if (a.t_u_frame < U_OPEN_FRAMES) a.t_u_frame += .5
-		if (a.t_u_frame == 2) sfx(SFX_UMBRELLA_UP)
-	else
-		a.gliding = false
-		a.u_diff = nil
-		if (a.t_u_frame > 0) a.t_u_frame -= .5
-		if (a.t_u_frame == 4) sfx(SFX_UMBRELLA_DOWN)
-	end
-
-
-	--falling
-
-	--[
-	if a.gliding and a.dy >= a.u_v then
-		if(not a.u_diff)a.u_diff = a.dy - a.u_v
-		a.dy = a.u_v + a.u_diff
-		a.u_diff *= a.u_friction
-	end
-	--]
-
-
-	--strafing
-
-	a.strafing = input_x != 0
-	if(input_x != 0)a.d = input_x
-
-	local accel = .1 --> airborn
-	if abs(a.dx) > a.walk_speed and a.d == sgn(a.dx) then
-		accel = .05 --> going too fast (probably wont happen)
-	elseif a.standing then
-		accel = .25 --> on ground
-	elseif a.strafing and a.gliding then
-		accel = .1 --> strafing while gliding
-	elseif a.strafing then
-		accel = .2 --> strafing while airborn
-	elseif a.gliding then
-		accel = 0 --> gliding
-	end
-
-
-	-- velocity
-
-	local mass_mul = 1 / a.mass
-	if a.pushing_actor then
-		mass_mul = 1 / (a.mass + a.pushing_actor.mass)
-	end
-
-	a.dx = approach(a.dx, input_x * a.walk_speed, accel * a.walk_speed) * mass_mul
-
-	b = a.pushing_actor
-	while b do
-		b.dx = a.dx
-		b = b.pushing_actor
-	end
-
-	--jumping
-
-	if input_jump or input_jump_grace > 0 then
-		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
-			--begin (trying to) jump
-			a.dy = -a.jump_speed
-		end
-	else
-		a.jumped = false
-	end
-
-	--> apply world collisions and velocities
-	update_actor(a)
-
-
-	--going down platforms
-	a.descending = input_down and a.standing
-end
-
---]]

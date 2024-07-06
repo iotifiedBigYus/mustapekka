@@ -5,6 +5,8 @@
 --source: celeste 2
 
 input_x = 0
+input_up = false
+input_down = false
 input_jump = false
 input_jump_pressed = 0
 input_jump_grace = 0
@@ -42,6 +44,12 @@ function update_input()
 		axis_x_value = 0
 		input_x = 0
 	end
+
+	-- up
+	input_up = btn(⬆️)
+
+	-- down
+	input_down = btn(⬇️)
 
 	-- jump
 	local jump = btn(🅾️)
