@@ -33,9 +33,9 @@ function make_actor(k,x,y,d)
 	--motion
 	a.x        = x
 	a.y        = y
-	a.dx       = 0
-	a.dy       = 0
-	a.ddy      = .02 -- gravity
+	a.speed_x       = 0
+	a.speed_y       = 0
+	a.accel_y      = .02 -- gravity
 	a.drag     = .02 --air drag
 	a.friction = .9 -- exponential deacceleration
 	a.traction = true
@@ -90,34 +90,32 @@ end
 
 
 function update_actor(a)
-	-- x movement 
 	collide_side(a)
-	-- y movement
 	collide_up(a)
 	collide_down(a)
 
 	--jumping
-	if(a.dy < 0) a.jumped = true
+	if(a.speed_y < 0) a.jumped = true
 
 	--moving
-	a.x += a.dx
-	a.y += a.dy
+	a.x += a.speed_x
+	a.y += a.speed_y
 
 	--snapping
-	if(a.dx == 0)a.x = snap8(a.x,a.cx)
-	if(a.dy == 0)a.y = snap8(a.y,0)
+	if(a.speed_x == 0)a.x = snap8(a.x,a.cx)
+	if(a.speed_y == 0)a.y = snap8(a.y,0)
 
 	--friction
 	if a.standing and a.traction then
-		a.dx *= a.friction
-		if (abs(a.dx) < MIN_SPEED) a.dx = 0
+		a.speed_x *= a.friction
+		if (abs(a.speed_x) < MIN_SPEED) a.speed_x = 0
 	end
 
 	--gravity
-	a.dy += a.ddy
+	a.speed_y += a.accel_y
 
 	--air resistance
-	a.dy -= sgn(a.dy) * a.dy * a.dy * a.drag
+	a.speed_y -= sgn(a.speed_y) * a.speed_y * a.speed_y * a.drag
 
 	--timers
 	a.t += 1

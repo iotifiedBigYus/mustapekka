@@ -36,8 +36,8 @@ function check_pushing(a1, a2)
 			end
 			
 			if a1.pushed_by_actor and a1.pushed_by_actor.is_player then
-				a1.dx = 0
-				a1.pushed_by_actor.dx = 0
+				a1.speed_x = 0
+				a1.pushed_by_actor.speed_x = 0
 			end
 		end
 	end
@@ -48,8 +48,8 @@ function aabb_vel(a1, a2)
 	--axis-aligned bounding box collision
 	--using strict interior and applying the horizontal velocity of a1
 	return (
-		a1.x + a1.dx - a1.w2 < a2.x + a2.w2 and
-		a1.x + a1.dx + a1.w2 > a2.x - a2.w2 and
+		a1.x + a1.speed_x - a1.w2 < a2.x + a2.w2 and
+		a1.x + a1.speed_x + a1.w2 > a2.x - a2.w2 and
 		a1.y - a1.h          < a2.y         and
 		a1.y                 > a2.y - a2.h
 	)

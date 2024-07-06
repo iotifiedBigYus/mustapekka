@@ -9,25 +9,25 @@
 
 
 function collide_side(a)
-	local d = a.dx ~= 0 and sgn(a.dx) or a.d
+	local d = a.speed_x ~= 0 and sgn(a.speed_x) or a.d
 	local e = d > 0 and 0 or -E --> stay outside edge
-	local x1 = a.x + a.dx + d * a.w2 + e
+	local x1 = a.x + a.speed_x + d * a.w2 + e
 	
 	if not (solid(x1,a.y-E) or solid(x1,a.y-a.h)) then
 		return
 	end
 
-	if a.dx != 0 then
-		local y1 = a.dy > 0 and  flr(8*(a.y+a.dy))*.125 or ceil(8*(a.y+a.dy))*.125
-		local y0 = a.dy > 0 and ceil(8* a.y      )*.125 or  flr(8* a.y      )*.125
-		local step = sgn(a.dy)
+	if a.speed_x != 0 then
+		local y1 = a.speed_y > 0 and  flr(8*(a.y+a.speed_y))*.125 or ceil(8*(a.y+a.speed_y))*.125
+		local y0 = a.speed_y > 0 and ceil(8* a.y      )*.125 or  flr(8* a.y      )*.125
+		local step = sgn(a.speed_y)
 		for yy = y0, y1, step*.125 do
 			if not (solid(x1,yy-E) or solid(x1,yy-a.h)) then
 				--> opening
 				if (solid(x1,yy-E+step) or solid(x1,yy-a.h+step)) then
 					--> opening is a gap
 					a.y = yy
-					a.dy = 0
+					a.speed_y = 0
 				end
 				return
 			end
@@ -37,29 +37,29 @@ function collide_side(a)
 	--> hit wall
 	-- search for contact point
 	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
-		a.x += sgn(a.dx) * E
+		a.x += sgn(a.speed_x) * E
 	end
 
 	if a.bounce > 0 then
-		a.dx = -a.bounce * a.dx
+		a.speed_x = -a.bounce * a.speed_x
 		sfx(a.bounce_sfx)
 	else
-		a.dx = 0
+		a.speed_x = 0
 	end
 end
 
 
 function collide_up(a)
-	if (a.dy > 0) return --> going down
+	if (a.speed_y > 0) return --> going down
 
-	local y1 = a.y+a.dy-a.h
-	local xl = snap8(a.x+a.dx-a.w2)
-	local xr = snap8(a.x+a.dx+a.w2)-E
+	local y1 = a.y+a.speed_y-a.h
+	local xl = snap8(a.x+a.speed_x-a.w2)
+	local xr = snap8(a.x+a.speed_x+a.w2)-E
 
 	local nudges
 	if a.standing then nudges = {0}
-	elseif a.dx > 0 then nudges = NUDGES_RIGHT
-	elseif a.dx < 0 then nudges = NUDGES_LEFT
+	elseif a.speed_x > 0 then nudges = NUDGES_RIGHT
+	elseif a.speed_x < 0 then nudges = NUDGES_LEFT
 	else nudges = NUDGES_CENTER end
 
 	for n in all(nudges) do
@@ -80,20 +80,20 @@ function collide_up(a)
 	end
 
 	if a.bounce > 0 then
-		a.dy = -a.bounce * a.dy
+		a.speed_y = -a.bounce * a.speed_y
 		sfx(a.bounce_sfx)
 	else
-		a.dy = 0
+		a.speed_y = 0
 	end
 end
 
 
 function collide_down(a)
-	if (a.dy < 0) return --> going up
+	if (a.speed_y < 0) return --> going up
 
-	local y1 = a.y+a.dy
-	local xl = a.x+a.dx-a.w2
-	local xr = a.x+a.dx+a.w2-E
+	local y1 = a.y+a.speed_y
+	local xl = a.x+a.speed_x-a.w2
+	local xr = a.x+a.speed_x+a.w2-E
 
 	local hit = false
 	if(solid(xl, y1) or solid(xr, y1))then
@@ -114,11 +114,11 @@ function collide_down(a)
 	end
 
 	if hit then
-		if a.bounce > 0 and abs(a.dy) > a.min_bounce_speed then
-			a.dy = -a.bounce * a.dy
+		if a.bounce > 0 and abs(a.speed_y) > a.min_bounce_speed then
+			a.speed_y = -a.bounce * a.speed_y
 			sfx(a.bounce_sfx)
 		else
-			a.dy = 0
+			a.speed_y = 0
 			a.standing = true
 		end
 	else
@@ -193,7 +193,7 @@ function collide_event(a1, a2)
 		a1.y = snap8(a1.y)
 
 		a1.standing = true
-		a1.dy = 0
+		a1.speed_y = 0
 	end
 	--]]
 
@@ -213,16 +213,16 @@ function collide_event(a1, a2)
 		a2.is_monster) then
 		local d=sgn(a1.x-a2.x)
 		if (a1.d!=d) then
-			a1.dx=0
+			a1.speed_x=0
 			a1.d=d
 		end
 	end
 	
 	-- bouncy mushroom
 	if (a2.k==82) then
-		if (a1.dy > 0 and 
+		if (a1.speed_y > 0 and 
 		not a1.standing) then
-			a1.dy=-1.1
+			a1.speed_y=-1.1
 			a2.active_t=6
 			sfx(18)
 		end
@@ -234,8 +234,8 @@ function collide_event(a1, a2)
 			if (a2.k==64) then
 				a1.super = 30*4
 				--sfx(17)
-				a1.dx = a1.dx * 2
-				--a1.dy = a1.dy-0.1
+				a1.speed_x = a1.speed_x * 2
+				--a1.speed_y = a1.speed_y-0.1
 				-- a1.standing = false
 				sfx(13)
 			end
@@ -277,7 +277,7 @@ function collide_event(a1, a2)
 				for xx=-1,1 do
 				if (mget(x+xx,y)==0) then
 					local a=make_actor(53,x+xx,y+1)
-					a.dx=xx/2
+					a.speed_x=xx/2
 				end
 				end
 			end
@@ -301,10 +301,10 @@ function collide_event(a1, a2)
 				) then
 				
 				-- slow down player
-				a1.dx *= 0.7
-				a1.dy *= -0.7
+				a1.speed_x *= 0.7
+				a1.speed_y *= -0.7
 				
-				if (btn(🅾️,a1.id))a1.dy -= .5
+				if (btn(🅾️,a1.id))a1.speed_y -= .5
 				
 				monster_hit(a2)
 				
@@ -326,8 +326,8 @@ function aabb_gravity(a1, a2)
 	return (
 		a1.x - a1.w2         < a2.x + a2.w2 and
 		a1.x + a1.w2         > a2.x - a2.w2 and
-		a1.y + a1.ddy - a1.h < a2.y         and
-		a1.y + a1.ddy        > a2.y - a2.h
+		a1.y + a1.accel_y - a1.h < a2.y         and
+		a1.y + a1.accel_y        > a2.y - a2.h
 	)
 end
 

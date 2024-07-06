@@ -25,8 +25,8 @@ function spawn_ball(x,y,dx,dy)
 
 	a.x = x
 	a.y = y
-	a.dx = dx
-	a.dy = dy
+	a.speed_x = dx
+	a.speed_y = dy
 
 	return a
 end

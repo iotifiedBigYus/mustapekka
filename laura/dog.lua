@@ -57,7 +57,7 @@ function update_dog(a)
 	if(a.strafing_x != 0)a.d = a.strafing_x
 
 	local accel = .1 --> airborn
-	if abs(a.dx) > a.walk_speed and a.d == sgn(a.dx) then
+	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
 		accel = .05 --> going too fast (probably wont happen)
 	elseif a.standing and a.has_target then
 		accel = .25 --> on ground with target
@@ -67,7 +67,7 @@ function update_dog(a)
 		accel = .2 --> strafing while airborn
 	end
 
-	a.dx = approach(a.dx, a.strafing_x * a.walk_speed, accel * a.walk_speed)
+	a.speed_x = approach(a.speed_x, a.strafing_x * a.walk_speed, accel * a.walk_speed)
 
 	--> apply world collisions and velocities
 	update_actor(a)
@@ -171,7 +171,7 @@ end
 
 function update_dog_sprite(a)
 	--walking animation
-	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.dx) >= a.walk_speed or a.t_frame % 4 != 0))
+	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
 
 	if a.walking then
 		--if (a.t_frame % 4 == 3) sfx(SFX_STEP)
