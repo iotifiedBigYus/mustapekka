@@ -7,10 +7,6 @@ function init_dog_data()
 
 	a.w2 = .375
 	a.h  = .875
-	a.eye_pos_x    =  .25
-	a.eye_pos_y    = -.75
-	a.eye_global_x = 0
-	a.eye_global_y = 0
 	a.walk_speed   = .1875
 	a.traction     = false
 	a.strafing_x   = 0
@@ -88,11 +84,7 @@ end
 
 
 function update_target(a)
-	--eye sight
-	a.eye_global_x = a.x
-	a.eye_global_y = a.y - .5 * a.h
-
-	local x1, y1 = a.eye_global_x, a.eye_global_y
+	local x1, y1 = a.x, a.y - .5 * a.h
 	
 	--> choose player if no ball is present
 	local x2, y2 = player.x, player.y-.5
@@ -188,7 +180,7 @@ end
 function draw_dog(a)
 	local fr = a.k + a.frame
 
-	local x = pos8(a.x-.5)--.5+8*(a.x-.5)
+	local x = pos8(a.x-.5)
 	local y = pos8(a.y-1)
 
 	spr(fr, x, y,1,1,a.d<0)
@@ -196,6 +188,10 @@ function draw_dog(a)
 	if( a.walking) spr(a.k+1, x+a.d, y+1,1,1,a.d<0)
 
 	if SIGTHLINES and a.has_target then
-		line(pos8(a.eye_global_x), pos8(a.eye_global_y), pos8(a.target_x), pos8(a.target_y),11)
+		line(
+			pos8(a.x), pos8(a.y - .5 * a.h),
+			pos8(a.target_x), pos8(a.target_y),
+			11
+		)
 	end
 end

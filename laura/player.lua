@@ -212,15 +212,6 @@ function draw_player(a)
 	-- draw one pixel up
 	if (fget(fr,3) and a.standing) y-=1
 
-	--umbrella
-	if (a.t_u_frame >= 3) then
-		local x1 = a.d > 0 and x+1.5 or x+6.5 --> shift
-		local n = flr(a.t_u_frame) - 2
-		
-		sspr(a.u_s_x[n], a.u_s_y[n], a.u_s_w[n], a.u_s_h[n],
-			 x1-.5*a.u_s_w[n], y+1-a.u_s_h[n])
-	end
-
 	--fade to black
 	if a.fade < 1 do
 		local n = flr(a.fade * 4 + 1.5)
