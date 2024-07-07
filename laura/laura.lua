@@ -216,18 +216,14 @@ end
 function _draw()
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
-
-	--camera coords
-	local cx = camera_x.pos-63.5
-	local cy = camera_y.pos-63.5
 	
 	--background
-	draw_background(cx, cy)
+	draw_background(camera_x.pos, camera_y.pos)
 
 
 	--foreground
 	pal(12,0,0) --> blue drawn as black
-	camera(cx, cy)
+	camera(camera_x.pos-63.5, camera_y.pos-63.5)
 	color(7)
 	print(info_string, info_x, info_y)
 	map()
@@ -252,7 +248,20 @@ end
 
 
 function draw_background(x, y)
-	cls(BG)
+	local px = world_w - x
+
+	-- mountains
+	camera( 0,0)
+	cls(12)
+	local mx = px * 0 % 128
+	map(MOUNTAINS_X, MOUNTAINS_Y, mx - 128, 16, MOUNTAINS_W, MOUNTAINS_H)
+	map(MOUNTAINS_X, MOUNTAINS_Y, mx, 16, MOUNTAINS_W, MOUNTAINS_H)
+	rectfill(0,48,127,127,13)
+
+	-- trees
 	camera(0,0)
-	map(BACKGROUND_X, BACKGROUND_Y, 0, 0)
+	local tx = px * .25 % 128
+	map(TREES_X, TREES_Y, tx - 128, 40, TREES_W, TREES_H)
+	map(TREES_X, TREES_Y, tx, 40., TREES_W, TREES_H)
+	rectfill(0,72,127,127,3)
 end
