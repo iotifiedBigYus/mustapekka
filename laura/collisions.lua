@@ -138,7 +138,7 @@ end
 
 
 function solid(x, y)
-	if (is_outside(x,y) )return true
+	if (is_outside(x,y)) return true
 				
 	local val = mget(x, y)
 	return fget(val, 1)
@@ -162,20 +162,13 @@ function collisions()
 			collide(actors[i],actors[j])
 		end
 	end
-
-	for i=1,#actors do
-		for j=i+1,#actors do
-			--check_pushing(actors[i],actors[j])
-			--check_pushing(actors[j],actors[i])
-		end
-	end
 end
 
 
 function collide(a1, a2)
 	if (not a1 or not a2 or a1==a2) return
 
-	if aabb_gravity(a1, a2) then
+	if aabb(a1, a2) then
 		collide_event(a1, a2)
 		collide_event(a2, a1)
 	end
@@ -184,6 +177,10 @@ end
 
 function collide_event(a1, a2)
 	local x, y, overlap = get_collision_direction(a1,a2)
+
+	if a1.is_player and a2.is_cat then
+		finish_level()
+	end
 
 	--[[
 	if y < 0 and overlap >= 0 and a2.standing then
@@ -196,8 +193,6 @@ function collide_event(a1, a2)
 		a1.speed_y = 0
 	end
 	--]]
-
-	x, y, overlap = get_collision_direction(a1,a2)
 
 	if a1.is_player and a2.is_furniture then
 	
@@ -320,14 +315,14 @@ function collide_event(a1, a2)
 end
 
 
-function aabb_gravity(a1, a2)
+function aabb(a1, a2)
 	--axis-aligned bounding box collision
-	--using strict interior and gravity
+	--using strict interior
 	return (
-		a1.x - a1.w2         < a2.x + a2.w2 and
-		a1.x + a1.w2         > a2.x - a2.w2 and
-		a1.y + a1.accel_y - a1.h < a2.y         and
-		a1.y + a1.accel_y        > a2.y - a2.h
+		a1.x - a1.w2 < a2.x + a2.w2 and
+		a1.x + a1.w2 > a2.x - a2.w2 and
+		a1.y - a1.h  < a2.y         and
+		a1.y         > a2.y - a2.h
 	)
 end
 
@@ -351,3 +346,18 @@ function get_collision_direction(a1, a2)
 	if (r < l and r < t and r < b) return  1,  0, r --right collision
 	return 0, 0, 0
 end
+
+
+--[[
+
+function aabb_gravity(a1, a2)
+	--axis-aligned bounding box collision
+	--using strict interior and gravity
+	return (
+		a1.x - a1.w2         < a2.x + a2.w2 and
+		a1.x + a1.w2         > a2.x - a2.w2 and
+		a1.y + a1.accel_y - a1.h < a2.y         and
+		a1.y + a1.accel_y        > a2.y - a2.h
+	)
+end
+]]

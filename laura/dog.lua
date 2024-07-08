@@ -24,17 +24,12 @@ end
 
 
 function spawn_dogs()
-	local spr = SPR_DOG
 	local dogs = {}
 
-	for x=world_x,world_x+world_w-1 do
-		for y=world_y,world_y+world_h-1 do
-			if mget(x,y) == spr then
-				local a = make_actor(spr, x+.5, y+1, -1)
-				add(dogs, a)
-				clear_cell(x,y)
-			end
-		end
+	for c in all(find_sprites(SPR_DOG)) do
+		local x, y = unpack(c)
+		add(dogs, make_actor(SPR_DOG, x+.5, y+1, -1))
+		clear_cell(x,y)
 	end
 
 	return dogs
@@ -42,15 +37,19 @@ end
 
 
 function update_dog(a)
-	if btn(0,1) then
-		a.strafing_x = -1
-	elseif btn(1,1) then
-		a.strafing_x = 1
+	-- target
+
+	update_target(a)
+
+	if a.has_target then
+		if (a.t_target == 0) a.strafing_x = a.target_dir_x
+		a.t_target = approach(a.t_target)
+	else
+		a.t_target = DOG_TARGET_TIME
+		a.strafing_x = 0
 	end
 
-	--strafing
-
-	if(a.strafing_x != 0)a.d = a.strafing_x
+	-- velocity
 
 	local accel = .1 --> airborn
 	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
@@ -67,19 +66,6 @@ function update_dog(a)
 
 	--> apply world collisions and velocities
 	update_actor(a)
-
-	update_target(a)
-
-	if a.has_target then
-		if a.t_target == 0 then
-			a.strafing_x = a.target_dir_x
-		end
-		a.t_target = approach(a.t_target)
-		--a.t_target = max(a.t_target - 1)
-	else
-		a.t_target = DOG_TARGET_TIME
-		a.strafing_x = 0
-	end
 end
 
 
@@ -119,7 +105,6 @@ function update_target(a)
 		a.has_target = false
 		return
 	end
-
 
 	--digital differential analysis
 	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
@@ -166,10 +151,8 @@ function update_dog_sprite(a)
 	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
 
 	if a.walking then
-		--if (a.t_frame % 4 == 3) sfx(SFX_STEP)
-		local t = flr(a.t_frame)
-		a.frame = 16+t
-		a.t_frame = flr(3*a.t_frame+1.5)/3 % 4 -->four ticks per frame
+		a.frame = 16+flr(a.t_frame)
+		a.t_frame = flr(3*a.t_frame+1.5)/3 % 4
 	else
 		--standing still
 		a.frame = 0

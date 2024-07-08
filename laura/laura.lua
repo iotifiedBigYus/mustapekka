@@ -8,53 +8,49 @@
 -- *-------------------*
 
 
+
+
+
 function _init()
-	t = 0
-
-	--debug object / namespace
-	debug = {t=0}   
+	debug = {t=0} --debug object / namespace
 	
-	actors = {}
-	local l = levels[LEVEL_N]
-	world_x = l[1]
-	world_y = l[2]
-	world_w = l[3]
-	world_h = l[4]
-
 	init_actor_data()
 
-	player = spawn_player()
-	sofa = spawn_sofa(SOFA_X, SOFA_Y)
-	sofa2 = spawn_sofa(SOFA2_X, SOFA2_Y)
-	dogs = spawn_dogs()
+	reset_game()
+end
 
-	make_camera()
 
-	info_string = '🅾️/z jump\n❎/x glide'
-	info_x = player.x*8-16
-	info_y = player.y*8-16
+function reset_game()
+	state = 'play'
+	level_index = LEVEL_N
 
 	music_playing = PLAY_MUSIC
 
 	make_menu()
 
 	pal(ALT_COLORS,1)
+
+	init_level()
+	
+	--t_started = 0
 end
 
 
-function clear_cell(x, y)
-	--straight up copied from jelpi
-	local val0 = mget(x-1,y)
-	local val1 = mget(x+1,y)
-	if ((x>world_x and val0 == 0) or (x<world_x+world_w-1 and val1 == 0)) then
-		mset(x,y,0)
-	elseif (not fget(val1,1)) then
-		mset(x,y,val1)
-	elseif (not fget(val0,1)) then
-		mset(x,y,val0)
-	else
-		mset(x,y,0)
-	end
+function init_level()
+	t_finished = 0
+	t_started = 1
+	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
+
+	actors = {}
+	player = spawn_player()
+	cat = spawn_cat()
+
+	info_message = {"🅾️/z jump\n❎/x glide", player.x*8-16, player.y*8-16, 7}
+
+	make_camera()
+
+	iris_x = pos8(player.x)-camera_x.pos+63.5
+	iris_y = pos8(player.y-.5)-camera_y.pos+63.5
 end
 
 
@@ -93,120 +89,80 @@ function _update60()
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
 
+	if state == 'play' then
+		update_play()
+	end
+end
+
+
+function update_play()
 	update_input()
 
 	for a in all(actors) do a:update() end
-	update_camera()
+
+	if (t_finished == 0) update_camera()
 
 	collisions()
 
 	for a in all(actors) do a:update_sprite() end
 
-	update_spawning(player.x,player.y)
-end
+	update_spawning(player.x, player.y)
 
-
-function pos8(x)
-	return .5 + 8*x
-end
-
-
-function snap8(val, shift)
-	shift = shift or 0
-	return flr(8*(val+shift)+.5) * .125 - shift
+	update_outgame()
 end
 
 
 function update_spawning(x0, y0)
-
 	x0=flr(x0)
 	y0=flr(y0)
-	
-	-- spawn actors close to x0,y0
 
-	for y=0,16 do
-		for x=flr(x0)-10,max(16,x0+14) do
-			local val = mget(x,y)
+	for y = max(world_y, y0-SPAWN_RADIUS), min(world_y+world_h-1, y0+SPAWN_RADIUS) do
+		for x = max(world_x, x0-SPAWN_RADIUS), min(world_x+world_w-1, x0+SPAWN_RADIUS) do
+			local val = mget(x, y)
 			
-			-- actor
-			if (fget(val, 5)) then    
-				m = spawn_actor(val,x,y,d)
-				clear_cel(x,y)
+			if (fget(val, 0)) then    
+				spawn_actor(val, x+.5, y+1)
+				clear_cell(x, y)
 			end
-			
 		end
 	end
 end
 
 
-function approach(x, target, max_delta)
-	target = target or 0
-	max_delta = max_delta or 1
-	return x < target and min(x + max_delta, target) or max(x - max_delta, target)
-end
-
-
-function fade_out(a)
-
-	dpal={0,1,1, 2,1,13,6,
-	   4,4,9,3, 13,1,13,14}
-	
-	
-					
-	-- palette fade
-	for i=0,40 do
-		for j=1,15 do
-			col = j
-			for k=1,((i+(j%5))/4) do
-				col=dpal[col]
-			end
-			pal(j,col,1)
-		end
-		flip()
-	end
-	
-end
-
-
-function dda(x1, y1, x2, y2)
-	--digital differential analysis
-	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
-	local map_x = flr(x1)
-	local map_y = flr(y1)
-	local dx = x2 - x1
-	local dy = y2 - y1
-	local sx = sqrt(1 + dy / dx * dy / dx)
-	local sy = sqrt(1 + dx / dy * dx / dy)
-	local step_x = sgn(dx)
-	local step_y = sgn(dy)
-	local ray_x = dx < 0 and (x1 - map_x) * sx or (map_x + 1 - x1) * sx
-	local ray_y = dy < 0 and (y1 - map_y) * sy or (map_y + 1 - y1) * sy
-	local dist = 0
-	local len = sqrt(dx * dx + dy * dy)
-	local found = false
-
-	while not found and dist < len do
-		if sx != 0 and (sy == 0 or ray_x < ray_y) then
-			map_x += step_x
-			dist = ray_x
-			ray_x += sx
+function update_outgame()
+	if t_started > 0 then
+		if t_started == STARTED_TIME then
+			t_started = 0
 		else
-			map_y += step_y
-			dist = ray_y
-			ray_y += sy
-		end
-
-		if solid(map_x, map_y) then
-			found = true
+			t_started += 1
 		end
 	end
-	
-	local blocked = found and dist < len
-	local bx = blocked and x1 + dist / len * dx or x2
-	local by = blocked and y1 + dist / len * dy or y2
 
-	return blocked, min(dist, len), bx, by, step_x
+	if t_finished > 0 then
+		if t_finished == FINISHED_TIME  then
+			next_level()
+		else
+			t_finished += 1
+		end
+	end
 end
+
+
+function finish_level()
+	debug.next_level = true
+	if (t_finished == 0) t_finished = 1
+end
+
+
+function next_level()
+	level_index += 1
+	if level_index > #level_data then
+		level_index = 1
+	end
+
+	init_level()
+end
+
 
 -- *-------------------*
 -- | drawing functions |
@@ -214,36 +170,35 @@ end
 
 
 function _draw()
+	FREEZE = false
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
-	
+
+
+	if state == 'play' then
+		draw_play()
+	end
+
+	--debug
+	draw_debug()
+end
+
+
+function draw_play()
 	--background
 	draw_background(camera_x.pos, camera_y.pos)
-
 
 	--foreground
 	pal(12,0,0) --> blue drawn as black
 	camera(camera_x.pos-63.5, camera_y.pos-63.5)
-	color(7)
-	print(info_string, info_x, info_y)
+	print(unpack(info_message))
 	map()
 
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
 
-	--pset(camera_x.pos+.5, camera_y.pos+.5,7)
-
-	--debug
-	camera(0,0)
-	cursor(1,1)
-	color(7)
-	print('v'..VERSION)
-	if DEBUGGING then
-		for k,v in pairs(debug) do
-			print(k..': '..tostring(v))
-		end
-	end
+	draw_overlay()
 end
 
 
@@ -253,9 +208,10 @@ function draw_background(x, y)
 	-- mountains
 	camera( 0,0)
 	cls(12)
-	local mx = px * 0 % 128
-	map(MOUNTAINS_X, MOUNTAINS_Y, mx - 128, 16, MOUNTAINS_W, MOUNTAINS_H)
-	map(MOUNTAINS_X, MOUNTAINS_Y, mx, 16, MOUNTAINS_W, MOUNTAINS_H)
+	--local mx = px * 0 % 128
+	--map(MOUNTAINS_X, MOUNTAINS_Y, mx - 128, 16, MOUNTAINS_W, MOUNTAINS_H)
+	--map(MOUNTAINS_X, MOUNTAINS_Y, mx, 16, MOUNTAINS_W, MOUNTAINS_H)
+	map(MOUNTAINS_X, MOUNTAINS_Y, 0, 16, MOUNTAINS_W, MOUNTAINS_H)
 	rectfill(0,48,127,127,13)
 
 	-- trees
@@ -264,4 +220,54 @@ function draw_background(x, y)
 	map(TREES_X, TREES_Y, tx - 128, 40, TREES_W, TREES_H)
 	map(TREES_X, TREES_Y, tx, 40., TREES_W, TREES_H)
 	rectfill(0,72,127,127,3)
+end
+
+
+function draw_overlay()
+	if t_finished > 0 then
+		camera(0,0)
+		local x0 = pos8(cat.x)-camera_x.pos+63.5
+		local y0 = pos8(cat.y-.5)-camera_y.pos+63.5
+		draw_iris_out(x0,y0, IRIS_RADIUS - 2 *t_finished)
+	end
+
+	if t_started > 0 then
+		camera(0,0)
+		draw_iris_out(iris_x,iris_y,  2 * t_started)
+	end
+end
+
+
+function draw_iris_out(x0,y0,r)
+	-- diamond shape
+
+	x0, y0, r = flr(x0), flr(y0), flr(r)
+	for x = 0, x0-r-1 do
+		line(x, 0, x, 127, 0)
+	end
+
+	for dx = -r,r do
+		local dy = r - abs(dx)
+		
+		line(x0 + dx, y0 - dy, x0 + dx, -1, 0)
+		line(x0 + dx, y0 + dy, x0 + dx, 128, 0)
+	end
+
+	for x = x0+r+1, 127 do
+		line(x, 0, x, 127, 0)
+	end
+
+end
+
+
+function draw_debug()
+	camera(0,0)
+	cursor(1,1)
+	color(7)
+	print('v'..VERSION)
+	if DEBUGGING then
+		for k,v in pairs(debug) do
+			print(k..': '..tostring(v))
+		end
+	end
 end

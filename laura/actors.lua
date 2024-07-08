@@ -6,6 +6,7 @@ function init_actor_data()
 	actor_data = {
 	[SPR_PLAYER] = init_player_data(),
 	[SPR_DOG] = init_dog_data(),
+	--[[
 	[SPR_SOFA] = {
 		w2 = 1,
 		h  = 1,
@@ -13,8 +14,9 @@ function init_actor_data()
 		friction = 0.05,
 		is_furniture = true,
 		draw = draw_sofa
-	},
-	[SPR_BALL] = init_ball_data()
+	}, --]]
+	[SPR_BALL] = init_ball_data(),
+	[SPR_CAT] = init_cat_data()
 	}
 end
 
@@ -49,12 +51,8 @@ function make_actor(k,x,y,d)
 	a.h   = 1
 	a.f_x = 0
 	a.fade = 1
-	--pushing
-	a.pushing_actors = {}
-	a.pushing_actor = nil
-	a.pushed_by_actor = nil
 	--methods
-	a.update        = update_actor
+	a.update        = function() end
 	a.update_sprite = function() end
 	a.draw          = function() end
 	a.clear         = clear_cell
@@ -81,11 +79,6 @@ end
 
 function spawn_actor(k,x,y,d)
 	return make_actor(k,x,y,d)
-end
-
-
-function spawn_sofa(x,y)
-	return make_actor(SPR_SOFA,x,y,1)
 end
 
 
@@ -139,15 +132,6 @@ actor position is center bottom
 --]]
 
 
-function draw_sofa(a)
-	local x = pos8(a.x-1)
-	local y = pos8(a.y-1)
-
-	spr(a.k, x,   y)
-	spr(a.k, x+8, y,1,1,true)
-end
-
-
 function draw_hitbox(a)
 	rect(
 		8*snap8(a.x-a.w2),
@@ -157,3 +141,18 @@ function draw_hitbox(a)
 		8
 	)  
 end
+
+
+--[[
+function spawn_sofa(x,y)
+	return make_actor(SPR_SOFA,x,y,1)
+end
+
+function draw_sofa(a)
+	local x = pos8(a.x-1)
+	local y = pos8(a.y-1)
+
+	spr(a.k, x,   y)
+	spr(a.k, x+8, y,1,1,true)
+end
+--]]

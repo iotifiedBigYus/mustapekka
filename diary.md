@@ -47,7 +47,7 @@ I will consider introducing other elements to the visuals, which would justify a
 
 ## Sam, 10.3.2024
 
-Added auto_jump boolean. Making manual jumping the default. Feelis kinda weird, but It's better when you are trying to reach stuff and not wanting jumping off when you land.
+Added auto_jump boolean. Making manual jumping the default. Feels kinda weird, but It's better when you are trying to reach stuff and not wanting jumping off when you land.
 
 Added Benji's new diddy to the game with the ability to turn on and off the music in the menu.
 
@@ -373,3 +373,10 @@ Started on some forest graphics.
 ## Sam, 7.7.24
 
 Implemented a forest background with parallax.
+
+## Sam, 8.7.24
+
+The cat is now an actor that triggers an iris out and loads the next level. Cleaned up the code by removing remnants of umbrella and pushing code and creating a util.lua file. Started on a state machine, but as of now there is only a 'play' state.
+
+TODO:
+- make the dog chase the player if it can't see any balls.

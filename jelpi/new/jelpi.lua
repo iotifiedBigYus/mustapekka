@@ -1,6 +1,22 @@
 -- jelpi demo
 -- by zep
 
+
+--[[
+flags
+
+1 solid
+2 repeat top line
+3 draw one pixel up
+4 zero gravity / smashable
+5 actor
+6 is pickup / platform
+7 is monster
+
+
+
+]]
+
 level=2
 
 num_players = 1

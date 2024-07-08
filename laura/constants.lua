@@ -62,6 +62,11 @@ BALL_SPEED_X = .05
 BALL_SPEED_Y = -.15
 BALL_LIFETIME = 300
 
+SPAWN_RADIUS = 16
+IRIS_RADIUS = 256
+FINISHED_TIME = 128
+STARTED_TIME = 128
+
 -- *---------------*
 -- | color palette |
 -- *---------------*
@@ -124,8 +129,8 @@ SPR_U_WALKING      = 96
 FRAME_WALK      = 16
 FRAME_UMBR_WALK = 32
 
-SPR_SOFA = 68
-
 SPR_DOG = 100
 
 SPR_BALL = 84
+
+SPR_CAT = 80

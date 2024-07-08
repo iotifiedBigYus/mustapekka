@@ -14,23 +14,9 @@ function init_player_data()
 	a.walk_speed = .125 -- walking speed
 	a.jump_speed = .3 -- jump speed
 	a.mass = 1
-	--umbrella
-	a.u_d        = 0
-	a.u_v        = 0.125
-	a.u_diff     = nil --> initial difference to terminal speed
-	a.u_friction = 0.9
-	a.u_ddx      = U_DDX
-	a.u_drag_x   = U_DRAG_X
-	a.u_drag_y   = U_DRAG_Y
-	a.t_u_frame  = 0
-	a.u_h        = 1.375 --> height with umbrella
-	a.u_s_x      = {24, 24, 27, 25}
-	a.u_s_y      = {34, 37, 36, 32}
-	a.u_s_w      = {1, 3, 5, 7}
-	a.u_s_h      = {2, 3, 4, 4}
 	--state
 	a.is_player  = true
-	a.strafing   = false
+	a.strafing_x   = false
 	a.traction   = false --> false: no friction
 	a.jumped     = false
 	a.descending = false
@@ -53,63 +39,21 @@ end
 function spawn_player()
 	local a = make_actor(SPR_PLAYER, world_x+.5, world_y+1, 1)
 
-	for x=world_x,world_x+world_w-1 do
-		for y=world_y,world_y+world_h-1 do
-			if mget(x,y) == SPR_PLAYER then
-				a.x = x+0.5+a.cx
-				a.y = y+1
-
-				clear_cell(x,y)
-			end
-		end
+	for c in all(find_sprites(SPR_PLAYER)) do
+		local x, y = unpack(c)
+		a.x = x+0.5+a.cx
+		a.y = y+1
+		clear_cell(x,y)
 	end
+	
 	return a
 end
 
 
 function update_player(a)
-	--umbrella
-
-	--[[
-	local u = false
-	if btn(❎) and not a.standing then
-		local y1 = a.y+a.speed_y-a.u_h
-		local xl = snap8(a.x+a.speed_x-a.w2)
-		local xr = snap8(a.x+a.speed_x+a.w2)-E
-
-		u = not (solid(xl, y1) or solid(xr, y1))
-	end
-	--]]
-
-	if u then
-		if (not a.gliding) then
-			a.gliding = true
-			a.traction = false
-		end
-		if (a.t_u_frame < U_OPEN_FRAMES) a.t_u_frame += .5
-		if (a.t_u_frame == 2) sfx(SFX_UMBRELLA_UP)
-	else
-		a.gliding = false
-		a.u_diff = nil
-		if (a.t_u_frame > 0) a.t_u_frame -= .5
-		if (a.t_u_frame == 4) sfx(SFX_UMBRELLA_DOWN)
-	end
-
-
-	--falling
-
-	--[
-	if a.gliding and a.speed_y >= a.u_v then
-		if(not a.u_diff)a.u_diff = a.speed_y - a.u_v
-		a.speed_y = a.u_v + a.u_diff
-		a.u_diff *= a.u_friction
-	end
-	--]]
-
-
 	--strafing
 
-	a.strafing = input_x != 0
+	a.strafing_x = input_x != 0
 	if(input_x != 0)a.d = input_x
 
 	local accel = .1 --> airborn
@@ -117,29 +61,15 @@ function update_player(a)
 		accel = .05 --> going too fast (probably wont happen)
 	elseif a.standing then
 		accel = .25 --> on ground
-	elseif a.strafing and a.gliding then
-		accel = .1 --> strafing while gliding
-	elseif a.strafing then
+	elseif a.strafing_x then
 		accel = .2 --> strafing while airborn
 	elseif a.gliding then
 		accel = 0 --> gliding
 	end
 
-
 	-- velocity
 
-	local mass_mul = 1 / a.mass
-	if a.pushing_actor then
-		mass_mul = 1 / (a.mass + a.pushing_actor.mass)
-	end
-
-	a.speed_x = approach(a.speed_x, input_x * a.walk_speed, accel * a.walk_speed) * mass_mul
-
-	b = a.pushing_actor
-	while b do
-		b.speed_x = a.speed_x
-		b = b.pushing_actor
-	end
+	a.speed_x = approach(a.speed_x, input_x * a.walk_speed, accel * a.walk_speed)
 
 	--jumping
 
@@ -152,7 +82,6 @@ function update_player(a)
 		a.jumped = false
 	end
 
-
 	--balls
 
 	if input_alt_pressed == 1 then
@@ -161,7 +90,6 @@ function update_player(a)
 
 	--> apply world collisions and velocities
 	update_actor(a)
-
 
 	--going down platforms
 	a.descending = input_down and a.standing
@@ -180,11 +108,24 @@ end
 
 function update_player_sprite(a)
 	--walking animation
-	a.walking = (a.standing and (a.strafing or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
+	a.walking = (a.standing and (a.strafing_x or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
 
 	--recenter the spirte
 	a.f_x = approach(a.f_x, 0, a.f_vx)
 
+	if not a.standing then
+		a.frame = a.speed_y < a.accel_y and 2 or 3
+		a.t_frame = 3
+	elseif a.walking then
+		if (a.t_frame == 3) sfx(SFX_STEP)
+		a.frame = 1 + flr(a.t_frame)
+		a.t_frame = (a.t_frame + 0.25) % 4 -->four ticks per frame
+	else
+		--standing still
+		a.frame = 0
+	end
+
+	--[[
 	if not a.standing then
 		a.frame = a.speed_y < a.accel_y and 17 or 18
 		a.t_frame = 3
@@ -199,6 +140,8 @@ function update_player_sprite(a)
 		--standing still
 		a.frame = min(2, a.t_u_frame)
 	end
+
+	--]]
 end
 
 
