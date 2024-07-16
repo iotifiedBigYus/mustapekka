@@ -2,6 +2,7 @@
 --sam westerlund
 --6.6.24
 
+
 function init_dog_data()
 	local a = {}
 
@@ -38,8 +39,18 @@ end
 
 function update_dog(a)
 	-- target
-
-	update_target(a)
+	--> fist check for ball
+	a.has_target = false
+	for a1 in all(actors) do
+		if a1.k == SPR_BALL then
+			update_target(a, a1)
+			if (a.has_target) break
+		end
+	end
+	
+	if not a.has_target then
+		update_target(a, player)
+	end
 
 	if a.has_target then
 		if (a.t_target == 0) a.strafing_x = a.target_dir_x
@@ -69,17 +80,9 @@ function update_dog(a)
 end
 
 
-function update_target(a)
+function update_target(a, target)
 	local x1, y1 = a.x, a.y - .5 * a.h
-	
-	--> choose player if no ball is present
-	local x2, y2 = player.x, player.y-.5
-	for a2 in all(actors) do
-		if a2.k == SPR_BALL then
-			x2, y2 = a2.x, a2.y-.5*a2.h
-			break
-		end
-	end
+	local x2, y2 = target.x, target.y - .5 * target.h
 
 	local dx = x2 - x1
 	local dy = y2 - y1
