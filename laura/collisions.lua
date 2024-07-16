@@ -40,7 +40,7 @@ function collide_side(a)
 		a.x += d * E
 	end
 
-	if a.bounce > 0 then
+	if a.bounce > 0 and abs(a.speed_x) > a.min_bounce_speed then
 		a.speed_x = -a.bounce * a.speed_x
 		sfx(a.bounce_sfx)
 	else

@@ -380,3 +380,19 @@ The cat is now an actor that triggers an iris out and loads the next level. Clea
 
 TODO:
 - make the dog chase the player if it can't see any balls.
+
+## Sidner, 16.7.24
+
+Started designing a new level with multiple dogs. Discovered bug with the collision of the ball in a corner facing right. Sam resolved the issue.
+
+Levels:
+
+- Neighbour's House
+- Forest
+- Outpost/Police station/Military base
+- Sewers: stinky poopoo water level (big fat rat)
+- Road between two tunnels
+
+TODO:
+- little jingle when the cat is touched
+- throwable key

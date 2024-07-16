@@ -13,7 +13,7 @@ HITBOX     = false
 SIGTHLINES = true
 VERSION    = '0.5.0' --version number
 MAX_ACTORS = 30 --maximum amount of actors
-LEVEL_N    = 4
+LEVEL_N    = 5
 
 -- *------------------------------*
 -- | physics / physical constants |
