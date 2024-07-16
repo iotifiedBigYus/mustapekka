@@ -8,9 +8,6 @@
 -- *-------------------*
 
 
-
-
-
 function _init()
 	debug = {t=0} --debug object / namespace
 	
@@ -45,7 +42,9 @@ function init_level()
 	player = spawn_player()
 	cat = spawn_cat()
 
-	info_message = {"🅾️/z jump\n❎/x glide", player.x*8-16, player.y*8-16, 7}
+	info_message = {"", player.x*8-16, player.y*8-16, 7}
+
+	generate_nodes()
 
 	make_camera()
 

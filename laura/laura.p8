@@ -9,6 +9,8 @@ __lua__
 #include constants.lua
 #include util.lua
 
+#include astar.lua
+
 #include laura.lua
 #include camera.lua
 #include actors.lua
