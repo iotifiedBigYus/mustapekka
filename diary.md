@@ -385,14 +385,18 @@ TODO:
 
 Started designing a new level with multiple dogs. Discovered bug with the collision of the ball in a corner facing right. Sam resolved the issue.
 
-Levels:
+New ideas: We might add more distractions for the dogs, such as dog food and other interactable objects like doors, buttons and keys.
 
+The levels will follow a narrative throughline:
+The cat runs away through the levels, progressively going deeper.
+
+Levels:
 - Neighbour's House
 - Forest
 - Outpost/Police station/Military base
+- Facility (elevators with buttons)
 - Sewers: stinky poopoo water level (big fat rat)
-- Road between two tunnels
+- Road between two tunnels feat. moving vehicles
 
 TODO:
 - little jingle when the cat is touched
-- throwable key
