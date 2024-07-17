@@ -380,3 +380,7 @@ The cat is now an actor that triggers an iris out and loads the next level. Clea
 
 TODO:
 - make the dog chase the player if it can't see any balls.
+
+## Sam, 17.7.24
+
+Got the a star algorithm to work with the dog pathfinding, but it gets really slow when it does not find a path. Might tweak it so that it searches only for the next best move, not the whole path. Before that I need the dog to jump and look good doing so.
