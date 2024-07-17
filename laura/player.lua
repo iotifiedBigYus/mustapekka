@@ -45,8 +45,15 @@ function spawn_player()
 		a.y = y+1
 		clear_cell(x,y)
 	end
-	
+
 	return a
+
+	--[[
+	local x, y = find_sprites(SPR_PLAYER, true)
+	clear_cell(x,y)
+
+	return make_actor(SPR_PLAYER, x+.5, y+1, 1)
+	--]]
 end
 
 
@@ -63,8 +70,6 @@ function update_player(a)
 		accel = .25 --> on ground
 	elseif a.strafing_x then
 		accel = .2 --> strafing while airborn
-	elseif a.gliding then
-		accel = 0 --> gliding
 	end
 
 	-- velocity
@@ -148,8 +153,8 @@ end
 function draw_player(a)
 	local fr = a.k + a.frame
 
-	local x = .5+8*(a.x+a.f_x-.5-sgn(a.d)*a.cx)
-	local y = .5+8*(a.y+a.f_y-1)
+	local x = pos8(a.x+a.f_x-.5-sgn(a.d)*a.cx)
+	local y = pos8(a.y+a.f_y-1)
 
 	-- sprite flag 3 (green):
 	-- draw one pixel up

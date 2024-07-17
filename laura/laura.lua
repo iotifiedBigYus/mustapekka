@@ -13,6 +13,8 @@ function _init()
 	
 	init_actor_data()
 
+	cleared_cells = {}
+
 	reset_game()
 end
 
@@ -34,6 +36,8 @@ end
 
 
 function init_level()
+	reset_cells()
+
 	t_finished = 0
 	t_started = 1
 	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
@@ -48,8 +52,8 @@ function init_level()
 
 	make_camera()
 
-	iris_x = pos8(player.x)-camera_x.pos+63.5
-	iris_y = pos8(player.y-.5)-camera_y.pos+63.5
+	iris_x = pos8(player.x)-camera_axis_x.pos+63.5
+	iris_y = pos8(player.y-.5)-camera_axis_y.pos+63.5
 end
 
 
@@ -96,7 +100,6 @@ end
 
 function update_play()
 	update_input()
-	update_input2()
 
 	for a in all(actors) do a:update() end
 
@@ -169,11 +172,13 @@ end
 
 function draw_play()
 	--background
-	draw_background(camera_x.pos, camera_y.pos)
+	draw_background(camera_x, camera_y)
 
 	--foreground
 	pal(12,0,0) --> blue drawn as black
-	camera(camera_x.pos-63.5, camera_y.pos-63.5)
+	camera(pos8(camera_x), pos8(camera_y))
+
+
 	print(unpack(info_message))
 	map()
 
@@ -186,7 +191,6 @@ end
 
 
 function draw_background(x, y)
-	local px = world_w - x
 
 	-- mountains
 	camera( 0,0)
@@ -199,18 +203,19 @@ function draw_background(x, y)
 
 	-- trees
 	camera(0,0)
-	local tx = px * .25 % 128
-	map(TREES_X, TREES_Y, tx - 128, 40, TREES_W, TREES_H)
-	map(TREES_X, TREES_Y, tx, 40., TREES_W, TREES_H)
-	rectfill(0,72,127,127,3)
+	local tx = -x * 4 % 128
+	local ty = 32
+	map(TREES_X, TREES_Y, tx - 128, ty, TREES_W, TREES_H)
+	map(TREES_X, TREES_Y, tx, ty, TREES_W, TREES_H)
+	rectfill(0,ty+32,127,127,3)
 end
 
 
 function draw_overlay()
 	if t_finished > 0 then
 		camera(0,0)
-		local x0 = pos8(cat.x)-camera_x.pos+63.5
-		local y0 = pos8(cat.y-.5)-camera_y.pos+63.5
+		local x0 = pos8(cat.x)-camera_axis_x.pos+63.5
+		local y0 = pos8(cat.y-.5)-camera_axis_y.pos+63.5
 		draw_iris_out(x0,y0, IRIS_RADIUS - 2 *t_finished)
 	end
 

@@ -98,6 +98,17 @@ function spawn_actor(k,x,y,d)
 end
 
 
+function despawn_actors()
+	if not spawned_actors then
+		spawned_actors = {}
+		return
+	end
+
+	for a in all(spawned_actors) do
+
+	end
+end
+
 function update_actor(a)
 	collide_side(a)
 	collide_up(a)

@@ -2,11 +2,16 @@
 --3.4.2024
 
 function make_camera()
-    camera_x = make_camera_axis(8*player.x, 8*(world_x+8), 8*(world_x+world_w-8))
-    camera_y = make_camera_axis(8*player.y, 8*(world_y+8), 8*(world_y+world_h-8))
+    camera_axis_x = make_camera_axis(8*player.x, 8*(world_x+8), 8*(world_x+world_w-8))
+    camera_axis_y = make_camera_axis(8*player.y, 8*(world_y+8), 8*(world_y+world_h-8))
 
 	--debug.maxy = 8*(world_y+world_h-8)
 	--debug.miny = 8*(world_y+8)
+
+	camera_x = 0
+	camera_y = 0
+	camera_offset_x = 0
+	camera_offset_y = 0
 end
 
 
@@ -51,8 +56,21 @@ end
 
 
 function update_camera()
-    update_camera_axis(camera_x, 8*(player.x-sgn(player.d)*player.cx))
-    update_camera_axis(camera_y, 8*player.y)
+	--
+    update_camera_axis(camera_axis_x, 8*(player.x-sgn(player.d)*player.cx))
+    update_camera_axis(camera_axis_y, 8*player.y)
+
+	camera_offset_x = approach(camera_offset_x, player.speed_x*CAMERA_VELOCITY_SHIFT, CAMERA_SPEED)
+	camera_offset_y = approach(camera_offset_y, player.speed_y*CAMERA_VELOCITY_SHIFT, CAMERA_SPEED)
+
+	local x1 = player.x+player.cx+player.f_x-8-camera_offset_x
+	local y1 = player.y-8-player.speed_y*CAMERA_VELOCITY_SHIFT-camera_offset_y
+
+	camera_x = mid(world_x, x1, world_x+world_w-16)
+	camera_y = mid(world_y, y1, world_y+world_h-16)
+
+	camera_x = camera_axis_x.pos * .125 - 8
+	camera_y = camera_axis_y.pos * .125 - 8
 end
 
 
@@ -80,6 +98,7 @@ function update_camera_axis(c, p)
 end
 
 
+--[[
 function get_screen_pos(v, cam)
     return flr(v+.5) - flr(cam+.5) + 64
 end
@@ -96,3 +115,4 @@ function update_camera_axis_old(sys, pl)
 	if(sys.bounded)sys.pos = mid(sys.min, sys.pos, sys.max)
     sys.vel += (pl + sys.k3 * target_vel - sys.pos - sys.k1 * sys.vel) / sys.k2
 end
+--]]

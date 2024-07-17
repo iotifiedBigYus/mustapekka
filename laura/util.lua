@@ -21,6 +21,7 @@ end
 
 
 function clear_cell(x, y)
+	add(cleared_cells, {x,y,mget(x,y)})
 	--straight up copied from jelpi
 	local val0 = mget(x-1,y)
 	local val1 = mget(x+1,y)
@@ -33,6 +34,15 @@ function clear_cell(x, y)
 	else
 		mset(x,y,0)
 	end
+end
+
+
+function reset_cells()
+	for c in all(cleared_cells) do
+		mset(unpack(c))
+	end
+
+	cleared_cells = {}
 end
 
 
