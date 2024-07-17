@@ -36,12 +36,34 @@ function generate_nodes()
 				local node = {}
 				node.x = xx
 				node.y = yy
+				node.is_walkable = solid(xx,yy +1) or platform(xx, yy+1)
+				node.is_descendable = platform(xx, yy+1)
 				add(nodes, node)
 			end
 		end
 	end
 
 	return nodes
+end
+
+
+function find_node(nodes,x,y)
+	local x1, y1 = flr(x), ceil(y-1)
+	debug.p_x = x1
+	debug.p_y = y1
+	local nodes_x = {}
+	local min_y = world_y + world_h
+	local min_node = nil
+	for node in all(nodes) do
+		if node.x == x1 and node.is_walkable and node.y >= y1 and node.y < min_y then
+			min_node = node
+			min_y = node.y
+		end
+	end
+
+	debug.node_x = min_node.x
+	debug.node_y = min_node.y
+	return min_node
 end
 
 
@@ -59,7 +81,7 @@ local cachedPaths = nil
 
 function dist ( x1, y1, x2, y2 )
 	
-	return math.sqrt ( math.pow ( x2 - x1, 2 ) + math.pow ( y2 - y1, 2 ) )
+	return sqrt ( ( x2 - x1)^2 + ( y2 - y1 )^2 )
 end
 
 function dist_between ( nodeA, nodeB )
@@ -73,14 +95,14 @@ function heuristic_cost_estimate ( nodeA, nodeB )
 end
 
 function is_valid_node ( node, neighbor )
-
 	return true
 end
+
 
 function lowest_f_score ( set, f_score )
 
 	local lowest, bestNode = INF, nil
-	for _, node in ipairs ( set ) do
+	for node in all( set ) do
 		local score = f_score [ node ]
 		if score < lowest then
 			lowest, bestNode = score, node
@@ -92,9 +114,9 @@ end
 function neighbor_nodes ( theNode, nodes )
 
 	local neighbors = {}
-	for _, node in ipairs ( nodes ) do
+	for node in all( nodes ) do
 		if theNode ~= node and is_valid_node ( theNode, node ) then
-			table.insert ( neighbors, node )
+			add( neighbors, node )
 		end
 	end
 	return neighbors
@@ -122,7 +144,7 @@ end
 function unwind_path ( flat_path, map, current_node )
 
 	if map [ current_node ] then
-		table.insert ( flat_path, 1, map [ current_node ] ) 
+		add( flat_path, map [ current_node ], 1 ) 
 		return unwind_path ( flat_path, map, map [ current_node ] )
 	else
 		return flat_path
@@ -145,20 +167,21 @@ function a_star ( start, goal, nodes, valid_node_func )
 	g_score [ start ] = 0
 	f_score [ start ] = g_score [ start ] + heuristic_cost_estimate ( start, goal )
 
+	steps = 0
 	while #openset > 0 do
 	
 		local current = lowest_f_score ( openset, f_score )
 		if current == goal then
 			local path = unwind_path ( {}, came_from, goal )
-			table.insert ( path, goal )
+			add( path, goal )
 			return path
 		end
 
 		remove_node ( openset, current )		
-		table.insert ( closedset, current )
+		add( closedset, current )
 		
 		local neighbors = neighbor_nodes ( current, nodes )
-		for _, neighbor in ipairs ( neighbors ) do 
+		for neighbor in all( neighbors ) do 
 			if not_in ( closedset, neighbor ) then
 			
 				local tentative_g_score = g_score [ current ] + dist_between ( current, neighbor )
@@ -168,11 +191,14 @@ function a_star ( start, goal, nodes, valid_node_func )
 					g_score 	[ neighbor ] = tentative_g_score
 					f_score 	[ neighbor ] = g_score [ neighbor ] + heuristic_cost_estimate ( neighbor, goal )
 					if not_in ( openset, neighbor ) then
-						table.insert ( openset, neighbor )
+						add( openset, neighbor )
 					end
 				end
 			end
+			steps += 1
 		end
+
+		if steps > 100 then return nil end
 	end
 	return nil -- no valid path
 end

@@ -73,10 +73,3 @@ function update_input()
 	end
 	input_alt = alt
 end
-
-
-function consume_jump_press()
-	local val = input_jump_pressed > 0
-	input_jump_pressed = 0
-	return val
-end

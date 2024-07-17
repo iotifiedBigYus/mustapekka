@@ -35,9 +35,9 @@ function make_actor(k,x,y,d)
 	--motion
 	a.x        = x
 	a.y        = y
-	a.speed_x       = 0
-	a.speed_y       = 0
-	a.accel_y      = .02 -- gravity
+	a.speed_x  = 0
+	a.speed_y  = 0
+	a.accel_y  = .02 -- gravity
 	a.drag     = .02 --air drag
 	a.friction = .9 -- exponential deacceleration
 	a.traction = true
@@ -75,6 +75,22 @@ function delete_actor(a)
 	debug.actors_n = count(actors)
 end
 
+
+function update_spawning(x0, y0)
+	x0=flr(x0)
+	y0=flr(y0)
+
+	for y = max(world_y, y0-SPAWN_RADIUS), min(world_y+world_h-1, y0+SPAWN_RADIUS) do
+		for x = max(world_x, x0-SPAWN_RADIUS), min(world_x+world_w-1, x0+SPAWN_RADIUS) do
+			local val = mget(x, y)
+			
+			if (fget(val, 0)) then    
+				spawn_actor(val, x+.5, y+1)
+				clear_cell(x, y)
+			end
+		end
+	end
+end
 
 
 function spawn_actor(k,x,y,d)

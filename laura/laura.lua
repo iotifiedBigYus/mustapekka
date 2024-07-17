@@ -44,7 +44,7 @@ function init_level()
 
 	info_message = {"", player.x*8-16, player.y*8-16, 7}
 
-	generate_nodes()
+	level_nodes = generate_nodes()
 
 	make_camera()
 
@@ -96,6 +96,7 @@ end
 
 function update_play()
 	update_input()
+	update_input2()
 
 	for a in all(actors) do a:update() end
 
@@ -108,23 +109,6 @@ function update_play()
 	update_spawning(player.x, player.y)
 
 	update_outgame()
-end
-
-
-function update_spawning(x0, y0)
-	x0=flr(x0)
-	y0=flr(y0)
-
-	for y = max(world_y, y0-SPAWN_RADIUS), min(world_y+world_h-1, y0+SPAWN_RADIUS) do
-		for x = max(world_x, x0-SPAWN_RADIUS), min(world_x+world_w-1, x0+SPAWN_RADIUS) do
-			local val = mget(x, y)
-			
-			if (fget(val, 0)) then    
-				spawn_actor(val, x+.5, y+1)
-				clear_cell(x, y)
-			end
-		end
-	end
 end
 
 
