@@ -79,7 +79,7 @@ function collide_up(a)
 		a.y = a.y - E
 	end
 
-	if a.bounce > 0 then
+	if a.bounce > 0 and abs(a.speed_y) > a.min_bounce_speed  then
 		a.speed_y = -a.bounce * a.speed_y
 		sfx(a.bounce_sfx)
 	else
@@ -91,7 +91,7 @@ end
 function collide_down(a)
 	if (a.speed_y < 0) return --> going up
 
-	local y1 = a.y+a.speed_y
+	local y1 = a.y+a.speed_y-E
 	local xl = a.x+a.speed_x-a.w2
 	local xr = a.x+a.speed_x+a.w2-E
 
@@ -101,16 +101,13 @@ function collide_down(a)
 		hit = true
 		-- search down for collision point
 		while not solid(xl, a.y) and not solid(xr, a.y) do
-			a.y = a.y + E
+			a.y = flr(a.y) + 1
 		end
 	elseif ceil(a.y) == flr(y1) and (platform(xl, y1) or platform(xr, y1)) and not a.descending then
 		--> hit platform
 		hit = true
 		a.descending = false
-		-- search down for collision point
-		while not platform(xl, a.y) and not platform(xr, a.y) do
-			a.y = a.y + E
-		end
+		a.y = ceil(a.y)
 	end
 
 	if hit then

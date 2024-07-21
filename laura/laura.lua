@@ -109,7 +109,7 @@ function update_play()
 
 	for a in all(actors) do a:update_sprite() end
 
-	update_spawning(player.x, player.y)
+	update_spawning(player.x, player.y-player.h*.5)
 
 	update_outgame()
 end
@@ -175,7 +175,7 @@ function draw_play()
 	draw_background(camera_x, camera_y)
 
 	--foreground
-	pal(12,0,0) --> blue drawn as black
+	pal(12,0) --> blue drawn as black
 	camera(pos8(camera_x), pos8(camera_y))
 
 
@@ -185,6 +185,12 @@ function draw_play()
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
+
+
+	--m = blank_map(-1)
+	--draw map
+	--draw_map(m)
+	
 
 	draw_overlay()
 end
@@ -202,12 +208,18 @@ function draw_background(x, y)
 	rectfill(0,48,127,127,13)
 
 	-- trees
+
+	pal(3,2)
+
 	camera(0,0)
 	local tx = -x * 4 % 128
 	local ty = 32
+
 	map(TREES_X, TREES_Y, tx - 128, ty, TREES_W, TREES_H)
 	map(TREES_X, TREES_Y, tx, ty, TREES_W, TREES_H)
 	rectfill(0,ty+32,127,127,3)
+
+	pal(3,3)
 end
 
 

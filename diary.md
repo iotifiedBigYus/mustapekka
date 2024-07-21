@@ -387,4 +387,11 @@ Got the a star algorithm to work with the dog pathfinding, but it gets really sl
 
 The game now remembers what cells it has cleared and resets before he next level is initialized.
 
-Tried making the camera follow the player exactly, but it didnt feel as nice as the current movement.
+Tried making the camera follow the player exactly, but it didn't feel as nice as the current movement.
+
+## Sam, 19.7.24
+
+Changed the trees in the background to a darker red color so that the foreground can use dark green.
+
+Made a new walking animation for the dog that looks good while jumping. I think I nailed it.
+

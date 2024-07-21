@@ -80,8 +80,8 @@ function update_spawning(x0, y0)
 	x0=flr(x0)
 	y0=flr(y0)
 
-	for y = max(world_y, y0-SPAWN_RADIUS), min(world_y+world_h-1, y0+SPAWN_RADIUS) do
-		for x = max(world_x, x0-SPAWN_RADIUS), min(world_x+world_w-1, x0+SPAWN_RADIUS) do
+	for y = max(world_y, y0-UPDATE_LEFT), min(world_y+world_h-1, y0+UPDATE_RIGHT) do
+		for x = max(world_x, x0-UPDATE_UP), min(world_x+world_w-1, x0+UPDATE_DOWN) do
 			local val = mget(x, y)
 			
 			if (fget(val, 0)) then    
@@ -105,7 +105,7 @@ function despawn_actors()
 	end
 
 	for a in all(spawned_actors) do
-
+		mset(unpack(a))
 	end
 end
 
@@ -125,6 +125,7 @@ function update_actor(a)
 	if(a.speed_x == 0)a.x = snap8(a.x,a.cx)
 	if(a.speed_y == 0)a.y = snap8(a.y,0)
 
+	--TODO:
 	--friction
 	if a.standing and a.traction then
 		a.speed_x *= a.friction

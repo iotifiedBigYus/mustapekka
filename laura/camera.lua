@@ -5,6 +5,9 @@ function make_camera()
     camera_axis_x = make_camera_axis(8*player.x, 8*(world_x+8), 8*(world_x+world_w-8))
     camera_axis_y = make_camera_axis(8*player.y, 8*(world_y+8), 8*(world_y+world_h-8))
 
+	camera_axis_x2 = make_camera_axis(player.x-8, world_x, world_x+world_w-16)
+    camera_axis_y2 = make_camera_axis(player.y-8, world_y, world_y+world_h-16)
+
 	--debug.maxy = 8*(world_y+world_h-8)
 	--debug.miny = 8*(world_y+8)
 
@@ -59,6 +62,9 @@ function update_camera()
 	--
     update_camera_axis(camera_axis_x, 8*(player.x-sgn(player.d)*player.cx))
     update_camera_axis(camera_axis_y, 8*player.y)
+
+	--update_camera_axis2(camera_axis_x2, player.x+player.cx+player.f_x-8)
+    --update_camera_axis2(camera_axis_y2, player.y-8)
 
 	camera_offset_x = approach(camera_offset_x, player.speed_x*CAMERA_VELOCITY_SHIFT, CAMERA_SPEED)
 	camera_offset_y = approach(camera_offset_y, player.speed_y*CAMERA_VELOCITY_SHIFT, CAMERA_SPEED)

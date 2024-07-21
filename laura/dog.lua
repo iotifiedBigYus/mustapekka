@@ -129,7 +129,7 @@ function update_dog(a)
 	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
 		accel = .05 --> going too fast (probably wont happen)
 	elseif a.standing then
-		accel = .25 --> on ground
+		accel = .1 --> on ground
 	elseif strafing_x != 0 then
 		accel = .2 --> strafing while airborn
 	end
@@ -236,11 +236,14 @@ end
 
 function update_dog_sprite(a)
 	--walking animation
-	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
+	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 3))
 
-	if a.walking then
-		a.frame = 16+flr(a.t_frame)
-		a.t_frame = flr(3*a.t_frame+1.5)/3 % 4
+	if not a.standing then
+		a.frame = a.speed_y < a.accel_y and 6 or 8
+		a.t_frame = 3
+	elseif a.walking then
+		a.frame = 4 + 2 * flr(a.t_frame)
+		a.t_frame = (a.t_frame + 0.25) % 4 --flr(3*a.t_frame+1.5)/3 % 4
 	else
 		--standing still
 		a.frame = 0
@@ -249,6 +252,20 @@ end
 
 
 function draw_dog(a)
+	local x = pos8(a.x-.5)
+	local y = pos8(a.y-1)
+
+
+	local fr = a.k + a.frame
+
+	if a.frame == 0 then
+		spr(fr, x, y,1,1,a.d<0)
+	else
+		spr(fr, x-4, y,2,1,a.d<0)
+	end
+
+
+	--[[
 	local fr = a.k + a.frame
 
 	local x = pos8(a.x-.5)
@@ -257,6 +274,8 @@ function draw_dog(a)
 	spr(fr, x, y,1,1,a.d<0)
 
 	if( a.walking) spr(a.k+1, x+a.d, y+1,1,1,a.d<0)
+
+	--]]
 
 	if SIGTHLINES and a.has_target then
 		line(

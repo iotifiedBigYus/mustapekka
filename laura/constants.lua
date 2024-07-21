@@ -8,7 +8,7 @@
 
 DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 0 --frames per tick
+SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 SIGTHLINES = true
 VERSION    = '0.6.0' --version number
@@ -64,7 +64,15 @@ BALL_SPEED_X = .05
 BALL_SPEED_Y = -.15
 BALL_LIFETIME = 300
 
+
+UPDATE_LEFT = 12
+UPDATE_RIGHT = 16
+UPDATE_UP = 16
+UPDATE_DOWN = 12
 SPAWN_RADIUS = 16
+SPAWN_WIDTH = 16
+SPAWN_HEIGHT = 12
+
 IRIS_RADIUS = 256
 FINISHED_TIME = 128
 STARTED_TIME = 128
