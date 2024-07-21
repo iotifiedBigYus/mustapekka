@@ -42,6 +42,8 @@ function init_level()
 	t_started = 1
 	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
 
+	init_path_nodes()
+
 	actors = {}
 	player = spawn_player()
 	cat = spawn_cat()
@@ -110,6 +112,8 @@ function update_play()
 	for a in all(actors) do a:update_sprite() end
 
 	update_spawning(player.x, player.y-player.h*.5)
+
+	update_path(player.x, player.y-player.h*.5)
 
 	update_outgame()
 end
@@ -187,10 +191,14 @@ function draw_play()
 	for a in all(actors) do a:draw() end
 
 
+
+	draw_path_nodes()
+
+
 	--m = blank_map(-1)
 	--draw map
 	--draw_map(m)
-	
+	camera(0,0)
 
 	draw_overlay()
 end
@@ -225,14 +233,12 @@ end
 
 function draw_overlay()
 	if t_finished > 0 then
-		camera(0,0)
 		local x0 = pos8(cat.x)-camera_axis_x.pos+63.5
 		local y0 = pos8(cat.y-.5)-camera_axis_y.pos+63.5
 		draw_iris_out(x0,y0, IRIS_RADIUS - 2 *t_finished)
 	end
 
 	if t_started > 0 then
-		camera(0,0)
 		draw_iris_out(iris_x,iris_y,  2 * t_started)
 	end
 end

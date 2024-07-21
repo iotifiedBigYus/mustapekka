@@ -395,3 +395,8 @@ Changed the trees in the background to a darker red color so that the foreground
 
 Made a new walking animation for the dog that looks good while jumping. I think I nailed it.
 
+Started on a new pathfinding algorithm that generates a graph of paths.
+
+TODO:
+- fix bug where player leaves ground while jumping under a block 
+
