@@ -137,16 +137,23 @@ function update_path(target, jump_height)
 				local neigh = node.neighbors[i]
 				if neigh and not neigh.target_direction[target] then
 					if i == 4 then
-						local x2 = neigh.x
-						local y1 = neigh.y
+						local neigh1 = neigh
+						local jump
 						for dy = 1, jump_height do
-							local y2 = y1-dy
-							if is_outside(x2,y2) then break end
-
-							local node2 = path_node_matrix[y2][x2]
-							if node2 and (node2.on_ground or (node2.target_direction[target] and node2.target_direction[target] < 3)) then
-								neigh.target_direction[target] = 3
+							neigh1 = neigh1.neighbors[4]
+							if not neigh1 then break end
+							if neigh1.on_ground then
+								jump = dy
 								break
+							end
+							neigh1 = neigh1.neighbors[4]
+						end
+
+						if jump then
+							neigh1 = neigh
+							for _ = 1, jump do
+								neigh1.target_direction[target] = 3
+								neigh1 = neigh1.neighbors[4]
 							end
 						end
 					else
