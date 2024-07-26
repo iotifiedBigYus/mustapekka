@@ -10,7 +10,6 @@ __lua__
 #include constants.lua
 #include util.lua
 
-
 #include astar.lua
 #include path.lua
 

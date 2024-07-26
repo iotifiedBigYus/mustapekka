@@ -398,5 +398,9 @@ Made a new walking animation for the dog that looks good while jumping. I think 
 Started on a new pathfinding algorithm that generates a graph of paths.
 
 TODO:
-- fix bug where player leaves ground while jumping under a block 
+- fix bug where player leaves ground while jumping under a block
+
+## Sam, 26.7.24
+
+Worked on the pathfinding. The idea is based on Atrejo's algorithm, but the logic regarding reach by jumping is still not done.
 
