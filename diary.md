@@ -404,3 +404,7 @@ TODO:
 
 Worked on the pathfinding. The idea is based on Atrejo's algorithm, but the logic regarding reach by jumping is still not done.
 
+## Sam, 28.7.24
+
+I now got the pathfinding to work as I imagined, except for some problems. It needs to be optimized, the dog can get stuck jumping on the edge between coordinates, and the dog should try to get as close to the player as possible even though they can't reach them. Besides that I'm happy that I got it somewhat working.
+

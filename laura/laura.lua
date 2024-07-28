@@ -113,8 +113,6 @@ function update_play()
 
 	update_spawning(player.x, player.y-player.h*.5)
 
-	update_path(player)
-
 	update_outgame()
 end
 
@@ -186,12 +184,14 @@ function draw_play()
 	print(unpack(info_message))
 	map()
 
+
+
+	if PATH_NEIGHBORS then draw_path_nodes() end
+	if PATH_HEIGHTS then draw_path_heights() end
+
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
-
-	if PATH_NEIGHBORS then draw_path_nodes() end
-	if PATH_DIRECTIONS then draw_path_directions(player) end
 
 	--m = blank_map(-1)
 	--draw map

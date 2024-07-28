@@ -9,12 +9,16 @@ function init_dog_data()
 	a.h  = .875
 	a.walk_speed    = .1875
 	a.jump_speed    = .3
+	a.jumped     = false
+	a.jump       = false
+	a.descend   = false
 	a.traction      = false
 	a.strafing_x    = 0
 	a.update        = update_dog
 	a.update_sprite = update_dog_sprite
 	a.draw          = draw_dog
 	a.has_target    = false
+	a.target        = nil
 	a.t_target      = 0
 	a.target_x      = 0
 	a.target_y      = 0
@@ -24,7 +28,7 @@ function init_dog_data()
 	return a
 end
 
-
+--[[
 function spawn_dogs()
 	local dogs = {}
 
@@ -36,94 +40,80 @@ function spawn_dogs()
 
 	return dogs
 end
-
-
-function is_valid_neighbor ( node, neighbor )
-	local x1, y1 = node.x, node.y
-	local dx = neighbor.x - node.x
-	local dy = neighbor.y - node.y
-
-	if not neighbor.is_walkable then
-		return false --> in the air
-	elseif abs(dy) > 3 or abs(dx) > 1 then
-		return false --> too far
-	elseif dy == 0 and abs(dx) == 1 then
-		return true --> side to side
-	elseif node.is_descendable and dy > 0 and dx == 0 then
-		return true --> straight descend
-	elseif dy == -1 and dx == 0 and neighbor.is_descendable then
-		return true 
-	end
-
-	local u1 = not solid(x1, y1-1)
-	local u2 = u1 and not solid(x1, y1-2)
-	if dy == -1 and abs(dx) == 1 and u1 then
-		return true --> up an edge
-	elseif dy == -1 and x == 0 and neighbor.is_descendable then
-		return true --> up a platform
-	elseif dy == -2 and abs(dx) == 1 and u2 then
-		return true --> two-high edge
-	elseif dy == -2 and x == 0 and u1 and neighbor.is_descendable then
-		return true --> two-high platform
-	end
-
-	local s0 = not solid(x1+dx, y1)
-	local s1 = s0 and not solid(x1+dx, y1+1)
-	local s2 = s1 and not solid(x1+dx, y1+2)
-	if dy == 1 and abs(dx) == 1 and s0 then
-		return true --> down an edge
-	elseif dy == 2 and abs(dx) == 1 and s1 then
-		return true --> two-high edge
-	elseif dy == 3 and abs(dx) == 1 and s2 then
-		return true --> three-high edge
-	end
-
-	return false
-end
+--]]
 
 
 function update_dog(a)
 
-	update_input2()
-
+	if MANUAL_DOG then
+		update_manual_dog(a)
+		return
+	end
 
 	-- target
-
 	update_target(a)
 
-	--[[
-	if a.standing and a.has_target then
-		local start = find_node(level_nodes, a.x, a.y)
-		local goal = find_node(level_nodes, a.target_x, a.target_y)
-		a.path = path ( start, goal, level_nodes, false, is_valid_neighbor )
-	end
-	--]]
-
-	--[[
+	-- chase target
+	local dir
 	if a.has_target then
-		if (a.t_target == 0) a.strafing_x = a.target_dir_x
-		a.t_target = approach(a.t_target)
+		update_path(a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
+
+		dir = get_path_direction(a, a.target)
+	end
+	
+	if dir then
+		local dir_strafing_x = {-1,1,0,0}
+		local dir_jump = {false, false, true, false}
+		local dir_descend = {false, false, false, true}
+
+		a.strafing_x = dir_strafing_x[dir]
+		a.jump = dir_jump[dir]
+		a.descend = dir_descend[dir]
+
+		debug.dir = dir
 	else
-		a.t_target = DOG_TARGET_TIME
 		a.strafing_x = 0
+		a.jump = false
+		a.descend = false
+
+		debug.dir = 0
 	end
 
+	-- acceleration
 	local accel = .1 --> airborn
 	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
 		accel = .05 --> going too fast (probably wont happen)
-	elseif a.standing and a.has_target then
-		accel = .25 --> on ground with target
 	elseif a.standing then
-		accel = .05 --> on ground
+		accel = .1 --> on ground
 	elseif strafing_x != 0 then
-		accel = .2 --> strafing while airborn
+		accel = .1 --> strafing while airborn
 	end
-	--]]
+
+	-- velocity
+	a.speed_x = approach(a.speed_x, a.strafing_x * a.walk_speed, accel * a.walk_speed)
+
+	--jumping
+	if a.jump and a.standing then
+		a.speed_y = -a.jump_speed
+	end
+
+	--> apply world collisions and velocities
+	update_actor(a)
+
+	debug.dox_x = a.x
+	debug.dox_sp_x = a.speed_x
+
+	--going down platforms
+	a.descending = a.descend and a.standing
+end
+
+
+function update_manual_dog(a)
+	update_input2()
 
 	a.strafing_x = input2_x
 	if(input2_x != 0) a.d = input2_x
-
-	-- velocity
+	a.jump = input2_jump or input2_jump_grace > 0
 
 	local accel = .1 --> airborn
 	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
@@ -136,10 +126,7 @@ function update_dog(a)
 
 	a.speed_x = approach(a.speed_x, a.strafing_x * a.walk_speed, accel * a.walk_speed)
 
-
-	--jumping
-	
-	if input2_jump or input2_jump_grace > 0 then
+	if a.jump then
 		if a.standing and (not a.jumped or AUTO_JUMP) then
 			--begin (trying to) jump
 			a.speed_y = -a.jump_speed
@@ -147,7 +134,6 @@ function update_dog(a)
 	else
 		a.jumped = false
 	end
-
 
 	--> apply world collisions and velocities
 	update_actor(a)
@@ -161,13 +147,16 @@ function update_target(a)
 	local x1, y1 = a.x, a.y - .5 * a.h
 	
 	--> choose player if no ball is present
-	local x2, y2 = player.x, player.y-.5
+	local target = player
 	for a2 in all(actors) do
 		if a2.k == SPR_BALL then
-			x2, y2 = a2.x, a2.y-.5*a2.h
+			target = a2
 			break
 		end
 	end
+
+	a.target = target
+	local x2, y2 = target.x, target.y-.5*target.h
 
 	local dx = x2 - x1
 	local dy = y2 - y1
@@ -285,20 +274,5 @@ function draw_dog(a)
 		)
 	end
 
-	draw_path(a)
-end
-
-
-function draw_path(a)
-	if not a.path then return end
-
-	for i = 2, #a.path do
-		n1, n2 = a.path[i-1], a.path[i]
-
-		line(
-			pos8(n1.x), pos8(n1.y),
-			pos8(n2.x), pos8(n2.y),
-			8
-		)
-	end
+	if PATH_DIRECTIONS then draw_path_directions(a.target) end
 end

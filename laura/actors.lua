@@ -142,8 +142,6 @@ function update_actor(a)
 	a.t += 1
 end
 
-
-
 --[[
 
 actor position is center bottom

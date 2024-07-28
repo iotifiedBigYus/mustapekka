@@ -11,8 +11,8 @@
 
 function make_path_node(x,y,on_ground,col)
 	local node = {
-		x=x, y=y, neighbors={nil, nil, nil, nil}, on_ground = on_ground,
-		col=col, direction = nil, target_direction = {}
+		x=x, y=y, neighbors={}, on_ground = on_ground,
+		col=col, target_direction = {}, height = 0
 	}
 	add(path_nodes, node)
 	path_node_matrix[y][x] = node
@@ -31,7 +31,6 @@ function init_path_nodes()
 	for y = world_y, world_y+world_h-1 do
 		path_node_matrix[y] = {}
 		for x = world_x, world_x+world_w-1 do
-			--path_node_matrix[y][x] = nil
 			if not solid(x,y) and (solid(x,y+1) or platform(x,y+1)) then
 				local node = make_path_node(x,y,true,11)
 				if (platform(x,y+1)) add(floating_path_nodes, node)
@@ -68,25 +67,6 @@ function init_path_nodes()
 		end
 	end
 
-
-	--[[
-	local a = {nil, nil, nil, nil}
-	a[2] = 1
-	local n = 0
-
-	for i in all(a) do
-		n += 1
-		if i == 1 then
-			debug.here = true
-		end
-	end
-
-	debug.len = #a
-	debug.n = n
-	--]]
-
-	--debug.node = path.node_matrix[1][1]
-
 	-- connect floating nodes down
 	for node1 in all(floating_path_nodes) do
 		local checking = true
@@ -107,66 +87,88 @@ function init_path_nodes()
 		end
 	end
 	--]]
+
+	-- add heights
+	for node in all(path_nodes) do
+		if not node.on_ground then
+			local height = 0
+			local node1 = node
+			repeat
+				height += 1
+				node1 = node1.neighbors[4]
+			until not node1 or node1.on_ground
+
+			node.height = height
+		end
+	end
 end
 
 
-function update_path(target, jump_height)
+function update_path(target, jump_height, fall_height)
 	jump_height = jump_height or 1/0
+	fall_height = fall_height or 1/0
 	local x0 = flr(target.x)
-	local y0 = flr(target.y) - 1
+	local y0 = flr(target.y - 0.5* target.h)
 
-	--find node on player or underneath
+	-- find the node the target is on or one underneath
 	local target_node = path_node_matrix[y0][x0]
 	while not target_node do
 		y0 += 1
 		target_node = path_node_matrix[y0][x0]
 	end
 
-	--reset directions
+	-- reset directions
 	for node in all(path_nodes) do
 		node.direction = nil
 		node.target_direction[target] = nil
 	end
 
+	-- expand from target
 	local check_nodes = {target_node}
 	local new_check_nodes = {}
 	local flip_direction = {2,1,4,3}
 	repeat
 		for node in all(check_nodes) do
-			for i = 1,4 do
-				local neigh = node.neighbors[i]
-				if neigh and not neigh.target_direction[target] then
-					if i == 4 then
-						local neigh1 = neigh
-						local jump
-						for dy = 1, jump_height do
-							neigh1 = neigh1.neighbors[4]
-							if not neigh1 then break end
-							if neigh1.on_ground then
-								jump = dy
-								break
-							end
-							neigh1 = neigh1.neighbors[4]
-						end
-
-						if jump then
-							neigh1 = neigh
-							for _ = 1, jump do
-								neigh1.target_direction[target] = 3
-								neigh1 = neigh1.neighbors[4]
-							end
-						end
-					else
-						neigh.target_direction[target] = flip_direction[i]
-					end
-
-					add(new_check_nodes, neigh)
+		local dir = node.target_direction[target]
+		for i = 1,4 do
+		local neigh = node.neighbors[i]
+		if neigh and not neigh.target_direction[target] then
+			local direct = false
+			
+			if i == 3 then
+				-- expansion downwards, approach by jumping
+				if dir != 3 then
+					direct = neigh.height < fall_height
 				end
+			elseif i == 4 then
+				-- expansion downwards, approach by jumping
+				if dir != 4 then
+					direct = neigh.height < jump_height
+				end
+			else
+				direct = true
 			end
+
+			if direct then
+				neigh.target_direction[target] = flip_direction[i]
+				add(new_check_nodes, neigh)
+			end
+		end
+		end
 		end
 		check_nodes = new_check_nodes
 		new_check_nodes = {}
 	until #check_nodes == 0
+end
+
+
+function get_path_direction(a, target)
+	local x0 = flr(a.x)
+	local y0 = flr(a.y - 0.5* a.h)
+	local node = path_node_matrix[y0][x0]
+	if node then
+		return node.target_direction[target]
+	end
 end
 
 
@@ -189,6 +191,14 @@ function draw_path_nodes()
 end
 
 
+function draw_path_heights()
+	for node in all(path_nodes) do
+		print(node.height, node.x*8, node.y*8, 7)
+		--if node.on_ground then pset(node.x*8+6, node.y*8,7) end
+	end
+end
+
+
 function draw_path_directions(target)
 
 	local direction_x = {-1,1,0,0}
@@ -202,9 +212,9 @@ function draw_path_directions(target)
 			local dx = direction_x[dir]
 			local dy = direction_y[dir]
 			circ(x+dx*2,y+dy*2, 1, 7)
-			line(x,y,x-dx*3, y-dy*3,7)
+			line(x+dx*3,y+dy*3,x-dx*3, y-dy*3,7)
 		else
-			circ(x,y, 1, 7)
+			circ(x,y, 0, 7)
 		end
 	end
 end
