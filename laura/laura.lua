@@ -42,18 +42,13 @@ function init_level()
 	t_started = 1
 	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
 
-	path_node_matrix = init_path_nodes()
-
-	path_graph = make_path_graph(2,5)
-	inv_path_graph = make_path_graph(2,5,true)
+	make_path_graph()
 
 	actors = {}
 	player = spawn_player()
 	cat = spawn_cat()
 
 	info_message = {"", player.x*8-16, player.y*8-16, 7}
-
-	level_nodes = generate_nodes()
 
 	make_camera()
 
@@ -191,6 +186,10 @@ function draw_play()
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
+
+	if PATH_NEIGHBORS then draw_path_nodes() end
+	if PATH_HEIGHTS then draw_path_heights() end
+	if PATH_DIRECTIONS then draw_path_directions(player) end
 
 	--m = blank_map(-1)
 	--draw map

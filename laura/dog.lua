@@ -22,7 +22,8 @@ function init_dog_data()
 	a.target_x      = 0
 	a.target_y      = 0
 	a.target_dir_x  = 0
-	a.path          = nil
+	a.path_jump     = 2
+	a.path_fall     = 5
 
 	return a
 end
@@ -65,8 +66,10 @@ function update_dog(a)
 	-- chase target
 	local dir
 	if a.has_target then
-		update_path(a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
-		--update_path2(a, a.target)
+		update_path_from(a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
+		--update_path_from2(a, a.target)
+
+		update_direction_map(a.target, a)
 
 		dir = get_path_direction(a, a.target)
 		--dir = get_path_direction2(a, a.target)
@@ -280,10 +283,5 @@ function draw_dog(a)
 		)
 	end
 
-	if PATH_NEIGHBORS then draw_path_nodes() end
-	if PATH_HEIGHTS then draw_path_heights() end
-	if PATH_GRAPH then draw_path_graph(inv_path_graph) end
-	if PATH_DIRECTIONS and a.direction_map then draw_path_directions2(a.direction_map) end
-	if PATH_DIRECTIONS then draw_path_directions(player) end
-	if PATH_HEIGHTS then draw_path_heights() end
+	--if PATH_DIRECTIONS and a.direction_map then draw_path_directions2(a.direction_map) end
 end

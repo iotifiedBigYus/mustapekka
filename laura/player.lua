@@ -26,6 +26,9 @@ function init_player_data()
 	a.f_y       = 0
 	a.f_x       = 0
 	a.f_vx      = .04
+	--paths
+	a.path_x = {}
+	a.path_y = {}
 	--methods
 	a.update        = update_player
 	a.update_sprite = update_player_sprite
@@ -58,7 +61,6 @@ end
 
 function update_player(a)
 	--strafing
-
 	a.strafing_x = input_x != 0
 	if(input_x != 0)a.d = input_x
 
@@ -95,6 +97,8 @@ function update_player(a)
 	--> apply world collisions and velocities
 	update_actor(a)
 
+	debug.path_x = a.path_x
+
 	--going down platforms
 	a.descending = input_down and a.standing
 end
@@ -128,25 +132,8 @@ function update_player_sprite(a)
 		--standing still
 		a.frame = 0
 	end
-
-	--[[
-	if not a.standing then
-		a.frame = a.speed_y < a.accel_y and 17 or 18
-		a.t_frame = 3
-		if (a.t_u_frame > 0) a.frame += 16
-	elseif a.walking then
-		if (a.t_frame == 3) sfx(SFX_STEP)
-		local t = flr(a.t_frame)
-		a.frame = a.t_u_frame > 0 and 32+t or 16+t
-		a.t_frame = (a.t_frame + 0.25) % 4--flr(4*a.t_frame+1.5)/4 -->four ticks per frame
-		-- sfx
-	else
-		--standing still
-		a.frame = min(2, a.t_u_frame)
-	end
-
-	--]]
 end
+
 
 
 function draw_player(a)
