@@ -8,11 +8,13 @@
 
 DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 1 --frames per tick
+SLOWDOWN   = 0 --frames per tick
 HITBOX     = false
 SIGTHLINES = true
-PATH_DIRECTIONS = true
+PATH_DIRECTIONS = false
 PATH_NEIGHBORS = false
+PATH_HEIGHTS = false
+PATH_GRAPH = false
 PATH_HEIGHTS = false
 MANUAL_DOG  = false
 VERSION    = '0.6.0' --version number
@@ -47,6 +49,7 @@ JUMP_MAX = 5 --maximum jump duration (in ticks)
 COYOTE = 4 --coyote time (window where you can jump when falling)
 JUMP_GRACE = 4
 ALT_GRACE = 4
+SNAP_GRACE = 20
 E = .01 --epsilon (a small number used when finding edges)
 FVX = .04 --sprite recentering speed
 MIN_SPEED = .04 --minimum velocity

@@ -9,10 +9,9 @@ function init_dog_data()
 	a.h  = .875
 	a.walk_speed    = .1875
 	a.jump_speed    = .3
-	a.jumped     = false
-	a.jump       = false
-	a.descend   = false
-	a.traction      = false
+	a.jumped        = false
+	a.jump          = false
+	a.descend       = false
 	a.strafing_x    = 0
 	a.update        = update_dog
 	a.update_sprite = update_dog_sprite
@@ -26,6 +25,11 @@ function init_dog_data()
 	a.path          = nil
 
 	return a
+end
+
+
+function spawn_dog(x,y)
+	return make_actor(SPR_DOG, x, y, -1)
 end
 
 --[[
@@ -53,12 +57,19 @@ function update_dog(a)
 	-- target
 	update_target(a)
 
+	debug.overlap = false
+	if abs(a.x-a.target_x) < a.w2 and abs(a.y-a.h-a.target_y) < a.h2 then
+		debug.overlap = true
+	end 
+
 	-- chase target
 	local dir
 	if a.has_target then
 		update_path(a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
+		--update_path2(a, a.target)
 
 		dir = get_path_direction(a, a.target)
+		--dir = get_path_direction2(a, a.target)
 	end
 	
 	if dir then
@@ -69,14 +80,13 @@ function update_dog(a)
 		a.strafing_x = dir_strafing_x[dir]
 		a.jump = dir_jump[dir]
 		a.descend = dir_descend[dir]
-
-		debug.dir = dir
+		if dir <= 2 then
+			a.d = dir_strafing_x[dir]
+		end
 	else
 		a.strafing_x = 0
 		a.jump = false
 		a.descend = false
-
-		debug.dir = 0
 	end
 
 	-- acceleration
@@ -99,9 +109,6 @@ function update_dog(a)
 
 	--> apply world collisions and velocities
 	update_actor(a)
-
-	debug.dox_x = a.x
-	debug.dox_sp_x = a.speed_x
 
 	--going down platforms
 	a.descending = a.descend and a.standing
@@ -144,7 +151,7 @@ end
 
 
 function update_target(a)
-	local x1, y1 = a.x, a.y - .5 * a.h
+	local x1, y1 = a.x, a.y - a.h2
 	
 	--> choose player if no ball is present
 	local target = player
@@ -219,7 +226,6 @@ function update_target(a)
 	a.target_x = blocked and x1 + dist / len * dx or x2
 	a.target_y = blocked and y1 + dist / len * dy or y2
 	a.target_dir_x = step_x
-	a.d = step_x
 end
 
 
@@ -268,11 +274,16 @@ function draw_dog(a)
 
 	if SIGTHLINES and a.has_target then
 		line(
-			pos8(a.x), pos8(a.y - .5 * a.h),
+			pos8(a.x), pos8(a.y - a.h2),
 			pos8(a.target_x), pos8(a.target_y),
 			11
 		)
 	end
 
-	if PATH_DIRECTIONS then draw_path_directions(a.target) end
+	if PATH_NEIGHBORS then draw_path_nodes() end
+	if PATH_HEIGHTS then draw_path_heights() end
+	if PATH_GRAPH then draw_path_graph(inv_path_graph) end
+	if PATH_DIRECTIONS and a.direction_map then draw_path_directions2(a.direction_map) end
+	if PATH_DIRECTIONS then draw_path_directions(player) end
+	if PATH_HEIGHTS then draw_path_heights() end
 end

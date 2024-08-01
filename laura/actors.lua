@@ -40,7 +40,6 @@ function make_actor(k,x,y,d)
 	a.accel_y  = .02 -- gravity
 	a.drag     = .02 --air drag
 	a.friction = .9 -- exponential deacceleration
-	a.traction = true
 	a.d        = d or -1 --(looking direction)
 	a.mass     = 1
 	a.bounce   = 0
@@ -60,6 +59,9 @@ function make_actor(k,x,y,d)
 	for attr,v in pairs(actor_data[k]) do
 		a[attr]=v
 	end
+
+	--half height
+	a.h2 = a.h * .5
 
 	add(actors, a)
 
@@ -122,16 +124,12 @@ function update_actor(a)
 	a.y += a.speed_y
 
 	--snapping
-	if(a.speed_x == 0)a.x = snap8(a.x,a.cx)
-	if(a.speed_y == 0)a.y = snap8(a.y,0)
-
-	--TODO:
-	--friction
-	if a.standing and a.traction then
-		a.speed_x *= a.friction
-		if (abs(a.speed_x) < MIN_SPEED) a.speed_x = 0
+	if a.speed_x == 0 and a.speed_y == 0 then
+		a.x = snap8(a.x,a.cx)
+		a.y = snap8(a.y)
 	end
-
+	--if(a.speed_y == 0)a.y = snap8(a.y,0)
+	
 	--gravity
 	a.speed_y += a.accel_y
 

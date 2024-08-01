@@ -17,7 +17,6 @@ function init_player_data()
 	--state
 	a.is_player  = true
 	a.strafing_x = false
-	a.traction   = false --> false: no friction
 	a.jumped     = false
 	a.descending = false
 	a.gliding    = false

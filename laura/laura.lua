@@ -42,7 +42,10 @@ function init_level()
 	t_started = 1
 	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
 
-	init_path_nodes()
+	path_node_matrix = init_path_nodes()
+
+	path_graph = make_path_graph(2,5)
+	inv_path_graph = make_path_graph(2,5,true)
 
 	actors = {}
 	player = spawn_player()
@@ -90,6 +93,7 @@ end
 
 
 function _update60()
+
 	debug.t += 1
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
@@ -184,11 +188,6 @@ function draw_play()
 	print(unpack(info_message))
 	map()
 
-
-
-	if PATH_NEIGHBORS then draw_path_nodes() end
-	if PATH_HEIGHTS then draw_path_heights() end
-
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
@@ -270,6 +269,8 @@ function draw_debug()
 	color(7)
 	print('v'..VERSION)
 	if DEBUGGING then
+		print('mem: '..tostring(stat(0)/2048))
+		print('cpu: '..tostring(stat(1)))
 		for k,v in pairs(debug) do
 			print(k..': '..tostring(v))
 		end

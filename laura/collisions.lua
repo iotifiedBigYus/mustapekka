@@ -63,7 +63,7 @@ function collide_up(a)
 	else nudges = NUDGES_CENTER end
 
 	for n in all(nudges) do
-		if not (solid(xl+n, y1) or solid(xr+n, y1)) then
+		if not solid(xl+n, y1) and not solid(xr+n, y1) then
 			a.standing = false
 			a.t_coyote = 0
 			a.x += n
@@ -75,7 +75,7 @@ function collide_up(a)
 	--> hit
 
 	-- search up for collision point
-	while (not (solid(xl, a.y-a.h-E) or solid(xr, a.y-a.h-E))) do
+	while not solid(xl, a.y-a.h-E) and not solid(xr, a.y-a.h-E) do
 		a.y = a.y - E
 	end
 
@@ -89,7 +89,7 @@ end
 
 
 function collide_down(a)
-	if (a.speed_y < 0) return --> going up
+	if (a.speed_y <= 0) return --> going up
 
 	local y1 = a.y+a.speed_y-E
 	local xl = a.x+a.speed_x-a.w2
@@ -119,12 +119,11 @@ function collide_down(a)
 			a.standing = true
 		end
 	else
+		a.standing = false
 		--coyote time
 		if (not a.t_coyote) return
 		a.t_coyote = approach(a.t_coyote)
 		if (a.standing) a.t_coyote = COYOTE
-
-		a.standing = false
 	end
 end
 
