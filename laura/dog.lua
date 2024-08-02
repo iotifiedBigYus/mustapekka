@@ -160,19 +160,36 @@ end
 
 
 function update_target(a)
-	local x1, y1 = a.x, a.y - a.h2
-	
-	--> choose player if no ball is present
-	local target = player
-	for a2 in all(actors) do
-		if a2.k == SPR_BALL then
-			target = a2
-			break
+	--> choose player only if no ball is seen
+
+	--[[
+	if not a.target or not check_visibility(a, a.target) then
+		a.target = nil
+	end
+
+	if not a.target then
+		for ball in all(actors) do
+			if ball.k == SPR_BALL then
+				if check_visibility(a, ball) then
+					a.target = ball
+					break
+				end
+			end
 		end
 	end
 
-	a.target = target
-	local x2, y2 = target.x, target.y-.5*target.h
+	if not a.target and check_visibility(a, player) then
+		a.target = player
+	end
+
+	debug.target = a.target
+
+	--]]
+	--[
+
+	a.target = player
+	local x1, y1 = a.x, a.y - a.h2
+	local x2, y2 = a.target.x, a.target.y-.5*a.target.h
 
 	local dx = x2 - x1
 	local dy = y2 - y1
@@ -235,6 +252,67 @@ function update_target(a)
 	a.target_x = blocked and x1 + dist / len * dx or x2
 	a.target_y = blocked and y1 + dist / len * dy or y2
 	a.target_dir_x = step_x
+	--]]
+end
+
+
+function check_visibility(a, target)
+	local x1, y1 = a.x, a.y-a.h2
+	local x2, y2 = target.x, target.y-target.h2
+
+	local dx = x2 - x1
+	local dy = y2 - y1
+	local slope = dy / dx
+	local len = sqrt(dx * dx + dy * dy)
+
+	if abs(slope) > DOG_SIGHT_SLOPE then
+		return false
+	end
+	
+	if abs(dy) > DOG_SIGHT_HEIGHT then
+		return false
+	end
+
+	if abs(dx) > DOG_SIGHT_WIDTH then
+		return false
+	end
+
+	if len > DOG_SIGHT_DIST then
+		return false
+	end
+
+	--digital differential analysis
+	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
+	local map_x = flr(x1)
+	local map_y = flr(y1)
+	local step_x = sgn(dx)
+	local step_y = sgn(dy)
+	local sec_x = sqrt(1 + dy / dx * dy / dx) --secant
+	local sec_y = sqrt(1 + dx / dy * dx / dy) --cosecant
+	local ray_x = dx < 0 and (x1 - map_x) * sec_x or (map_x + 1 - x1) * sec_x
+	local ray_y = dy < 0 and (y1 - map_y) * sec_y or (map_y + 1 - y1) * sec_y
+	local dist = 0
+	local blocked = false
+
+	while not blocked and dist < len do
+		if sec_x != 0 and (sec_y == 0 or ray_x < ray_y) then
+			map_x += step_x
+			dist = ray_x
+			ray_x += sec_x
+		else
+			map_y += step_y
+			dist = ray_y
+			ray_y += sec_y
+		end
+
+		if solid(map_x, map_y) then
+			blocked = true
+		end
+	end
+	
+	blocked = blocked and dist < len
+
+	return not blocked and dist < DOG_SIGHT_DIST
 end
 
 
