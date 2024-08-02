@@ -24,6 +24,7 @@ function init_dog_data()
 	a.target_dir_x  = 0
 	a.path_jump     = 2
 	a.path_fall     = 5
+	a.t_strafing    = 0
 
 	return a
 end
@@ -66,26 +67,31 @@ function update_dog(a)
 	-- chase target
 	local dir
 	if a.has_target then
-		update_path_from(a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
-		--update_path_from2(a, a.target)
+		update_path_to(a, a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
+		--update_path_to2(a, a.target)
 
-		update_direction_map(a.target, a)
+		--update_direction_map(a.target, a)
 
 		dir = get_path_direction(a, a.target)
 		--dir = get_path_direction2(a, a.target)
 	end
 	
 	if dir then
-		local dir_strafing_x = {-1,1,0,0}
+		local dir_x = {-1,1,0,0}
 		local dir_jump = {false, false, true, false}
 		local dir_descend = {false, false, false, true}
 
-		a.strafing_x = dir_strafing_x[dir]
+		if dir_x[dir] != 0 then
+			a.strafing_x = dir_x[dir]
+			a.d = dir_x[dir]
+			a.t_strafing = DOG_STRAFING_TIME
+		else
+			if a.t_strafing == 0 then a.strafing_x = 0 end
+			a.t_strafing = approach(a.t_strafing)
+		end
+
 		a.jump = dir_jump[dir]
 		a.descend = dir_descend[dir]
-		if dir <= 2 then
-			a.d = dir_strafing_x[dir]
-		end
 	else
 		a.strafing_x = 0
 		a.jump = false

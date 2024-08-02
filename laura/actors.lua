@@ -78,6 +78,11 @@ function delete_actor(a)
 end
 
 
+function get_center_floored(a)
+	return flr(a.x), flr(a.y - a.h2)
+end
+
+
 function update_spawning(x0, y0)
 	x0=flr(x0)
 	y0=flr(y0)

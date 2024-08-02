@@ -408,10 +408,15 @@ Worked on the pathfinding. The idea is based on Atrejo's algorithm, but the logi
 
 I now got the pathfinding to work as I imagined, except for some problems. It needs to be optimized, the dog can get stuck jumping on the edge between coordinates, and the dog should try to get as close to the player as possible even though they can't reach them. Besides that I'm happy that I got it somewhat working.
 
-## Sam, 1.9.24
+## Sam, 1.8.24
 
 Tried to optimize the pathfinding by making the graph account for the jumping and falling heights of the dog. It got real confusing and I scrapped the idea. I'm having a hard time structuring the pathfinding in a logical way. The pathfinding should work like this:
 
 1. When a dog finds a target it starts chasing it by getting a direction from a direction map
 2. The direction map tied to the target is updated
 3. If there is no direction that leads to the target, the dog should pathfind to the point that is closest to the target
+
+
+## Sam, 2.8.24
+
+Got the dog to go as close to the player as possible even if it can't reach them. The pathfinding has yet to be optimized but it is on its way. There is a bug where the dog descends platforms it shouldn't.

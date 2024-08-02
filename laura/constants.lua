@@ -36,6 +36,7 @@ DOG_SIGHT_SLOPE = 1/0--5
 DOG_TARGET_TIME = 20
 DOG_JUMP_HEIGHT = 2
 DOG_FALL_HEIGHT = 3
+DOG_STRAFING_TIME = 2
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)

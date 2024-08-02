@@ -12,7 +12,7 @@
 function make_path_node(list, matrix, x,y,on_ground,col)
 	local node = {
 		x=x, y=y, neighbors={}, on_ground = on_ground,
-		col=col, target_direction = {}, height = 0
+		col=col, direction_to = {}, direction_from = {}, height = 0
 	}
 	add(list, node)
 	matrix[y][x] = node
@@ -44,6 +44,7 @@ function make_path_graph()
 		for dx = -1,1,2 do
 			x2 = x+dx
 			local node2 = matrix[y][x2]
+			--if node.on_ground and not node2 and not solid(x2,y) and not platform(x2,y) then
 			if node.on_ground and not node2 and not solid(x2,y) then
 				node2 = make_path_node(nodes, matrix, x2,y,false,9)
 				add(floating, node2)
@@ -101,41 +102,153 @@ function make_path_graph()
 end
 
 
-function update_direction_map(target, chaser)
-	local x0 = flr(target.x)
-	local y0 = flr(target.y - target.h2)
+function update_path_to(a, target, jump, fall)
+	jump = jump or 1/0
+	fall = fall or 1/0
 
-	-- find the node the actor is on or one underneath
-	local target_node = path_node_matrix[y0][x0]
-	while not target_node do
-		y0 += 1
-		target_node = path_node_matrix[y0][x0]
-	end
-
-	-- skip if same position
-	if x0 == target.path_x[chaser.k] and y0 == target.path_y[chaser.k] then
-		return
-	end
-
+	local start_node, x0, y0 = get_node(a)
+	local target_node, x1, y1 = get_node(target)
+	
 	-- reset directions
 	for node in all(path_nodes) do
-		node.direction = nil
-		node.target_direction[a] = nil
+		node.direction_to[target] = nil
 	end
 
-	target.path_x[chaser.k] = x0
-	target.path_y[chaser.k] = y0
+	--[[
+
+	-- expand from target node
+	expand_path(target, target_node, jump, fall)
+
+	if start_node.direction_to[target] then return end
+
+	--> path did not reach the start
+	local closest_node = find_closest_node(start_node, target_node, jump, fall)
+	expand_path(target, closest_node, jump, fall)
+	--]]
+
+	local closest_node = find_closest_node(start_node, target_node, jump, fall)
+	
+	expand_path(target, closest_node, jump, fall)
 end
 
 
-function update_path_from(a, jump_height, fall_height)
-	jump_height = jump_height or 1/0
-	fall_height = fall_height or 1/0
-	local x0 = flr(a.x)
-	local y0 = flr(a.y - a.h2)
+function expand_path(target, target_node, jump, fall)
+	local check_nodes = {target_node}
+	local new_check_nodes = {}
+	local flip_direction = {2,1,4,3}
+	repeat
+		for node in all(check_nodes) do
+		local dir = node.direction_to[target]
+		for i = 1,4 do
+		local neigh = node.neighbors[i]
+		if neigh and not neigh.direction_to[target] then
+			local direct = true
+			
+			if i == 3 then
+				-- expansion upwards, approach by falling
+				direct = dir != 3 and neigh.height < fall
+			elseif i == 4 then
+				-- expansion downwards, approach by jumping
+				direct = dir != 4 and neigh.height < jump
+			end
+
+			if direct then
+				neigh.direction_to[target] = flip_direction[i]
+				add(new_check_nodes, neigh)
+			end
+		end
+		end
+		end
+		check_nodes = new_check_nodes
+		new_check_nodes = {}
+	until #check_nodes == 0
+end
+
+
+function find_closest_node(start_node, target_node, jump, fall)
+	local x1, y1 = target_node.x, target_node.y
+
+	-- reset directions
+	for node in all(path_nodes) do
+		node.direction = nil
+	end
+
+	local check_nodes = {start_node}
+	local new_check_nodes = {}
+	local min_dist_sq = 1/0
+	local closest_node
+	repeat
+		for node in all(check_nodes) do
+			if node == target_node then
+				closest_node = target_node
+				check_nodes = {}
+				break
+			end
+
+			local dx = node.x - x1
+			local dy = node.y - y1
+			local dist_sq = dx * dx + dy * dy
+
+			if dist_sq < min_dist_sq then
+				min_dist_sq = dist_sq
+				closest_node = node
+			end
+
+			local dir = node.direction
+			
+			for i = 1,4 do
+			local neigh = node.neighbors[i]
+			if neigh and not neigh.direction then
+				local direct = true
+				
+				if i == 3 then
+					-- expansion upwards, approach by jumping
+					direct = dir != 4 and neigh.height < jump
+				elseif i == 4 then
+					-- expansion downwards, approach by falling
+					direct = dir != 3 and neigh.height < fall
+				end
+
+				if direct then
+					neigh.direction = i
+					add(new_check_nodes, neigh)
+				end
+			end
+			end
+		end
+		check_nodes = new_check_nodes
+		new_check_nodes = {}
+	until #check_nodes == 0
+
+	debug.closest_xy = tostring(closest_node.x)..","..tostring(closest_node.y)
+
+	return closest_node
+end
+
+
+
+function get_node(a)
+	local x0, y0 = get_center_floored(a)
 
 	-- find the node the actor is on or one underneath
-	local target_node = path_node_matrix[y0][x0]
+	local node = path_node_matrix[y0][x0]
+	while not node do
+		y0 += 1
+		node = path_node_matrix[y0][x0]
+	end
+
+	return node, x0, y0
+end
+
+
+function update_path_closest_to(a, target, jump_height, fall_height)
+	jump_height = jump_height or 1/0
+	fall_height = fall_height or 1/0
+	local x0, y0 = get_center_floored(a)
+	local x1, y1 = get_center_floored(target)
+
+	-- find the node the actor is on or one underneath
+	local start_node = path_node_matrix[y0][x0]
 	while not target_node do
 		y0 += 1
 		target_node = path_node_matrix[y0][x0]
@@ -144,7 +257,7 @@ function update_path_from(a, jump_height, fall_height)
 	-- reset directions
 	for node in all(path_nodes) do
 		node.direction = nil
-		node.target_direction[a] = nil
+		node.direction_to[a] = nil
 	end
 
 	-- expand from actor
@@ -153,10 +266,10 @@ function update_path_from(a, jump_height, fall_height)
 	local flip_direction = {2,1,4,3}
 	repeat
 		for node in all(check_nodes) do
-		local dir = node.target_direction[a]
+		local dir = node.direction_to[a]
 		for i = 1,4 do
 		local neigh = node.neighbors[i]
-		if neigh and not neigh.target_direction[a] then
+		if neigh and not neigh.direction_to[a] then
 			local direct = false
 			
 			if i == 3 then
@@ -174,7 +287,7 @@ function update_path_from(a, jump_height, fall_height)
 			end
 
 			if direct then
-				neigh.target_direction[a] = flip_direction[i]
+				neigh.direction_to[a] = flip_direction[i]
 				add(new_check_nodes, neigh)
 			end
 		end
@@ -191,7 +304,7 @@ function get_path_direction(a, target)
 	local y0 = flr(a.y - a.h2)
 	local node = path_node_matrix[y0][x0]
 	if node then
-		return node.target_direction[target]
+		return node.direction_to[target]
 	end
 end
 
@@ -231,7 +344,7 @@ function draw_path_directions(target)
 	for node in all(path_nodes) do
 		local x = node.x*8+4
 		local y = node.y*8+4
-		local dir = node.target_direction[target]
+		local dir = node.direction_to[target]
 		if dir then
 			local dx = direction_x[dir]
 			local dy = direction_y[dir]
