@@ -59,9 +59,7 @@ function update_dog(a)
 	-- target
 	update_target(a)
 
-	debug.overlap = false
 	if abs(a.x-a.target_x) < a.w2 and abs(a.y-a.h-a.target_y) < a.h2 then
-		debug.overlap = true
 	end 
 
 	-- chase target
@@ -160,103 +158,50 @@ end
 
 
 function update_target(a)
-	--> choose player only if no ball is seen
 
-	--[[
-	if not a.target or not check_visibility(a, a.target) then
-		a.target = nil
-	end
-
-	if not a.target then
-		for ball in all(actors) do
-			if ball.k == SPR_BALL then
-				if check_visibility(a, ball) then
-					a.target = ball
-					break
-				end
+	--> find target candidates
+	local candidates = {}
+	for a2 in all(actors) do
+		if a2.k == SPR_BALL or a2 == player then
+			if check_visibility(a, a2) then
+				add(candidates, a2)
 			end
 		end
 	end
 
-	if not a.target and check_visibility(a, player) then
-		a.target = player
-	end
-
-	debug.target = a.target
-
-	--]]
-	--[
-
-	a.target = player
-	local x1, y1 = a.x, a.y - a.h2
-	local x2, y2 = a.target.x, a.target.y-.5*a.target.h
-
-	local dx = x2 - x1
-	local dy = y2 - y1
-	local slope = dy / dx
-	local len = sqrt(dx * dx + dy * dy)
-
-	if abs(slope) > DOG_SIGHT_SLOPE then
-		a.has_target = false
-		return
-	end
-	
-	if abs(dy) > DOG_SIGHT_HEIGHT then
-		a.has_target = false
-		return
-	end
-
-	if abs(dx) > DOG_SIGHT_WIDTH then
-		a.has_target = false
-		return
-	end
-
-	if len > DOG_SIGHT_DIST then
-		a.has_target = false
-		return
-	end
-
-	--digital differential analysis
-	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn
-	local map_x = flr(x1)
-	local map_y = flr(y1)
-	local step_x = sgn(dx)
-	local step_y = sgn(dy)
-	local sec_x = sqrt(1 + dy / dx * dy / dx) --secant
-	local sec_y = sqrt(1 + dx / dy * dx / dy) --cosecant
-	local ray_x = dx < 0 and (x1 - map_x) * sec_x or (map_x + 1 - x1) * sec_x
-	local ray_y = dy < 0 and (y1 - map_y) * sec_y or (map_y + 1 - y1) * sec_y
-	local dist = 0
-	local blocked = false
-
-	while not blocked and dist < len do
-		if sec_x != 0 and (sec_y == 0 or ray_x < ray_y) then
-			map_x += step_x
-			dist = ray_x
-			ray_x += sec_x
-		else
-			map_y += step_y
-			dist = ray_y
-			ray_y += sec_y
-		end
-
-		if solid(map_x, map_y) then
-			blocked = true
+	--> choose closest candidate (player or ball)
+	local min_dist = 1/0
+	local closest_actor
+	for a2 in all(candidates) do
+		local dist = distance_sq(a, a2)
+		if dist < min_dist then
+			min_dist = dist
+			closest_actor = a2
 		end
 	end
-	
-	blocked = blocked and dist < len
-	a.has_target = not blocked and (a.has_target or dist < DOG_SIGHT_DIST)
-	if (not a.has_target) return
 
-	a.target_x = blocked and x1 + dist / len * dx or x2
-	a.target_y = blocked and y1 + dist / len * dy or y2
-	a.target_dir_x = step_x
-	--]]
+	a.target = closest_actor
+
+	local visible, x, y = check_visibility(a, closest_actor)
+
+	if visible then
+		a.has_target = true
+		a.target_x = x
+		a.target_y = y
+	end
+end
+
+
+function distance_sq(a1, a2)
+	local dx = a1.x - a2.x
+	local dy = a1.y - a1.h2 - a2.y + a2.h2
+	return dx * dx + dy * dy
 end
 
 
 function check_visibility(a, target)
+	if not target then return false end
+
 	local x1, y1 = a.x, a.y-a.h2
 	local x2, y2 = target.x, target.y-target.h2
 
@@ -312,7 +257,11 @@ function check_visibility(a, target)
 	
 	blocked = blocked and dist < len
 
-	return not blocked and dist < DOG_SIGHT_DIST
+	local visible = not blocked and dist < DOG_SIGHT_DIST
+	local x = blocked and x1 + dist / len * dx or x2
+	local y = blocked and y1 + dist / len * dy or y2
+
+	return visible, x, y
 end
 
 

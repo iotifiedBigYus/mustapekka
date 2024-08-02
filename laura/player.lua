@@ -97,8 +97,6 @@ function update_player(a)
 	--> apply world collisions and velocities
 	update_actor(a)
 
-	debug.path_x = a.path_x
-
 	--going down platforms
 	a.descending = input_down and a.standing
 end

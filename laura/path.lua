@@ -103,6 +103,8 @@ end
 
 
 function update_path_to(a, target, jump, fall)
+	if not target then return end
+	
 	jump = jump or 1/0
 	fall = fall or 1/0
 
@@ -219,8 +221,6 @@ function find_closest_node(start_node, target_node, jump, fall)
 		check_nodes = new_check_nodes
 		new_check_nodes = {}
 	until #check_nodes == 0
-
-	debug.closest_xy = tostring(closest_node.x)..","..tostring(closest_node.y)
 
 	return closest_node
 end
