@@ -420,3 +420,7 @@ Tried to optimize the pathfinding by making the graph account for the jumping an
 ## Sam, 2.8.24
 
 Got the dog to go as close to the player as possible even if it can't reach them. The pathfinding has yet to be optimized but it is on its way. There is a bug where the dog descends platforms it shouldn't.
+
+## Sam, 4.8.24
+
+Some cleanup, and some more work on the pathfinding. Solid blocks might create some problems.

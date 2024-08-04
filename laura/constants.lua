@@ -8,7 +8,7 @@
 
 DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
-SLOWDOWN   = 0 --frames per tick
+SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
 SIGTHLINES = true
 PATH_DIRECTIONS = true
@@ -36,7 +36,6 @@ DOG_SIGHT_SLOPE = 1/0--5
 DOG_TARGET_TIME = 20
 DOG_JUMP_HEIGHT = 2
 DOG_FALL_HEIGHT = 3
-DOG_STRAFING_TIME = 2
 
 U_DRAG_X = 0.05 --umbrella sideways air drag
 U_DRAG_Y = 1.2 --umbrella drag (when going down)

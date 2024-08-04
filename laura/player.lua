@@ -11,12 +11,13 @@ function init_player_data()
 	a.w2 = 5/8 * .5 --> half width
 	a.h  = 1
 	--motion
-	a.walk_speed = .125 -- walking speed
+	a.walk_speed = 1 / 8 -- walking speed
+	a.walk_accel = 1 / 32
 	a.jump_speed = .3 -- jump speed
 	a.mass = 1
+	a.strafing_x = 0
 	--state
 	a.is_player  = true
-	a.strafing_x = false
 	a.jumped     = false
 	a.descending = false
 	a.gliding    = false
@@ -61,21 +62,15 @@ end
 
 function update_player(a)
 	--strafing
-	a.strafing_x = input_x != 0
-	if(input_x != 0)a.d = input_x
-
-	local accel = .1 --> airborn
-	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
-		accel = .05 --> going too fast (probably wont happen)
-	elseif a.standing then
-		accel = .25 --> on ground
-	elseif a.strafing_x then
-		accel = .2 --> strafing while airborn
-	end
+	a.strafing_x = input_x
+	if(a.strafing_x != 0)a.d = input_x
 
 	-- velocity
-
-	a.speed_x = approach(a.speed_x, input_x * a.walk_speed, accel * a.walk_speed)
+	a.speed_x = approach(
+		a.speed_x,
+		input_x * a.walk_speed,
+		a.walk_accel * get_situation_acceleration(a)
+	)
 
 	--jumping
 
@@ -114,7 +109,7 @@ end
 
 function update_player_sprite(a)
 	--walking animation
-	a.walking = (a.standing and (a.strafing_x or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
+	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
 
 	--recenter the spirte
 	a.f_x = approach(a.f_x, 0, a.f_vx)

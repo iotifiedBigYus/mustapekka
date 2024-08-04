@@ -9,6 +9,10 @@
 
 
 function _init()
+
+	cartdata( 'iotifiedbigyus_mustapekka' )
+
+
 	debug = {t=0} --debug object / namespace
 	
 	init_actor_data()
@@ -54,6 +58,8 @@ function init_level()
 
 	iris_x = pos8(player.x)-camera_axis_x.pos+63.5
 	iris_y = pos8(player.y-.5)-camera_axis_y.pos+63.5
+
+	debug.off = 6.1 % 1
 end
 
 

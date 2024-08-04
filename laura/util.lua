@@ -64,6 +64,28 @@ function approach(x, target, max_delta)
 end
 
 
+function aabb(a1, a2)
+	--axis-aligned bounding box collision
+	--using strict interior
+	return (
+		a1.x - a1.w2 < a2.x + a2.w2 and
+		a1.x + a1.w2 > a2.x - a2.w2 and
+		a1.y - a1.h  < a2.y         and
+		a1.y         > a2.y - a2.h
+	)
+end
+
+
+function overlaps(a, x, y)
+	return (
+	    a.x - a.w2 < x and
+		a.x + a.w2 > x and
+		a.y - a.h  < y and
+		a.y        > y
+	)
+end
+
+
 function dda(x1, y1, x2, y2)
 	--digital differential analysis
 	--source: youtu.be/NbSee-XM7WA?si=SdPCtOXWTj_hdpCn

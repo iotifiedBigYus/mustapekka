@@ -4,20 +4,22 @@
 
 function init_actor_data()
 	actor_data = {
-	[SPR_PLAYER] = init_player_data(),
-	[SPR_DOG] = init_dog_data(),
-	--[[
-	[SPR_SOFA] = {
-		w2 = 1,
-		h  = 1,
-		mass = 2,
-		friction = 0.05,
-		is_furniture = true,
-		draw = draw_sofa
-	}, --]]
-	[SPR_BALL] = init_ball_data(),
-	[SPR_CAT] = init_cat_data()
+		[SPR_PLAYER] = init_player_data(),
+		[SPR_DOG] = init_dog_data(),
+		[SPR_BALL] = init_ball_data(),
+		[SPR_CAT] = init_cat_data()
 	}
+end
+
+
+function point(x,y)
+	local a = {}
+	a.x = x
+	a.y = y
+	a.w2 = 0
+	a.h = 0
+	a.h2 = 0
+	return a
 end
 
 
@@ -68,6 +70,19 @@ function make_actor(k,x,y,d)
 	debug.actors_n = count(actors)
 
 	return a
+end
+
+
+function get_situation_acceleration(a)
+	-- acceleration
+	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
+		return .2 --> going too fast (probably wont happen)
+	elseif a.standing then
+		return 1 --> on ground
+	elseif a.strafing_x != 0 then
+		return .8 --> strafing while airborn
+	end
+	return .4 --> airborn
 end
 
 

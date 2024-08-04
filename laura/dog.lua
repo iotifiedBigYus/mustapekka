@@ -7,7 +7,8 @@ function init_dog_data()
 
 	a.w2 = .375
 	a.h  = .875
-	a.walk_speed    = .1875
+	a.walk_speed    = 1.5 / 8
+	a.walk_accel    = 1.5 / 128
 	a.jump_speed    = .3
 	a.jumped        = false
 	a.jump          = false
@@ -24,7 +25,6 @@ function init_dog_data()
 	a.target_dir_x  = 0
 	a.path_jump     = 2
 	a.path_fall     = 5
-	a.t_strafing    = 0
 
 	return a
 end
@@ -59,55 +59,27 @@ function update_dog(a)
 	-- target
 	update_target(a)
 
-	if abs(a.x-a.target_x) < a.w2 and abs(a.y-a.h-a.target_y) < a.h2 then
-	end 
-
 	-- chase target
 	local dir
 	if a.has_target then
-		update_path_to(a, a.target, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
-		--update_path_to2(a, a.target)
+		update_path_to(a, a.target_x, a.target_y, DOG_JUMP_HEIGHT, DOG_FALL_HEIGHT)
 
-		--update_direction_map(a.target, a)
-
-		dir = get_path_direction(a, a.target)
-		--dir = get_path_direction2(a, a.target)
-	end
-	
-	if dir then
-		local dir_x = {-1,1,0,0}
-		local dir_jump = {false, false, true, false}
-		local dir_descend = {false, false, false, true}
-
-		if dir_x[dir] != 0 then
-			a.strafing_x = dir_x[dir]
-			a.d = dir_x[dir]
-			a.t_strafing = DOG_STRAFING_TIME
-		else
-			if a.t_strafing == 0 then a.strafing_x = 0 end
-			a.t_strafing = approach(a.t_strafing)
-		end
-
-		a.jump = dir_jump[dir]
-		a.descend = dir_descend[dir]
-	else
-		a.strafing_x = 0
-		a.jump = false
-		a.descend = false
+		local x, y = get_center_floored(a)
+		dir = get_path_direction(x, y)
+		dir_above = get_path_direction(x, y-1)
+		dir_below = get_path_direction(x, y+1)
 	end
 
-	-- acceleration
-	local accel = .1 --> airborn
-	if abs(a.speed_x) > a.walk_speed and a.d == sgn(a.speed_x) then
-		accel = .05 --> going too fast (probably wont happen)
-	elseif a.standing then
-		accel = .1 --> on ground
-	elseif strafing_x != 0 then
-		accel = .1 --> strafing while airborn
-	end
+	update_movement(a, dir, dir_above, dir_below)
+
+	if a.strafing_x != 0 then a.d = a.strafing_x end
 
 	-- velocity
-	a.speed_x = approach(a.speed_x, a.strafing_x * a.walk_speed, accel * a.walk_speed)
+	a.speed_x = approach(
+		a.speed_x,
+		a.walk_speed * a.strafing_x,
+		a.walk_accel * get_situation_acceleration(a)
+	)
 
 	--jumping
 	if a.jump and a.standing then
@@ -119,6 +91,37 @@ function update_dog(a)
 
 	--going down platforms
 	a.descending = a.descend and a.standing
+end
+
+
+function update_movement(a, dir, dir_above, dir_below)
+	if not dir then
+		a.strafing_x = 0
+		a.jump = false
+		a.descend = false
+		return
+	end
+
+	local jump = dir == 3
+	local descend = dir == 4
+
+	local strafe
+	local dir_x  = {-1,1,0,0}
+
+	local above_strafe = jump    and a.speed_y < 0 and dir_above and dir_x[dir_above] != 0
+	local below_strafe = descend and a.speed_y > 0 and dir_below and dir_x[dir_below] != 0
+
+	if above_strafe then
+		strafe = dir_x[dir_above]
+	elseif below_strafe then
+		strafe = dir_x[dir_below]
+	else
+		strafe = dir_x[dir]
+	end
+
+	a.strafing_x = strafe
+	a.jump = jump
+	a.descend = descend
 end
 
 
@@ -158,37 +161,27 @@ end
 
 
 function update_target(a)
-
-	--> find target candidates
-	local candidates = {}
-	for a2 in all(actors) do
-		if a2.k == SPR_BALL or a2 == player then
-			if check_visibility(a, a2) then
-				add(candidates, a2)
-			end
+	--> find target
+	local target
+	for i = #actors, 1, -1 do
+		local a2 = actors[i]
+		if (a2.k == SPR_BALL or a2 == player) and check_visibility(a, a2) then
+			target = a2
+			break
 		end
 	end
 
-	--> choose closest candidate (player or ball)
-	local min_dist = 1/0
-	local closest_actor
-	for a2 in all(candidates) do
-		local dist = distance_sq(a, a2)
-		if dist < min_dist then
-			min_dist = dist
-			closest_actor = a2
-		end
-	end
-
-	a.target = closest_actor
-
-	local visible, x, y = check_visibility(a, closest_actor)
+	local visible, x, y = check_visibility(a, target)
 
 	if visible then
 		a.has_target = true
-		a.target_x = x
-		a.target_y = y
+		a.target_x   = x
+		a.target_y   = y
+	elseif overlaps(a, a.target_x, a.target_y) then
+		a.has_target = false
 	end
+
+	debug.targ = a.has_target
 end
 
 
