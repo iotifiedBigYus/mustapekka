@@ -1,0 +1,15 @@
+Sfx and music list
+sam westerlund
+7.8.2024
+
+Music
+
+00 - main music
+22 - a small victory
+
+SFX:
+
+63 - step
+61 - deploy umbrella
+62 - undeploy umbrella
+60 - bark

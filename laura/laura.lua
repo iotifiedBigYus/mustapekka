@@ -143,7 +143,10 @@ end
 
 function finish_level()
 	debug.next_level = true
-	if (t_finished == 0) t_finished = 1
+	if t_finished > 0 then return end
+
+	t_finished = 1
+	music(VICTORY_JINGLE)
 end
 
 
@@ -237,7 +240,7 @@ function draw_overlay()
 	if t_finished > 0 then
 		local x0 = pos8(cat.x)-camera_axis_x.pos+63.5
 		local y0 = pos8(cat.y-.5)-camera_axis_y.pos+63.5
-		draw_iris_out(x0,y0, IRIS_RADIUS - 2 *t_finished)
+		draw_iris_out(x0,y0, IRIS_RADIUS * (1 - t_finished / FINISHED_TIME))
 	end
 
 	if t_started > 0 then

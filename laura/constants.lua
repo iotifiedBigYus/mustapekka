@@ -81,7 +81,7 @@ SPAWN_WIDTH = 16
 SPAWN_HEIGHT = 12
 
 IRIS_RADIUS = 256
-FINISHED_TIME = 128
+FINISHED_TIME = 340
 STARTED_TIME = 128
 
 -- *---------------*
@@ -123,6 +123,7 @@ SFX_BALL_BOUNCE = 59
 MUSIC         = 0
 MUSIC_FADE_IN = 1000
 FALL_SFX_V    = 0.1
+VICTORY_JINGLE = 22
 
 -- *---------*
 -- | sprites |
