@@ -424,3 +424,9 @@ Got the dog to go as close to the player as possible even if it can't reach them
 ## Sam, 4.8.24
 
 Some cleanup, and some more work on the pathfinding. Solid blocks might create some problems.
+
+## Sam, 12.8.24
+
+Made the dog continue strafing until it reaches inside the next cell, this way it wont stop walking when it emerges from under a solid block, expecting to jump.
+
+When saving the .p8 it warned of being too large. Will have to do some cleanup.

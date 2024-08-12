@@ -119,7 +119,15 @@ function update_movement(a, dir, dir_above, dir_below)
 		strafe = dir_x[dir]
 	end
 
-	a.strafing_x = strafe
+	--keep strafing until inside
+	if strafe == 0 and inside_cell(a) then
+		a.strafing_x = 0
+	elseif strafe == 0 then
+		a.strafing_x = center_cell(a)
+	else
+		a.strafing_x = strafe
+	end
+
 	a.jump = jump
 	a.descend = descend
 end

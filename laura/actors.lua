@@ -86,6 +86,22 @@ function get_situation_acceleration(a)
 end
 
 
+function inside_cell(a)
+	return flr(a.x - a.w2) <= a.x - a.w2 and ceil(a.x + a.w2) > a.x + a.w2
+	   and flr(a.y - a.h ) <= a.y - a.h  and ceil(a.y)        > a.y	
+end
+
+
+function center_cell(a)
+	if flr(a.x - a.w2) < a.x - a.w2 then
+		return 1
+	elseif ceil(a.x + a.w2) > a.x + a.w2 then
+		return -1
+	end
+	return 0
+end
+
+
 function delete_actor(a)
 	del(actors, a)
 
