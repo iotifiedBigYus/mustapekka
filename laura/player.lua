@@ -101,9 +101,12 @@ function throw_ball(a)
 	ball = spawn_ball(
 		a.x+BALL_POS_X*a.d,
 		a.y+BALL_POS_Y,
-		a.speed_x+BALL_SPEED_X*a.d,
-		a.speed_y+BALL_SPEED_Y
+		0,--a.speed_x+BALL_SPEED_X*a.d,
+		0--a.speed_y+BALL_SPEED_Y
 	)
+	debug.ball_r = ball.x + ball.w2
+	debug.ball_l = ball.x - ball.w2
+	debug.ball_sp = ball.speed_x
 end
 
 

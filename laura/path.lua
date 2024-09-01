@@ -242,6 +242,7 @@ function get_node(x, y)
 	local node = path_node_matrix[y0][x0]
 	while not node do
 		y0 += 1
+		print(tostr(x0)..','..tostr(y0))
 		node = path_node_matrix[y0][x0]
 	end
 

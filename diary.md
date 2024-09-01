@@ -430,3 +430,8 @@ Some cleanup, and some more work on the pathfinding. Solid blocks might create s
 Made the dog continue strafing until it reaches inside the next cell, this way it wont stop walking when it emerges from under a solid block, expecting to jump.
 
 When saving the .p8 it warned of being too large. Will have to do some cleanup.
+
+## Sam, 1.9.24
+
+The balls stick to the wall when throwing them to the right beside one. Tried some debugging but haven't found the reason yet. I suspect that the collision detection does not work as intended.
+

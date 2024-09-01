@@ -11,6 +11,7 @@
 function collide_side(a)
 	local d = a.speed_x ~= 0 and sgn(a.speed_x) or a.d
 	local e = d > 0 and 0 or -E --> stay outside edge
+	--local e = d > 0 and -E or 0 --> stay outside edge
 	local x1 = a.x + a.speed_x + d * a.w2 + e
 	
 	if not (solid(x1,a.y-E) or solid(x1,a.y-a.h)) then
@@ -36,8 +37,10 @@ function collide_side(a)
 
 	--> hit wall
 	-- search for contact point
+	if(a.k==SPR_BALL)ball.cont = false
 	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
 		a.x += d * E
+		if(a.k==SPR_BALL)ball.cont = true
 	end
 
 	if a.bounce > 0 and abs(a.speed_x) > a.min_bounce_speed then
