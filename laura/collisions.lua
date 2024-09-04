@@ -18,6 +18,7 @@ function collide_side(a)
 		return
 	end
 
+	-- squeeze inside gap
 	if a.speed_x != 0 then
 		local y1 = a.speed_y > 0 and  flr(8*(a.y+a.speed_y))*.125 or ceil(8*(a.y+a.speed_y))*.125
 		local y0 = a.speed_y > 0 and ceil(8* a.y      )*.125 or  flr(8* a.y      )*.125
@@ -28,6 +29,7 @@ function collide_side(a)
 				if (solid(x1,yy-E+step) or solid(x1,yy-a.h+step)) then
 					--> opening is a gap
 					a.y = yy
+					fall_damage(a, a.speed_y)
 					a.speed_y = 0
 				end
 				return
@@ -118,7 +120,7 @@ function collide_down(a)
 			a.speed_y = -a.bounce * a.speed_y
 			sfx(a.bounce_sfx)
 		else
-			impact_damage(a, a.speed_y)
+			fall_damage(a, a.speed_y)
 			a.speed_y = 0
 			a.standing = true
 		end

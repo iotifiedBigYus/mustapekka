@@ -3,6 +3,11 @@
 -- 8.7.2024
 
 
+function remap(val,min1,max1,min2,max2)
+	--return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
+	return min2 + (max2 - min2) * ((val - min1) / (max1 - min1))
+end
+
 function find_sprites(spr, single)
 	local coords = {}
 

@@ -23,6 +23,8 @@ function init_player_data()
 	a.gliding    = false
 	a.walking    = false
 	a.t_coyote   = 0
+	a.t_damage   = 0
+	a.regen      = 0.01
 	--drawing
 	a.f_y       = 0
 	a.f_x       = 0
@@ -61,6 +63,7 @@ end
 
 
 function update_player(a)
+	if not a.alive then return end
 	--strafing
 	a.strafing_x = input_x
 	if(a.strafing_x != 0)a.d = input_x
@@ -73,7 +76,6 @@ function update_player(a)
 	)
 
 	--jumping
-
 	if input_jump or input_jump_grace > 0 then
 		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
 			--begin (trying to) jump
@@ -84,13 +86,20 @@ function update_player(a)
 	end
 
 	--balls
-
 	if input_alt_pressed == 1 then
 		throw_ball(a)
 	end
 
 	--> apply world collisions and velocities
 	update_actor(a)
+
+	--> health
+	if a.hp < a.max_hp then
+		a.hp = approach(a.hp, a.max_hp, a.regen)
+		a.t_damage += 1 / remap(a.hp / a.max_hp, 0.1, 1, 6, 30)
+	else
+		a.t_damage = 0
+	end
 
 	--going down platforms
 	a.descending = input_down and a.standing
@@ -101,8 +110,8 @@ function throw_ball(a)
 	ball = spawn_ball(
 		a.x+BALL_POS_X*a.d,
 		a.y+BALL_POS_Y,
-		0,--a.speed_x+BALL_SPEED_X*a.d,
-		0--a.speed_y+BALL_SPEED_Y
+		a.speed_x+BALL_SPEED_X*a.d,
+		a.speed_y+BALL_SPEED_Y
 	)
 	debug.ball_r = ball.x + ball.w2
 	debug.ball_l = ball.x - ball.w2
@@ -142,29 +151,29 @@ function draw_player(a)
 	-- draw one pixel up
 	if (fget(fr,3) and a.standing) y-=1
 
-	--fade to black
-	if a.fade < 1 do
-		local n = flr(a.fade * 4 + 1.5)
+	local damage_colors = {
+		[1]  = 4,
+		[9]  = 8,
+		[10] = 15,
+		[12] = 2,
+		[15] = 9
+	}
 
-		local c = {
-			{0,1,5,15,10},
-			{0,2,1,6,15},
-			{0,2,2,14,9},
-			{0,0,0,2,1}
-		}
+	local i_damage_colors = {
+		[1]  = 1,
+		[9]  = 9,
+		[10] = 10,
+		[12] = 0,
+		[15] = 15
+	}
 
-		for i = 1,4 do
-			pal(c[i][5], c[i][n], 0)
-		end
+	if a.hp < a.max_hp * .1 or a.hp < a.max_hp and flr(a.t_damage % 2) == 0 then
+		pal(damage_colors,0)
 	end
 
 	--draw body
 	spr(fr, x,y,1,1,a.d<0)
 
 	--palette reset
-	if a.fade < 1 then
-		for i = 1,4 do
-			pal(c[i][5], c[i][5], 0)
-		end
-	end
+	pal(i_damage_colors,0)
 end

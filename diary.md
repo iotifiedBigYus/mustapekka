@@ -435,3 +435,7 @@ When saving the .p8 it warned of being too large. Will have to do some cleanup.
 
 The balls stick to the wall when throwing them to the right beside one. Tried some debugging but haven't found the reason yet. I suspect that the collision detection does not work as intended.
 
+
+## Sam, 4.9.24
+
+Ignored the dog and the ball for now and started working on fall damage and hp. I'm thinking that I don't want a health bar, but rather communicate health by making the player flash red. Fall damage does not feel consequential atm, so it needs tweaking and some sfx to go with it. The level now restarts when you die.

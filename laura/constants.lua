@@ -10,8 +10,9 @@ DEBUGGING  = true--show debug info
 FREEZE     = false --update the game one frame at a time by pressng player two 🅾️
 SLOWDOWN   = 1 --frames per tick
 HITBOX     = false
-SIGTHLINES = true
-PATH_DIRECTIONS = true
+SIGTHLINES = false
+HEALTHBARS = true
+PATH_DIRECTIONS = false
 PATH_NEIGHBORS = false
 PATH_HEIGHTS = false
 MANUAL_DOG  = false
@@ -83,6 +84,7 @@ SPAWN_HEIGHT = 12
 IRIS_RADIUS = 256
 FINISHED_TIME = 340
 STARTED_TIME = 128
+DEATH_TIME = 240
 
 -- *---------------*
 -- | color palette |

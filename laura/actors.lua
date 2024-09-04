@@ -31,10 +31,11 @@ function make_actor(k,x,y,d)
 	local a = {}
 	a.k = k --> sprite id of actor
 	a.standing = true
-	a.frame   = 0
-	a.t_frame = 0
+	a.frame    = 0
+	a.t_frame  = 0
 	a.t        = 0
-	a.health  = 1
+	a.hp       = 1
+	a.max_hp   = 1
 	--motion
 	a.x        = x
 	a.y        = y
@@ -47,6 +48,10 @@ function make_actor(k,x,y,d)
 	a.mass     = 1
 	a.bounce   = 0
 	a.min_bounce_speed = 1
+	a.min_damage_speed = 0.3
+	a.hurt_fall = 4
+	--state
+	a.alive = true
 	--sprite
 	a.cx  = 0
 	a.w2  = .5
@@ -149,11 +154,34 @@ function despawn_actors()
 end
 
 
-function impact_damage(a, speed)
-	if not a.fall_damage then 
+function fall_damage(a, speed)
+	local hurt = (abs(speed) - a.min_damage_speed) * a.hurt_fall
+	if hurt > 0 then
+		damage(a, hurt)
 	end
-	if speed > 0.5 then
-		debug.damage = speed
+end
+
+
+function damage(a, hurt)
+	a.hp -= hurt
+	if a.hp <= 0 then
+		a.alive = false
+	end
+end
+
+
+function draw_local_health(a)
+	local w2 = max(a.w2,0.5)
+	draw_health_bar(pos8(a.x-w2),pos8(a.y-a.h-0.25),max(16*w2,8),a.hp/a.max_hp)	
+end
+
+
+function draw_health_bar(x,y,w,p)
+	x = flr(x)
+	y = flr(y)
+	line(x,y,x+w-1,y,8)
+	if w*p > 0.5 then
+		line(x,y,x+(w-.5)*mid(0,p,1),y,11)
 	end
 end
 

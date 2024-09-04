@@ -43,6 +43,7 @@ function init_level()
 	reset_cells()
 
 	t_finished = 0
+	t_death = 0
 	t_started = 1
 	world_x, world_y, world_w, world_h = unpack(level_data[level_index])
 
@@ -131,6 +132,13 @@ function update_outgame()
 		end
 	end
 
+	if not player.alive then
+		t_death += 1
+		if t_death == DEATH_TIME  then
+			init_level()
+		end
+	end
+
 	if t_finished > 0 then
 		if t_finished == FINISHED_TIME  then
 			next_level()
@@ -188,14 +196,15 @@ function draw_play()
 	pal(12,0) --> blue drawn as black
 	camera(pos8(camera_x), pos8(camera_y))
 
-
 	print(unpack(info_message))
 	map()
 
 	--actors
 	if (HITBOX) foreach(actors, draw_hitbox)
 	for a in all(actors) do a:draw() end
+	if (HEALTHBARS) foreach(actors, draw_local_health)
 
+	if HEALTHBARS then end
 	if PATH_NEIGHBORS then draw_path_nodes() end
 	if PATH_HEIGHTS then draw_path_heights() end
 	if PATH_DIRECTIONS then draw_path_directions(player) end
@@ -237,10 +246,17 @@ end
 
 
 function draw_overlay()
+	--iris out
 	if t_finished > 0 then
 		local x0 = pos8(cat.x)-camera_axis_x.pos+63.5
 		local y0 = pos8(cat.y-.5)-camera_axis_y.pos+63.5
 		draw_iris_out(x0,y0, IRIS_RADIUS * (1 - t_finished / FINISHED_TIME))
+	end
+
+	if t_death > 0 then
+		local x0 = pos8(player.x)-camera_axis_x.pos+63.5
+		local y0 = pos8(player.y-.5)-camera_axis_y.pos+63.5
+		draw_iris_out(x0,y0, IRIS_RADIUS * (1 - t_death / DEATH_TIME))
 	end
 
 	if t_started > 0 then

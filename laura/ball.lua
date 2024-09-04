@@ -33,6 +33,8 @@ end
 
 
 function update_ball(a)
+	if a.standing then a.speed_x *= a.friction end
+
 	update_actor(a)
 
 	if (a.t >= BALL_LIFETIME) delete_actor(a)
