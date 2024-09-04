@@ -118,6 +118,7 @@ function collide_down(a)
 			a.speed_y = -a.bounce * a.speed_y
 			sfx(a.bounce_sfx)
 		else
+			impact_damage(a, a.speed_y)
 			a.speed_y = 0
 			a.standing = true
 		end

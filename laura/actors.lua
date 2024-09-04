@@ -31,9 +31,10 @@ function make_actor(k,x,y,d)
 	local a = {}
 	a.k = k --> sprite id of actor
 	a.standing = true
-	a.frame = 0
+	a.frame   = 0
 	a.t_frame = 0
-	a.t = 0
+	a.t        = 0
+	a.health  = 1
 	--motion
 	a.x        = x
 	a.y        = y
@@ -146,6 +147,16 @@ function despawn_actors()
 		mset(unpack(a))
 	end
 end
+
+
+function impact_damage(a, speed)
+	if not a.fall_damage then 
+	end
+	if speed > 0.5 then
+		debug.damage = speed
+	end
+end
+
 
 function update_actor(a)
 	collide_side(a)
