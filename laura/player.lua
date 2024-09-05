@@ -23,7 +23,6 @@ function init_player_data()
 	a.gliding    = false
 	a.walking    = false
 	a.t_coyote   = 0
-	a.t_damage   = 0
 	a.regen      = 0.01
 	--drawing
 	a.f_y       = 0
@@ -63,7 +62,7 @@ end
 
 
 function update_player(a)
-	if not a.alive then return end
+	if not a.is_alive then return end
 	--strafing
 	a.strafing_x = input_x
 	if(a.strafing_x != 0)a.d = input_x
@@ -90,16 +89,12 @@ function update_player(a)
 		throw_ball(a)
 	end
 
+	--> health
+	a.t_damage = approach(a.t_damage)
+	a.hp = approach(a.hp, a.max_hp, a.regen)
+
 	--> apply world collisions and velocities
 	update_actor(a)
-
-	--> health
-	if a.hp < a.max_hp then
-		a.hp = approach(a.hp, a.max_hp, a.regen)
-		a.t_damage += 1 / remap(a.hp / a.max_hp, 0.1, 1, 6, 30)
-	else
-		a.t_damage = 0
-	end
 
 	--going down platforms
 	a.descending = input_down and a.standing
@@ -120,6 +115,7 @@ end
 
 
 function update_player_sprite(a)
+	if not a.is_alive then a.frame = 5 return end
 	--walking animation
 	a.walking = (a.standing and (a.strafing_x != 0 or abs(a.speed_x) >= a.walk_speed or a.t_frame % 4 != 0))
 
@@ -167,7 +163,11 @@ function draw_player(a)
 		[15] = 15
 	}
 
-	if a.hp < a.max_hp * .1 or a.hp < a.max_hp and flr(a.t_damage % 2) == 0 then
+	--if a.hp < a.max_hp * .1 or a.hp < a.max_hp and flr(a.t_damage % 2) == 0 then
+	--	pal(damage_colors,0)
+	--end
+
+	if a.t_damage > 0 then
 		pal(damage_colors,0)
 	end
 

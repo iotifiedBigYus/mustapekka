@@ -9,7 +9,9 @@ Music
 
 SFX:
 
-63 - step
-61 - deploy umbrella
-62 - undeploy umbrella
+58 - damage
+59 - tennis ball
 60 - bark
+62 - undeploy umbrella
+61 - deploy umbrella
+63 - step

@@ -36,6 +36,7 @@ function make_actor(k,x,y,d)
 	a.t        = 0
 	a.hp       = 1
 	a.max_hp   = 1
+	a.t_damage = 0
 	--motion
 	a.x        = x
 	a.y        = y
@@ -51,7 +52,7 @@ function make_actor(k,x,y,d)
 	a.min_damage_speed = 0.3
 	a.hurt_fall = 4
 	--state
-	a.alive = true
+	a.is_alive = true
 	--sprite
 	a.cx  = 0
 	a.w2  = .5
@@ -164,8 +165,10 @@ end
 
 function damage(a, hurt)
 	a.hp -= hurt
+	a.t_damage = remap(a.hp,a.max_hp,0,0,60)
+	if(a.is_player) then sfx(SFX_OUCH) end
 	if a.hp <= 0 then
-		a.alive = false
+		a.is_alive = false
 	end
 end
 

@@ -132,7 +132,7 @@ function update_outgame()
 		end
 	end
 
-	if not player.alive then
+	if not player.is_alive then
 		t_death += 1
 		if t_death == DEATH_TIME  then
 			init_level()
