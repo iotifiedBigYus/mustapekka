@@ -9,8 +9,8 @@ Music
 
 SFX:
 
-58 - damage
-59 - tennis ball
+58 - ouch
+59 - ball bounce
 60 - bark
 62 - undeploy umbrella
 61 - deploy umbrella

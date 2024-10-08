@@ -8,9 +8,6 @@ function make_camera()
 	camera_axis_x2 = make_camera_axis(player.x-8, world_x, world_x+world_w-16)
     camera_axis_y2 = make_camera_axis(player.y-8, world_y, world_y+world_h-16)
 
-	--debug.maxy = 8*(world_y+world_h-8)
-	--debug.miny = 8*(world_y+8)
-
 	camera_x = 0
 	camera_y = 0
 	camera_offset_x = 0
@@ -21,18 +18,18 @@ end
 function make_camera_axis(pos, min, max)
 	--f (frequency): natural frequency
 
-	--z (damping): how the atem comes to settle at the target
-	--damping = 0: atem is undamped, never settles
-	--0<damping<1: atem is underdamped.
+	--z (damping): how the system comes to settle at the target
+	--damping = 0: system is undamped, never settles
+	--0<damping<1: system is underdamped.
 	--damping = 1: critical damping
-	--damping >= 1: atem does not vibrate
+	--damping >= 1: system does not vibrate
 
-	--r (response): inital response of the atem
-	--response = 0: atem takes time to accelerate
+	--r (response): inital response of the system
+	--response = 0: system takes time to accelerate
 	--response > 0: reacts immediately
-	--response > 1: atem will overshoot
-	--response < 0: atem will anitcipate
-	--response = 2 is typical for mechanical atems
+	--response > 1: system will overshoot
+	--response < 0: system will anitcipate
+	--response = 2 is typical for mechanical systems
 
 	local c = {}
 

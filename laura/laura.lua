@@ -59,8 +59,6 @@ function init_level()
 
 	iris_x = pos8(player.x)-camera_axis_x.pos+63.5
 	iris_y = pos8(player.y-.5)-camera_axis_y.pos+63.5
-
-	debug.off = 6.1 % 1
 end
 
 
@@ -174,7 +172,6 @@ end
 
 
 function _draw()
-	FREEZE = false
 	if FREEZE and not btnp(🅾️,1) then return end
 	if debug.t % SLOWDOWN ~= 0 then return end
 
@@ -204,7 +201,6 @@ function draw_play()
 	for a in all(actors) do a:draw() end
 	if (HEALTHBARS) foreach(actors, draw_local_health)
 
-	if HEALTHBARS then end
 	if PATH_NEIGHBORS then draw_path_nodes() end
 	if PATH_HEIGHTS then draw_path_heights() end
 	if PATH_DIRECTIONS then draw_path_directions(player) end
@@ -296,7 +292,12 @@ function draw_debug()
 		print('mem: '..tostring(stat(0)/2048))
 		print('cpu: '..tostring(stat(1)))
 		for k,v in pairs(debug) do
-			print(k..': '..tostring(v))
+			if type(v) == "function" then
+				v()
+				print("function '"..k.."' called")
+			else
+				print(k..': '..tostring(v))
+			end
 		end
 	end
 end

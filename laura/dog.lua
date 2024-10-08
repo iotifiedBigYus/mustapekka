@@ -163,6 +163,9 @@ function update_manual_dog(a)
 	--> apply world collisions and velocities
 	update_actor(a)
 
+	--jumping
+	if(a.speed_y < 0) a.jumped = true
+
 	--going down platforms
 	a.descending = input2_down and a.standing
 end
@@ -188,8 +191,6 @@ function update_target(a)
 	elseif overlaps(a, a.target_x, a.target_y) then
 		a.has_target = false
 	end
-
-	debug.targ = a.has_target
 end
 
 

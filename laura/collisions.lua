@@ -40,8 +40,8 @@ function collide_side(a)
 	--> hit wall
 	-- search for contact point
 	if(a.k==SPR_BALL)ball.cont = false
-	while not (solid(a.x+d*(a.w2+E)+e, a.y-E) or solid(a.x+d*(a.w2+E)+e, a.y-a.h)) do
-		a.x += d * E
+	while not (solid(a.x+d*(a.w2+D)+e, a.y-E) or solid(a.x+d*(a.w2+D)+e, a.y-a.h)) do
+		a.x += d * D
 		if(a.k==SPR_BALL)ball.cont = true
 	end
 
@@ -80,8 +80,8 @@ function collide_up(a)
 	--> hit
 
 	-- search up for collision point
-	while not solid(xl, a.y-a.h-E) and not solid(xr, a.y-a.h-E) do
-		a.y = a.y - E
+	while not solid(xl, a.y-a.h-D) and not solid(xr, a.y-a.h-D) do
+		a.y = a.y - D
 	end
 
 	if a.bounce > 0 and abs(a.speed_y) > a.min_bounce_speed  then
@@ -96,7 +96,7 @@ end
 function collide_down(a)
 	if (a.speed_y <= 0) return --> going up
 
-	local y1 = a.y+a.speed_y-E
+	local y1 = a.y+a.speed_y
 	local xl = a.x+a.speed_x-a.w2
 	local xr = a.x+a.speed_x+a.w2-E
 
@@ -124,14 +124,74 @@ function collide_down(a)
 			a.speed_y = 0
 			a.standing = true
 		end
+
+		if (a.t_coyote and a.standing) a.t_coyote = COYOTE
 	else
 		a.standing = false
 		--coyote time
-		if (not a.t_coyote) return
-		a.t_coyote = approach(a.t_coyote)
-		if (a.standing) a.t_coyote = COYOTE
+		if (a.t_coyote) a.t_coyote = approach(a.t_coyote)
 	end
 end
+
+
+function is_stuck(a)
+	return (solid(a.x-a.w2,   a.y-a.h)
+		or  solid(a.x+a.w2-E, a.y-a.h)
+		or 	solid(a.x-a.w2,   a.y-E)
+		or 	solid(a.x+a.w2-E, a.y-E))
+end
+
+
+function unstuck(a)
+	if not is_stuck(a) then return end
+
+	a.speed_x = 0
+	a.speed_y = 0
+	local x0 = a.x
+	local y0 = a.y
+
+	for radial = 0,128 do
+		for n = 0, 2*radial do
+			local tangential = ceil(n * .5) * ((n % 2) * 2 - 1)
+
+			local dx, dy = radial, -tangential
+
+			for _ = 1,4 do
+
+				if dx < 0 then
+					a.x = ceil(x0 + dx) - a.w2
+				elseif dx > 0 then
+					a.x = flr(x0 + dx) + a.w2
+				else
+					a.x = x0
+				end
+
+				if dy < 0 then
+					a.y = ceil(y0 + dy)
+				elseif dy > 0 then
+					a.y = flr(y0 + dy) + a.h
+				else
+					a.y = y0
+				end
+				
+				if not is_stuck(a) then
+					return
+				end
+
+				dx, dy = dy, -dx
+			end
+		end
+	end
+
+	a.x = x0
+	a.y = y0
+end
+
+
+function tang(n)
+	return ceil(n * .5) * ((n % 2) * 2 - 1)
+end
+
 
 
 function is_outside(x,y)

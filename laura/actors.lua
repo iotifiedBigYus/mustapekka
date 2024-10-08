@@ -42,7 +42,7 @@ function make_actor(k,x,y,d)
 	a.y        = y
 	a.speed_x  = 0
 	a.speed_y  = 0
-	a.accel_y  = .02 -- gravity
+	a.accel_y  = GRAVITY -- gravity
 	a.drag     = .02 --air drag
 	a.friction = .9 -- exponential deacceleration
 	a.d        = d or -1 --(looking direction)
@@ -156,6 +156,7 @@ end
 
 
 function fall_damage(a, speed)
+	if not FALL_DAMAGE then return end
 	local hurt = (abs(speed) - a.min_damage_speed) * a.hurt_fall
 	if hurt > 0 then
 		damage(a, hurt)
@@ -189,14 +190,14 @@ function draw_health_bar(x,y,w,p)
 end
 
 
-function update_actor(a)
+function update_actor_collisions(a)
 	collide_side(a)
 	collide_up(a)
 	collide_down(a)
+end
 
-	--jumping
-	if(a.speed_y < 0) a.jumped = true
 
+function update_actor_position(a)
 	--moving
 	a.x += a.speed_x
 	a.y += a.speed_y
@@ -206,15 +207,23 @@ function update_actor(a)
 		a.x = snap8(a.x,a.cx)
 		a.y = snap8(a.y)
 	end
-	--if(a.speed_y == 0)a.y = snap8(a.y,0)
-	
+end
+
+
+function update_actor_speed(a)
 	--gravity
 	a.speed_y += a.accel_y
 
 	--air resistance
 	a.speed_y -= sgn(a.speed_y) * a.speed_y * a.speed_y * a.drag
+end
 
-	--timers
+
+function update_actor(a)
+	update_actor_collisions(a)
+	update_actor_position(a)
+	update_actor_speed(a)
+
 	a.t += 1
 end
 

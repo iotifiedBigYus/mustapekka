@@ -439,3 +439,12 @@ The balls stick to the wall when throwing them to the right beside one. Tried so
 ## Sam, 4.9.24
 
 Ignored the dog and the ball for now and started working on fall damage and hp. I'm thinking that I don't want a health bar, but rather communicate health by making the player flash red. Fall damage does not feel consequential atm, so it needs tweaking and some sfx to go with it. The level now restarts when you die.
+
+
+## Sam, 8.10.24
+
+The falldamage kinde sucked so I sacked it. I Noticed the ball got stuck inside the wall when thrown next to it, so I spent some time engineering an "unstuck" function that finds the closest point in the immidiate neighbors that is not stuck. I ended up not using it because you could just not make it spawn inside the wall.
+
+After that I noticed that the ball does not bounce on a platform if it at the level of your feet. Fixed it.
+
+I changed how gravity and jumping works. Gravity gets smaller when jumping but returns to normal after getting to the apex or letting go. Tinkered with different gravities, but I like the 0.02 I've been using so far.

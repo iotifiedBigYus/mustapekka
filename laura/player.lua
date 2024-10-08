@@ -13,11 +13,13 @@ function init_player_data()
 	--motion
 	a.walk_speed = 1 / 8 -- walking speed
 	a.walk_accel = 1 / 32
-	a.jump_speed = .3 -- jump speed
+	a.jump_speed = JUMP_SPEED -- jump speed
+	a.t_jump = 0
 	a.mass = 1
 	a.strafing_x = 0
 	--state
 	a.is_player  = true
+	a.is_jumping     = false
 	a.jumped     = false
 	a.descending = false
 	a.gliding    = false
@@ -67,23 +69,6 @@ function update_player(a)
 	a.strafing_x = input_x
 	if(a.strafing_x != 0)a.d = input_x
 
-	-- velocity
-	a.speed_x = approach(
-		a.speed_x,
-		input_x * a.walk_speed,
-		a.walk_accel * get_situation_acceleration(a)
-	)
-
-	--jumping
-	if input_jump or input_jump_grace > 0 then
-		if (a.standing or a.t_coyote > 0) and (not a.jumped or AUTO_JUMP) then
-			--begin (trying to) jump
-			a.speed_y = -a.jump_speed
-		end
-	else
-		a.jumped = false
-	end
-
 	--balls
 	if input_alt_pressed == 1 then
 		throw_ball(a)
@@ -93,11 +78,70 @@ function update_player(a)
 	a.t_damage = approach(a.t_damage)
 	a.hp = approach(a.hp, a.max_hp, a.regen)
 
-	--> apply world collisions and velocities
-	update_actor(a)
+	-- velocity
+	a.speed_x = approach(
+		a.speed_x,
+		input_x * a.walk_speed,
+		a.walk_accel * get_situation_acceleration(a)
+	)
+
+	if input_jump and not a.jumped and not a.is_jumping and (a.standing or a.t_coyote > 0) then
+		--begin (trying to) jump
+		a.speed_y = -a.jump_speed
+		a.jumped = true
+	end
+	
+	if not input_jump then
+		a.jumped = false
+	end
+
+	--> world collisions
+	update_actor_collisions(a)
+
+	--> position
+	update_actor_position(a)
+
+	--jumping
+	--if(a.speed_y < 0) a.is_jumping = true
+	a.is_jumping = input_jump and a.speed_y < 0
+
+
+	local dg = 0.001
+	local ds = 0.001
+	if btn(0,1) then JUMP_GRAVITY -= dg end
+	if btn(1,1) then JUMP_GRAVITY += dg end
+	if btn(2,1) then a.jump_speed   += ds end
+	if btn(3,1) then a.jump_speed   -= ds end
+
+	debug.jump_g = JUMP_GRAVITY
+	debug.jump_sp = a.jump_speed
+	
+
+	if a.is_jumping then
+		a.accel_y = GRAVITY * JUMP_GRAVITY
+	else
+		a.accel_y = GRAVITY
+	end
+
+	--gravity
+	a.speed_y = approach(
+		a.speed_y,
+		MAX_SPEED,
+		a.accel_y
+	)
+
+	--air resistance
+	--a.speed_y -= sgn(a.speed_y) * a.speed_y * a.speed_y * a.drag
+
+	--> timer
+	a.t += 1
 
 	--going down platforms
 	a.descending = input_down and a.standing
+end
+
+
+function update_jump(a)
 end
 
 
@@ -108,9 +152,6 @@ function throw_ball(a)
 		a.speed_x+BALL_SPEED_X*a.d,
 		a.speed_y+BALL_SPEED_Y
 	)
-	debug.ball_r = ball.x + ball.w2
-	debug.ball_l = ball.x - ball.w2
-	debug.ball_sp = ball.speed_x
 end
 
 
@@ -134,7 +175,6 @@ function update_player_sprite(a)
 		a.frame = 0
 	end
 end
-
 
 
 function draw_player(a)
